@@ -1,6 +1,6 @@
 # Hedron: Utilities for Java
 
-Hedron.
+Hedron utilities for Java.
 
 ## Build
 
@@ -12,7 +12,7 @@ $ cd hedron/
 $ ./gradlew build
 ```
 
-## Bugs and F5edback
+## Bugs and Feedback
 
 For bugs, questions and discussions please use the [Github Issues](https://github.com/Breakpoint-au/Hedron/issues).
 
