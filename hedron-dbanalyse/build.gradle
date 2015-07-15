@@ -1,0 +1,24 @@
+version="1.1.0-SNAPSHOT"
+
+apply plugin:'application'
+mainClassName = 'au.com.breakpoint.hedron.dbanalyse.DbAnalyse'
+
+repositories
+{
+    // for local jars
+    flatDir
+    {
+        dirs "lib"
+    }
+}
+
+dependencies
+{
+    compile project (':hedron-core')
+
+    // [local jar file]
+    compile name: 'schemacrawler-12.04.02'
+
+    testCompile 'junit:junit-dep:4.10'
+}
+

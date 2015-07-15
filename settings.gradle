@@ -1,0 +1,5 @@
+rootProject.name='hedron'
+include 'hedron-core', \
+    'hedron-daogen', \
+    'hedron-dbanalyse', \
+    'hedron-indexer'

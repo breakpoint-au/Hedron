@@ -1,0 +1,22 @@
+version="1.0.1-SNAPSHOT"
+
+dependencies {
+    compile group: 'args4j',                name: 'args4j',             version: '+'
+    compile group: 'org.apache.commons',    name: 'commons-dbcp2',      version: '+'
+    compile group: 'com.google.code.gson',  name: 'gson',               version: '+'
+    compile group: 'javax.mail',            name: 'javax.mail-api',     version: '+'
+    compile group: 'org.springframework',   name: 'spring-jdbc',        version: '+'
+    compile group: 'org.springframework',   name: 'spring-web',         version: '+'
+    compile group: 'javax',                 name: 'javaee-api',         version: '7.+'
+
+    // [no good] compile group: 'com.oracle', name: 'ojdbc6', version: '+'
+    compile                                 name: 'ojdbc6'
+
+    testCompile 'junit:junit-dep:4.10'
+}
+
+jar {
+    manifest {
+        name = 'hedron-core'
+    }
+}

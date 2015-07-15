@@ -1,0 +1,19 @@
+{
+    // Individual source paths, associating with a logical name.
+    sourcePaths:
+    [
+        {
+            path: 'B:/Projects/sr/TLSOTR/sp1',
+            includeFiles: [ 'includeFile1a.sql', 'includeFile1b.sql' ],
+            excludeFiles: [ 'excludeFile1a.sql', 'excludeFile1b.sql' ]
+        },
+        {
+            path: 'B:/Projects/sr/TLSOTR/sp2', 
+            includeFiles: [ 'includeFile2a.sql', 'includeFile2b.sql' ],
+            excludeFiles: [ 'excludeFile2a.sql', 'excludeFile2b.sql' ]
+        }
+    ],
+
+    // Overall configuration.
+    destination: 'B:/Projects/sr/TLSOTR/sql/index'
+}

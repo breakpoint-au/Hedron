@@ -1,0 +1,49 @@
+// To install/upgrade gradle wrapper
+//      gradle wrapper --gradle-version 2.5
+
+// To build all
+//      gradlew
+
+// To generate Eclipse artefacts
+//      gradlew eclipse
+
+
+defaultTasks 'build', 'installDist'
+
+buildscript {
+    repositories {
+        jcenter ()
+    }
+}
+
+ext {
+    githubProjectName = rootProject.name    
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    repositories {
+        jcenter ()
+
+        // for local jars
+        flatDir
+        {
+            dirs "$rootProject.projectDir/hedron-core/lib"
+        }
+    }
+
+    group = "au.com.breakpoint.${githubProjectName}"
+
+    eclipse {
+        classpath {
+            // include 'provided' dependencies on the classpath
+            downloadSources = true
+            downloadJavadoc = true
+        }
+    }
+}

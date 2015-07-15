@@ -1,0 +1,23 @@
+package au.com.breakpoint.tools.indexer;
+
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import au.com.breakpoint.hedron.core.args4j.HgUtilArgs4j;
+
+public class OptionsTest
+{
+    @Test
+    public void testMode ()
+    {
+        final Options options = new Options ();
+        final String[] args = new String[]
+        {
+                "-config", "someval", "-mode", "Index"
+        };
+
+        // Check args & prepare usage string (in thrown AssertException).
+        HgUtilArgs4j.getProgramOptions (args, options);
+
+        assertEquals (Options.Mode.Index, options.m_mode);
+    }
+}

@@ -1,0 +1,23 @@
+{
+    // Which keywords to use
+    keywordFilename: 'c:/dev/sr/otrpdi/Projects/SR/TLSOTR/keywords.generated.json',
+    
+    // Individual source paths, associating with a logical name.
+    sourcePaths:
+    [
+        {
+            name: 'tlsotr',
+            path: 'C:/dev/sr/otrpdi/Projects/sr/TLSOTR/sql',
+            includeFiles: [ '.+\\.generated\\.sql' ],
+            excludeFiles: [ 'Migrat.+', 'Upgrade.*\\.sql', 'Issue.*\\.sql', 'Populate.*\\.sql', '.+\\.cmd' ]
+        }
+//        ,
+//        {
+//            name: 'tlsotr-dev',
+//            path: 'C:/dev/sr/otrpdi/Projects/sr/TLSOTR/sql/dev',
+//            excludeFiles: [ 'Migrat.+', 'Upgrade.*\\.sql', 'Issue.*\\.sql', 'Populate.*\\.sql', '.+\\.cmd' ]
+//        }
+    ],
+
+    destination: 'C:/dev/sr/otrpdi/Projects/sr/TLSOTR/sql/index'
+}

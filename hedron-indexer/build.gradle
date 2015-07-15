@@ -1,0 +1,11 @@
+version="1.0.0-SNAPSHOT"
+
+apply plugin:'application'
+mainClassName = 'au.com.breakpoint.hedron.indexer.Indexer'
+
+dependencies
+{
+    compile project (':hedron-core')
+
+    testCompile 'junit:junit-dep:4.10'
+}
