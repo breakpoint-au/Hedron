@@ -16,7 +16,7 @@ $ ./gradlew build
 
 For bugs, questions and discussions please use the [Github Issues](https://github.com/breakpoint-au/Hedron/issues).
 
- 
+
 ## LICENSE
 
 Copyright 2015 Breakpoint Pty Limited
