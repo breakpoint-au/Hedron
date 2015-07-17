@@ -41,7 +41,6 @@ subprojects {
 
     eclipse {
         classpath {
-            // include 'provided' dependencies on the classpath
             downloadSources = true
             downloadJavadoc = true
         }
