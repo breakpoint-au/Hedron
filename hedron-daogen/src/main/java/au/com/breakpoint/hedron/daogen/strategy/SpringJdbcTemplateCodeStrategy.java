@@ -153,8 +153,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 }
                 pw.printf ("import org.springframework.jdbc.object.*;%n");
             }
-            pw.printf ("import au.com.breakpoint.util.*;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.*;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.*;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.*;%n");
 
             pw.printf ("%n");
             pw.printf ("/**%n");
@@ -374,7 +374,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     {
                         final String name = sprs.getName ();
                         pw.printf (
-                            "            r.m_resultSet%s = au.com.breakpoint.util.HgUtil.uncheckedCast (outParams.get (VARIABLE_NAME_%s));%n",
+                            "            r.m_resultSet%s = au.com.breakpoint.hedron.core.HgUtil.uncheckedCast (outParams.get (VARIABLE_NAME_%s));%n",
                             name, name);
                     }
 
@@ -441,12 +441,12 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("package %s.entity;%n", outputPackage);
             pw.printf ("%n");
             //            pw.printf ("import java.io.Serializable;%n");
-            pw.printf ("import au.com.breakpoint.util.HgUtil;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.IEntity;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.BaseEntity;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.HgUtil;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.IEntity;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.BaseEntity;%n");
             if (pk != null && pk.getColumns ().size () > 1)
             {
-                pw.printf ("import au.com.breakpoint.util.Tuple;%n");
+                pw.printf ("import au.com.breakpoint.hedron.core.Tuple;%n");
             }
             pw.printf ("%n");
             pw.printf ("/**%n");
@@ -498,7 +498,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     case Duplicate:
                     {
-                        pw.printf ("        m_column%s = au.com.breakpoint.util.HgUtil.duplicate (rhs.m_column%s);%n",
+                        pw.printf ("        m_column%s = au.com.breakpoint.hedron.core.HgUtil.duplicate (rhs.m_column%s);%n",
                             columnName, columnName);
                         break;
                     }
@@ -538,21 +538,21 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         if (jti.m_minValue < Long.MAX_VALUE)
                         {
                             pw.printf (
-                                "            au.com.breakpoint.util.context.ThreadContext.assertError (column%s >= MinValue%s, \"Column %s.%s value %%s cannot be less than %%s\", column%s, MinValue%s);%n",
+                                "            au.com.breakpoint.hedron.core.context.ThreadContext.assertError (column%s >= MinValue%s, \"Column %s.%s value %%s cannot be less than %%s\", column%s, MinValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName, columnName);
                         }
                         if (jti.m_maxValue > Long.MIN_VALUE)
                         {
                             pw.printf (
-                                "            au.com.breakpoint.util.context.ThreadContext.assertError (column%s <= MaxValue%s, \"Column %s.%s value %%s cannot be greater than %%s\", column%s, MaxValue%s);%n",
+                                "            au.com.breakpoint.hedron.core.context.ThreadContext.assertError (column%s <= MaxValue%s, \"Column %s.%s value %%s cannot be greater than %%s\", column%s, MaxValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName, columnName);
                         }
                         if (jti.m_size > -1)
                         {
                             pw.printf (
-                                "            au.com.breakpoint.util.context.ThreadContext.assertError (column%s.length () <= Size%s, \"Column %s.%s value [%%s] cannot be longer than %%s characters\", column%s, Size%s);%n",
+                                "            au.com.breakpoint.hedron.core.context.ThreadContext.assertError (column%s.length () <= Size%s, \"Column %s.%s value [%%s] cannot be longer than %%s characters\", column%s, Size%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName);
                         }
@@ -563,27 +563,27 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         if (jti.m_nonPrimitiveTypeJavaLangType)
                         {
                             pw.printf (
-                                "        au.com.breakpoint.util.context.ThreadContext.assertError (column%s != null, \"Column %s.%s value is classified as 'mandatory'; it cannot be null\");%n",
+                                "        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (column%s != null, \"Column %s.%s value is classified as 'mandatory'; it cannot be null\");%n",
                                 columnName, c.getParent ().getEntityName (), columnName);
                         }
                         if (jti.m_minValue < Long.MAX_VALUE)
                         {
                             pw.printf (
-                                "        au.com.breakpoint.util.context.ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s >= MinValue%s, \"Column %s.%s value %%s cannot be less than %%s\", column%s, MinValue%s);%n",
+                                "        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s >= MinValue%s, \"Column %s.%s value %%s cannot be less than %%s\", column%s, MinValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName);
                         }
                         if (jti.m_maxValue > Long.MIN_VALUE)
                         {
                             pw.printf (
-                                "        au.com.breakpoint.util.context.ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s <= MaxValue%s, \"Column %s.%s value %%s cannot be greater than %%s\", column%s, MaxValue%s);%n",
+                                "        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s <= MaxValue%s, \"Column %s.%s value %%s cannot be greater than %%s\", column%s, MaxValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName);
                         }
                         if (jti.m_size > -1)
                         {
                             pw.printf (
-                                "        au.com.breakpoint.util.context.ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s.length () <= Size%s, \"Column %s.%s value [%%s] cannot be longer than %%s characters\", column%s, Size%s);%n",
+                                "        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s.length () <= Size%s, \"Column %s.%s value [%%s] cannot be longer than %%s characters\", column%s, Size%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName);
                         }
@@ -988,19 +988,19 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("import org.springframework.jdbc.core.RowMapper;%n");
             if (pk != null && pk.getColumns ().size () > 1)
             {
-                pw.printf ("import au.com.breakpoint.util.Tuple;%n");
+                pw.printf ("import au.com.breakpoint.hedron.core.Tuple;%n");
             }
-            pw.printf ("import au.com.breakpoint.util.dao.OrderByElement;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.WhereElement;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.FetchSql;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.UpdateSql;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.BaseEntityDao;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.DaoUtil;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.DaoUtil.SqlData;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.OrderByElement;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.WhereElement;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.FetchSql;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.UpdateSql;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.BaseEntityDao;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.DaoUtil;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.DaoUtil.SqlData;%n");
             pw.printf ("import %s.entity.%s;%n", outputPackage, entityName);
             if (canUpdate)
             {
-                pw.printf ("import au.com.breakpoint.util.dao.SetElement;%n");
+                pw.printf ("import au.com.breakpoint.hedron.core.dao.SetElement;%n");
             }
             if (canCreate)
             {
@@ -1012,7 +1012,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 }
                 else
                 {
-                    pw.printf ("import au.com.breakpoint.util.context.ThreadContext;%n");
+                    pw.printf ("import au.com.breakpoint.hedron.core.context.ThreadContext;%n");
                 }
             }
             pw.printf ("%n");
@@ -1582,9 +1582,9 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("import java.sql.SQLException;%n");
             pw.printf ("import javax.sql.DataSource;%n");
             pw.printf ("import java.util.List;%n");
-            pw.printf ("import au.com.breakpoint.util.Tuple;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.DaoUtil;%n");
-            pw.printf ("import au.com.breakpoint.util.dao.BaseExecutableDao;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.Tuple;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.DaoUtil;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.dao.BaseExecutableDao;%n");
             pw.printf ("%n");
             pw.printf ("/**%n");
             pw.printf (" * Low-level DAO object encapsulating the %s SQL action%n", daoName);

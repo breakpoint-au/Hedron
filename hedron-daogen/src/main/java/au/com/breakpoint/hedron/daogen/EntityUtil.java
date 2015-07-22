@@ -88,7 +88,7 @@ public class EntityUtil
                         jti.m_javaObjectType = "Byte";
                         jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "byte";
                         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                        jti.m_javaConversionMethod = "au.com.breakpoint.util.HgUtil.getByteValue";
+                        jti.m_javaConversionMethod = "au.com.breakpoint.hedron.core.HgUtil.getByteValue";
                         jti.m_javaTypeOfLimitValue = "byte";
                         jti.m_jdbcType = "Byte";
                         jti.m_jdbcResultSetAccessor = "getByte";
@@ -107,7 +107,7 @@ public class EntityUtil
                         jti.m_javaObjectType = "Short";
                         jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "short";
                         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                        jti.m_javaConversionMethod = "au.com.breakpoint.util.HgUtil.getShortValue";
+                        jti.m_javaConversionMethod = "au.com.breakpoint.hedron.core.HgUtil.getShortValue";
                         jti.m_javaTypeOfLimitValue = "short";
                         jti.m_jdbcType = "Short";
                         jti.m_jdbcResultSetAccessor = "getShort";
@@ -130,7 +130,7 @@ public class EntityUtil
                         jti.m_javaObjectType = "Long";
                         jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "long";
                         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                        jti.m_javaConversionMethod = "au.com.breakpoint.util.HgUtil.getLongValue";
+                        jti.m_javaConversionMethod = "au.com.breakpoint.hedron.core.HgUtil.getLongValue";
                         jti.m_javaTypeOfLimitValue = "long";
                         jti.m_jdbcType = "Long";
                         jti.m_jdbcResultSetAccessor = "getLong";
@@ -690,7 +690,7 @@ public class EntityUtil
         jti.m_javaObjectType = "Integer";
         jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "int";
         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-        jti.m_javaConversionMethod = "au.com.breakpoint.util.HgUtil.getIntValue";
+        jti.m_javaConversionMethod = "au.com.breakpoint.hedron.core.HgUtil.getIntValue";
         jti.m_javaTypeOfLimitValue = "int";
         jti.m_jdbcType = "Int";
         jti.m_jdbcResultSetAccessor = "getInt";
@@ -792,13 +792,13 @@ public class EntityUtil
     // invoke hashCode on the field
     public static final String EQUALS_INTRINSIC = "m_column%s == eRhs.m_column%s";
 
-    public static final String EQUALS_OBJECT = "au.com.breakpoint.util.HgUtil.safeEquals (m_column%s, eRhs.m_column%s)";
+    public static final String EQUALS_OBJECT = "au.com.breakpoint.hedron.core.HgUtil.safeEquals (m_column%s, eRhs.m_column%s)";
 
     public static final String HASHCODE_ALREADY_INT_COMPATIBLE = "m_column%s";
 
     public static final String HASHCODE_AS_INT = "(int) m_column%s";
 
-    public static final String HASHCODE_OBJECT = "au.com.breakpoint.util.HgUtil.safeHashCode (m_column%s)";
+    public static final String HASHCODE_OBJECT = "au.com.breakpoint.hedron.core.HgUtil.safeHashCode (m_column%s)";
 
     public static final Map<String, ColumnTypeInfo> m_jtiCache = GenericFactory.newHashMap ();
 

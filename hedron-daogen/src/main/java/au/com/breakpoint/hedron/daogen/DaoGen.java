@@ -33,14 +33,16 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.HcUtilFile;
-import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.JsonUtil;
 import au.com.breakpoint.hedron.core.SmartFile;
 import au.com.breakpoint.hedron.core.args4j.HgUtilArgs4j;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
+import au.com.breakpoint.hedron.core.log.ConsoleLogger;
+import au.com.breakpoint.hedron.core.log.Logging;
 import au.com.breakpoint.hedron.daogen.strategy.IOverrideStrategy;
 import au.com.breakpoint.hedron.daogen.strategy.IRelationCodeStrategy;
 import au.com.breakpoint.hedron.daogen.strategy.SpringJdbcTemplateCodeStrategy;
@@ -166,7 +168,7 @@ public class DaoGen
         for (final Map.Entry<String, Table> entry : schemaObjects.m_tables.entrySet ())
         {
             final IRelation ir = entry.getValue ();
-            final List<Capability> capabilities = GenericFactory.newArrayList (); // to be filled in by shouldGenerateDao
+            final List<Capability> capabilities = GenericFactory.newArrayList ();// to be filled in by shouldGenerateDao
             if (shouldGenerateDao (capabilities, ir))
             {
                 tasks.add ( () -> generateIRelationCode (ir, capabilities));
@@ -178,14 +180,14 @@ public class DaoGen
             final IRelation ir = entry.getValue ();
 
             // Generate entity for this relation.
-            final List<Capability> noCapabilities = GenericFactory.newArrayList (); // to be filled in by shouldGenerateDao
+            final List<Capability> noCapabilities = GenericFactory.newArrayList ();// to be filled in by shouldGenerateDao
             tasks.add ( () -> generateIRelationCode (ir, noCapabilities));
         }
 
         for (final Map.Entry<String, View> entry : schemaObjects.m_views.entrySet ())
         {
             final IRelation ir = entry.getValue ();
-            final List<Capability> capabilities = GenericFactory.newArrayList (); // to be filled in by shouldGenerateDao
+            final List<Capability> capabilities = GenericFactory.newArrayList ();// to be filled in by shouldGenerateDao
             if (shouldGenerateDao (capabilities, ir))
             {
                 tasks.add ( () -> generateIRelationCode (ir, capabilities));
@@ -396,7 +398,8 @@ public class DaoGen
                 }
                 else if (nodeName.equals ("code-strategy"))
                 {
-                    final String strategyClassName = "au.com.breakpoint.daogen.strategy." + value + "CodeStrategy";
+                    final String strategyClassName =
+                        SpringJdbcTemplateCodeStrategy.class.getPackage ().getName () + "." + value + "CodeStrategy";
                     final Class<?> c = HcUtil.getClassObject (strategyClassName);
                     m_options.m_codeStrategy = (IRelationCodeStrategy) HcUtil.instantiate (c);
                 }
@@ -637,7 +640,7 @@ public class DaoGen
 
     private boolean shouldGenerateDao (final IRelation ir)
     {
-        final List<Capability> capabilities = GenericFactory.newArrayList (); // to be filled in by shouldGenerateDao; ignored here
+        final List<Capability> capabilities = GenericFactory.newArrayList ();// to be filled in by shouldGenerateDao; ignored here
         return shouldGenerateDao (capabilities, ir);
     }
 
@@ -674,7 +677,7 @@ public class DaoGen
     {
         final BooleanHolder ok = new BooleanHolder ();
 
-        final List<Capability> capabilities = GenericFactory.newArrayList (); // to be filled in by shouldGenerateDao
+        final List<Capability> capabilities = GenericFactory.newArrayList ();// to be filled in by shouldGenerateDao
 
         for (final Filter f : m_filters)
         {
@@ -719,7 +722,7 @@ public class DaoGen
 
     public static void main (final String[] args)
     {
-        //Logging.getLoggers ().get (0).setLevels ("fewid");
+        Logging.addLogger (new ConsoleLogger ("fewi"));
         ExecutionScopes.executeProgram ( () -> new DaoGen ().generateDaos (args));
     }
 
