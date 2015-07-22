@@ -62,7 +62,7 @@ import schemacrawler.schemacrawler.SchemaInfoLevel;
 import schemacrawler.utility.SchemaCrawlerUtility;
 import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.Tuple.E2;
-import au.com.breakpoint.hedron.core.args4j.HgUtilArgs4j;
+import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.dbanalyse.strategy.AllPassSchemaObjectFilterStrategy;
@@ -79,7 +79,7 @@ public class DbAnalyse
         final CommandLine commandLine = new CommandLine ();
 
         // Check args & prepare usage string (in thrown AssertException).
-        HgUtilArgs4j.getProgramOptions (args, commandLine);
+        HcUtilArgs4j.getProgramOptions (args, commandLine);
 
         getOptionsFromFile (commandLine.m_optionsFile);
 

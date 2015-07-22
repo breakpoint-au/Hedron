@@ -28,7 +28,7 @@ import au.com.breakpoint.hedron.core.TimedScope;
 import au.com.breakpoint.hedron.core.Tuple.E3;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 
-public class HgUtilGetDifferencesTest
+public class HcUtilGetDifferencesTest
 {
     @Test
     public void testGetDifferencesCorrectnessCustom ()
@@ -270,20 +270,20 @@ public class HgUtilGetDifferencesTest
     private static final long COUNT = 30_000L;
 
     //TimedScope,msecTotal,Executions,Successful,Slow,msecMin,msecMax,msecAverage,msecInitAverage,msecHistogram
-    //"HgUtilGetDifferencesTest.getDifferencesCustom",19.049039,5,5,0,0.020684,18.350371,3.8098077999999997,0.174667,"[0-1:4; 16-31:1]"
-    //"HgUtilGetDifferencesTest.getDifferencesListBased",12546.297656,5,5,0,0.012641,12546.219898,2509.2595312,0.0194395,"[0-1:4; 8192-16383:1]"
-    //"HgUtilGetDifferencesTest.getDifferencesSetBased",9648.624517,5,5,0,0.045199,9648.398139,1929.7249034000001,0.0565945,"[0-1:4; 8192-16383:1]"
+    //"HcUtilGetDifferencesTest.getDifferencesCustom",19.049039,5,5,0,0.020684,18.350371,3.8098077999999997,0.174667,"[0-1:4; 16-31:1]"
+    //"HcUtilGetDifferencesTest.getDifferencesListBased",12546.297656,5,5,0,0.012641,12546.219898,2509.2595312,0.0194395,"[0-1:4; 8192-16383:1]"
+    //"HcUtilGetDifferencesTest.getDifferencesSetBased",9648.624517,5,5,0,0.045199,9648.398139,1929.7249034000001,0.0565945,"[0-1:4; 8192-16383:1]"
 
     private static final boolean m_performTest = false;
 
     private static final TimedScope m_timedScopeGetDifferencesCustom =
-        TimedScope.of (HgUtilGetDifferencesTest.class, "getDifferencesCustom");
+        TimedScope.of (HcUtilGetDifferencesTest.class, "getDifferencesCustom");
 
     private static final TimedScope m_timedScopeGetDifferencesListBased =
-        TimedScope.of (HgUtilGetDifferencesTest.class, "getDifferencesListBased");
+        TimedScope.of (HcUtilGetDifferencesTest.class, "getDifferencesListBased");
 
     private static final TimedScope m_timedScopeGetDifferencesSetBased =
-        TimedScope.of (HgUtilGetDifferencesTest.class, "getDifferencesSetBased");
+        TimedScope.of (HcUtilGetDifferencesTest.class, "getDifferencesSetBased");
 
     private static final long START_VALUE = Long.MAX_VALUE / 2;
 }

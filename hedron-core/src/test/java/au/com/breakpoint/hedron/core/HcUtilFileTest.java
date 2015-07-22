@@ -34,7 +34,7 @@ import au.com.breakpoint.hedron.core.Tuple.E3;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.core.log.Logging;
 
-public class HgUtilFileTest
+public class HcUtilFileTest
 {
     @Test
     public void test_asciiHexStringToByteArray ()
@@ -168,7 +168,7 @@ public class HgUtilFileTest
     {
         createTestDirs ();
 
-        final String remainingFilepath = getTempPath ("HgUtilTest-prune.temp/d1/d11/remaining-file.txt");
+        final String remainingFilepath = getTempPath ("HcUtilTest-prune.temp/d1/d11/remaining-file.txt");
         writeSampleFile (remainingFilepath, 10);
 
         final List<String> deletedDirs = HcUtilFile.deleteEmptyDirectories (TEMP_FILEPATH_PRUNE, true);
@@ -390,9 +390,9 @@ public class HgUtilFileTest
 
     private static final String PROJ_DIR = HcUtil.getBputilProjectDirectoryName ();
 
-    private static final String TEMP_FILEPATH_1 = getTempPath ("HgUtilTest-1.temp");
+    private static final String TEMP_FILEPATH_1 = getTempPath ("HcUtilTest-1.temp");
 
-    private static final String TEMP_FILEPATH_2 = getTempPath ("HgUtilTest-2.temp");
+    private static final String TEMP_FILEPATH_2 = getTempPath ("HcUtilTest-2.temp");
 
-    private static final String TEMP_FILEPATH_PRUNE = getTempPath ("HgUtilTest-prune.temp");
+    private static final String TEMP_FILEPATH_PRUNE = getTempPath ("HcUtilTest-prune.temp");
 }

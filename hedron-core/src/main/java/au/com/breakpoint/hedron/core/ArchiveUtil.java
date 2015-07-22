@@ -18,7 +18,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.kohsuke.args4j.Option;
 import au.com.breakpoint.hedron.core.Tuple.E3;
-import au.com.breakpoint.hedron.core.args4j.HgUtilArgs4j;
+import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 
 public class ArchiveUtil
@@ -206,7 +206,7 @@ public class ArchiveUtil
     public static void main (final String[] args)
     {
         //m_feedback.outputMessage (true, 0, "LogTool %s", m_options.m_mode);
-        HgUtilArgs4j.getProgramOptions (args, m_options);
+        HcUtilArgs4j.getProgramOptions (args, m_options);
         new ArchiveUtil ().smartCopyJarfile ();
     }
 

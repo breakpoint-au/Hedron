@@ -33,7 +33,7 @@ public class ColumnTypeInfo
 
     public String m_javaConvenienceType; // long for BigDecimal, etc
 
-    public String m_javaConversionMethod; // eg au.com.breakpoint.hedron.core.HgUtil.getLongValue
+    public String m_javaConversionMethod; // eg au.com.breakpoint.hedron.core.HcUtil.getLongValue
 
     public String m_javaObjectType; // String, Integer, etc
 

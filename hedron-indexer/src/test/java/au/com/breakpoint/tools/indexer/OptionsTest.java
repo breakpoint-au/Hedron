@@ -2,7 +2,7 @@ package au.com.breakpoint.tools.indexer;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import au.com.breakpoint.hedron.core.args4j.HgUtilArgs4j;
+import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 
 public class OptionsTest
 {
@@ -16,7 +16,7 @@ public class OptionsTest
         };
 
         // Check args & prepare usage string (in thrown AssertException).
-        HgUtilArgs4j.getProgramOptions (args, options);
+        HcUtilArgs4j.getProgramOptions (args, options);
 
         assertEquals (Options.Mode.Index, options.m_mode);
     }

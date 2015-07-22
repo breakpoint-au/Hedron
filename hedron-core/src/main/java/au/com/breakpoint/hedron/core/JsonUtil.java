@@ -10,7 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import au.com.breakpoint.hedron.core.Tuple.E2;
-import au.com.breakpoint.hedron.core.args4j.HgUtilArgs4j;
+import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 
@@ -169,7 +169,7 @@ public class JsonUtil
         final Options options = new Options ();
 
         // Check args & prepare usage string (in thrown AssertException).
-        HgUtilArgs4j.getProgramOptions (args, options);
+        HcUtilArgs4j.getProgramOptions (args, options);
 
         int exitValue = 0;
         switch (options.m_mode)

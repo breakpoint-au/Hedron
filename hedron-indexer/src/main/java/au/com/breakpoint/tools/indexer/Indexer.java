@@ -21,7 +21,7 @@ import au.com.breakpoint.hedron.core.JsonUtil;
 import au.com.breakpoint.hedron.core.ListMap;
 import au.com.breakpoint.hedron.core.SmartFile;
 import au.com.breakpoint.hedron.core.UserFeedback;
-import au.com.breakpoint.hedron.core.args4j.HgUtilArgs4j;
+import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.tools.indexer.AppConfiguration.SourcePath;
@@ -317,11 +317,11 @@ public class Indexer
     private void run (final String[] args)
     {
         // Check args & prepare usage string (in thrown AssertException).
-        HgUtilArgs4j.getProgramOptions (args, m_options);
+        HcUtilArgs4j.getProgramOptions (args, m_options);
         m_feedback.outputMessage (true, 0, "%s [%s]", BUILD_STRING, m_options.m_configFilename);
 
         // Set up logging.
-        //            HgUtilLog4j.startLogging (m_options.m_log4jConfigFile, MSEC_LOG4J_REFRESH_CHECK, true);
+        //            HcUtilLog4j.startLogging (m_options.m_log4jConfigFile, MSEC_LOG4J_REFRESH_CHECK, true);
 
         setConfigFile (m_options.m_configFilename);
 

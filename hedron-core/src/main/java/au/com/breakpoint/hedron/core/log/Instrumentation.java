@@ -33,7 +33,7 @@ import au.com.breakpoint.hedron.core.ShutdownPriority;
 import au.com.breakpoint.hedron.core.TimedScope;
 import au.com.breakpoint.hedron.core.TimedScope.ScopeResult;
 import au.com.breakpoint.hedron.core.Tuple.E2;
-import au.com.breakpoint.hedron.core.args4j.HgUtilArgs4j;
+import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.concurrent.CallingThreadExecutor;
 import au.com.breakpoint.hedron.core.concurrent.Concurrency;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
@@ -170,7 +170,7 @@ public class Instrumentation
             } , ShutdownPriority.ExecutionSummaryWriting, "execution summary writing");// higher priority than threadpool, less than IProcessor shutdowns
 
             // Check args & prepare usage string (in thrown AssertException).
-            HgUtilArgs4j.getProgramOptions (args, cfg);
+            HcUtilArgs4j.getProgramOptions (args, cfg);
 
             HcUtil.setApplicationName (appname, buildString);
 

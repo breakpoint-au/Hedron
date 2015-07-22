@@ -29,8 +29,8 @@ public class SmartFileTest
     {
         try
         {
-            HgUtilFileTest.writeSampleFile (TEMP_FILEPATH_1, LINE_COUNT);
-            HgUtilFileTest.writeSampleFile (TEMP_FILEPATH_2, LINE_COUNT);
+            HcUtilFileTest.writeSampleFile (TEMP_FILEPATH_1, LINE_COUNT);
+            HcUtilFileTest.writeSampleFile (TEMP_FILEPATH_2, LINE_COUNT);
             assertTrue (HcUtilFile.areFilesIdentical (TEMP_FILEPATH_1, TEMP_FILEPATH_2));
 
             final boolean updated = writeSmartSampleFile (TEMP_FILEPATH_2, LINE_COUNT + 1);
@@ -49,8 +49,8 @@ public class SmartFileTest
     {
         try
         {
-            HgUtilFileTest.writeSampleFile (TEMP_FILEPATH_1, LINE_COUNT);
-            HgUtilFileTest.writeSampleFile (TEMP_FILEPATH_2, LINE_COUNT);
+            HcUtilFileTest.writeSampleFile (TEMP_FILEPATH_1, LINE_COUNT);
+            HcUtilFileTest.writeSampleFile (TEMP_FILEPATH_2, LINE_COUNT);
             assertTrue (HcUtilFile.areFilesIdentical (TEMP_FILEPATH_1, TEMP_FILEPATH_2));
 
             final boolean updated = writeSmartSampleFile (TEMP_FILEPATH_2, LINE_COUNT);

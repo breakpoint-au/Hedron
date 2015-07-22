@@ -22,7 +22,7 @@ import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 
-public class HgUtilConcurrencyTestApp
+public class HcUtilConcurrencyTestApp
 {
     public static void main (final String[] args)
     {

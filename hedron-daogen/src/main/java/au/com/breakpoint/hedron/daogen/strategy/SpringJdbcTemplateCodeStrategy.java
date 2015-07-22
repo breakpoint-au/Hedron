@@ -374,7 +374,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     {
                         final String name = sprs.getName ();
                         pw.printf (
-                            "            r.m_resultSet%s = au.com.breakpoint.hedron.core.HgUtil.uncheckedCast (outParams.get (VARIABLE_NAME_%s));%n",
+                            "            r.m_resultSet%s = au.com.breakpoint.hedron.core.HcUtil.uncheckedCast (outParams.get (VARIABLE_NAME_%s));%n",
                             name, name);
                     }
 
@@ -441,7 +441,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("package %s.entity;%n", outputPackage);
             pw.printf ("%n");
             //            pw.printf ("import java.io.Serializable;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.HgUtil;%n");
+            pw.printf ("import au.com.breakpoint.hedron.core.HcUtil;%n");
             pw.printf ("import au.com.breakpoint.hedron.core.dao.IEntity;%n");
             pw.printf ("import au.com.breakpoint.hedron.core.dao.BaseEntity;%n");
             if (pk != null && pk.getColumns ().size () > 1)
@@ -498,7 +498,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     case Duplicate:
                     {
-                        pw.printf ("        m_column%s = au.com.breakpoint.hedron.core.HgUtil.duplicate (rhs.m_column%s);%n",
+                        pw.printf ("        m_column%s = au.com.breakpoint.hedron.core.HcUtil.duplicate (rhs.m_column%s);%n",
                             columnName, columnName);
                         break;
                     }

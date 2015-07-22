@@ -1219,7 +1219,7 @@ public class HcUtil
     {
         final T o = getApplicationObject (key);
         ThreadContext.assertFault (o != null,
-            "There is no stored object with key [%s]. You need to call HgUtil.putApplicationObject ([%s], [value]) first",
+            "There is no stored object with key [%s]. You need to call HcUtil.putApplicationObject ([%s], [value]) first",
             key, key);
         return o;
     }
@@ -1371,9 +1371,9 @@ public class HcUtil
         // Naive implementation. 638 times too slow.
         //
         //TimedScope  msecMax
-        //HgUtilGetDifferencesTest.getDifferencesCustom   18.350371   1
-        //HgUtilGetDifferencesTest.getDifferencesListBased    12546.2199  683.7038825
-        //HgUtilGetDifferencesTest.getDifferencesSetBased 9648.398139 525.7876333
+        //HcUtilGetDifferencesTest.getDifferencesCustom   18.350371   1
+        //HcUtilGetDifferencesTest.getDifferencesListBased    12546.2199  683.7038825
+        //HcUtilGetDifferencesTest.getDifferencesSetBased 9648.398139 525.7876333
         //
         //
         //final List<T> leftOnly = GenericFactory.newArrayList (lhs);
@@ -3385,14 +3385,14 @@ public class HcUtil
      * ExecutorService m_serialAsyncExecutor = new CallingThreadMockExecutorService ();
      */
     private static final IValue<ExecutorService> m_serialAsyncExecutor =
-        SafeLazyValue.of ( () -> Concurrency.createFixedThreadPool (1, "HgUtil.m_serialAsyncExecutor", false));
+        SafeLazyValue.of ( () -> Concurrency.createFixedThreadPool (1, "HcUtil.m_serialAsyncExecutor", false));
 
     /**
      * Scheduler used for scheduleOnce () and schedulePeriodically (). Note: the
      * Concurrency.createSingleThreadScheduledExecutor method handles scheduler shutdown.
      */
     private static final IValue<ScheduledExecutorService> m_sharedScheduler =
-        SafeLazyValue.of ( () -> Concurrency.createSingleThreadScheduledExecutor ("HgUtil.m_sharedScheduler", false));
+        SafeLazyValue.of ( () -> Concurrency.createSingleThreadScheduledExecutor ("HcUtil.m_sharedScheduler", false));
 
     private static final IValue<List<E2<String, String>>> m_standardSubstitutions =
         new SafeLazyValue<List<E2<String, String>>> ( () ->
@@ -3435,7 +3435,7 @@ public class HcUtil
     static
     {
         // Register the shutdown hook for cleanup on JVM shutdown.
-        final Thread shutdownHook = new Thread ("HgUtil.shutdownHook")
+        final Thread shutdownHook = new Thread ("HcUtil.shutdownHook")
         {
             @Override
             public void run ()

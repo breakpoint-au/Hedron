@@ -54,7 +54,7 @@ import au.com.breakpoint.hedron.core.context.OpResult;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.core.context.OpResult.Severity;
 
-public class HgUtilTest
+public class HcUtilTest
 {
     //@Test
     //public void test_getStackTrace ()
@@ -185,34 +185,34 @@ public class HgUtilTest
     public void test_safeApply ()
     {
         assertEquals (null, HcUtil.safeApply (null, String::length));
-        assertEquals (null, HcUtil.safeApply ("12", HgUtilTest::getNullString));
+        assertEquals (null, HcUtil.safeApply ("12", HcUtilTest::getNullString));
         assertEquals (Integer.valueOf (2), HcUtil.safeApply ("12", String::length));
 
-        assertEquals (null, HcUtil.safeApply (null, String::length, HgUtilTest::bitCount));
-        assertEquals (null, HcUtil.safeApply ("123", HgUtilTest::getNullInteger, HgUtilTest::bitCount));
-        assertEquals (null, HcUtil.safeApply ("123", String::length, HgUtilTest::getNullString));
-        assertEquals (Integer.valueOf (2), HcUtil.safeApply ("123", String::length, HgUtilTest::bitCount));
-        assertEquals (Integer.valueOf (1), HcUtil.safeApply ("1234", String::length, HgUtilTest::bitCount));
+        assertEquals (null, HcUtil.safeApply (null, String::length, HcUtilTest::bitCount));
+        assertEquals (null, HcUtil.safeApply ("123", HcUtilTest::getNullInteger, HcUtilTest::bitCount));
+        assertEquals (null, HcUtil.safeApply ("123", String::length, HcUtilTest::getNullString));
+        assertEquals (Integer.valueOf (2), HcUtil.safeApply ("123", String::length, HcUtilTest::bitCount));
+        assertEquals (Integer.valueOf (1), HcUtil.safeApply ("1234", String::length, HcUtilTest::bitCount));
 
-        assertEquals (null, HcUtil.safeApply (null, String::length, HgUtilTest::bitCount, Object::toString));
+        assertEquals (null, HcUtil.safeApply (null, String::length, HcUtilTest::bitCount, Object::toString));
         assertEquals (null,
-            HcUtil.safeApply ("1234", HgUtilTest::getNullInteger, HgUtilTest::bitCount, Object::toString));
-        assertEquals (null, HcUtil.safeApply ("1234", String::length, HgUtilTest::getNullInteger, Object::toString));
-        assertEquals (null, HcUtil.safeApply ("1234", String::length, HgUtilTest::bitCount, HgUtilTest::getNullString));
-        assertEquals ("1", HcUtil.safeApply ("1234", String::length, HgUtilTest::bitCount, Object::toString));
+            HcUtil.safeApply ("1234", HcUtilTest::getNullInteger, HcUtilTest::bitCount, Object::toString));
+        assertEquals (null, HcUtil.safeApply ("1234", String::length, HcUtilTest::getNullInteger, Object::toString));
+        assertEquals (null, HcUtil.safeApply ("1234", String::length, HcUtilTest::bitCount, HcUtilTest::getNullString));
+        assertEquals ("1", HcUtil.safeApply ("1234", String::length, HcUtilTest::bitCount, Object::toString));
 
         assertEquals (null,
-            HcUtil.safeApply (null, String::length, HgUtilTest::bitCount, Object::toString, String::length));
-        assertEquals (null, HcUtil.safeApply ("1234", HgUtilTest::getNullInteger, HgUtilTest::bitCount,
+            HcUtil.safeApply (null, String::length, HcUtilTest::bitCount, Object::toString, String::length));
+        assertEquals (null, HcUtil.safeApply ("1234", HcUtilTest::getNullInteger, HcUtilTest::bitCount,
             Object::toString, String::length));
         assertEquals (null,
-            HcUtil.safeApply ("1234", String::length, HgUtilTest::getNullInteger, Object::toString, String::length));
+            HcUtil.safeApply ("1234", String::length, HcUtilTest::getNullInteger, Object::toString, String::length));
         assertEquals (null,
-            HcUtil.safeApply ("1234", String::length, HgUtilTest::bitCount, HgUtilTest::getNullString, String::length));
-        assertEquals (null, HcUtil.safeApply ("1234", String::length, HgUtilTest::bitCount, Object::toString,
-            HgUtilTest::getNullString));
+            HcUtil.safeApply ("1234", String::length, HcUtilTest::bitCount, HcUtilTest::getNullString, String::length));
+        assertEquals (null, HcUtil.safeApply ("1234", String::length, HcUtilTest::bitCount, Object::toString,
+            HcUtilTest::getNullString));
         assertEquals (Integer.valueOf (1),
-            HcUtil.safeApply ("1234", String::length, HgUtilTest::bitCount, Object::toString, String::length));
+            HcUtil.safeApply ("1234", String::length, HcUtilTest::bitCount, Object::toString, String::length));
     }
 
     @Test
@@ -1560,7 +1560,7 @@ public class HgUtilTest
         assertTrue (!String[].class.isAssignableFrom (Object[].class));// same class or super
 
         //        final List<String> list = GenericFactory.newArrayList ("a", "b", "c");
-        //        final String[] array = HgUtil.toArray (list);
+        //        final String[] array = HcUtil.toArray (list);
         //        assertTrue (list.size () == array.length);
         //        assertTrue (list.get (2).equals (array[2]));
     }
@@ -2036,7 +2036,7 @@ public class HgUtilTest
     {
         assertEquals (0, HcUtil.safeGetLength ((Integer[]) null));
         assertEquals (0, HcUtil.safeGetLength (new Integer[0]));
-        assertEquals (4, HcUtil.safeGetLength (new HgUtilTest[4]));
+        assertEquals (4, HcUtil.safeGetLength (new HcUtilTest[4]));
     }
 
     @Test

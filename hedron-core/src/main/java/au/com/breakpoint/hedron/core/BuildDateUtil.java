@@ -4,7 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import org.kohsuke.args4j.Option;
-import au.com.breakpoint.hedron.core.args4j.HgUtilArgs4j;
+import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 
@@ -40,7 +40,7 @@ public class BuildDateUtil
             final Options options = new Options ();
 
             // Check args & prepare usage string (in thrown AssertException).
-            HgUtilArgs4j.getProgramOptions (args, options);
+            HcUtilArgs4j.getProgramOptions (args, options);
 
             switch (options.m_mode)
             {

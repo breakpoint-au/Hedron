@@ -26,7 +26,7 @@ import org.kohsuke.args4j.OptionHandlerRegistry;
 import org.kohsuke.args4j.ParserProperties;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 
-public class HgUtilArgs4j
+public class HcUtilArgs4j
 {
     public static void getProgramOptions (final String[] args, final Object options)
     {
