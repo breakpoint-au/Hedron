@@ -3173,7 +3173,7 @@ public class HcUtil
         String s = null;
 
         final String slashed = toSlashPath (startingDir) + "/";
-        final int i = slashed.lastIndexOf ("/" + requiredDirName + "/");
+        final int i = slashed.toLowerCase ().lastIndexOf ("/" + requiredDirName.toLowerCase () + "/");
 
         if (i != -1)
         {
@@ -3230,8 +3230,7 @@ public class HcUtil
             s = getAvailableDirectoryName (new String[]
             {
                     "B:/Projects",
-                    "Q:/Projects",
-                    "/Volumes/Internal-2TB/leigh/dev/root/tools/Projects"
+                    "/Volumes/Internal-2TB/dev/root/tools/Projects"
             });
         }
 
