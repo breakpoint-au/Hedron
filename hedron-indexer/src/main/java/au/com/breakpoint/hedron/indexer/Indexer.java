@@ -1,4 +1,4 @@
-package au.com.breakpoint.tools.indexer;
+package au.com.breakpoint.hedron.indexer;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import au.com.breakpoint.hedron.core.UserFeedback;
 import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
-import au.com.breakpoint.tools.indexer.AppConfiguration.SourcePath;
+import au.com.breakpoint.hedron.indexer.AppConfiguration.SourcePath;
 
 // TODO 0 remove obsolete files from the index output dir
 

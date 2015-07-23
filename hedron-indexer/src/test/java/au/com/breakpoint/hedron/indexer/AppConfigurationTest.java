@@ -1,10 +1,11 @@
-package au.com.breakpoint.tools.indexer;
+package au.com.breakpoint.hedron.indexer;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import au.com.breakpoint.hedron.core.HcUtil;
-import au.com.breakpoint.tools.indexer.AppConfiguration.SourcePath;
+import au.com.breakpoint.hedron.indexer.AppConfiguration;
+import au.com.breakpoint.hedron.indexer.AppConfiguration.SourcePath;
 
 public class AppConfigurationTest
 {

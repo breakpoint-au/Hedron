@@ -1,8 +1,9 @@
-package au.com.breakpoint.tools.indexer;
+package au.com.breakpoint.hedron.indexer;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
+import au.com.breakpoint.hedron.indexer.Options;
 
 public class OptionsTest
 {

@@ -1,4 +1,4 @@
-package au.com.breakpoint.tools.indexer;
+package au.com.breakpoint.hedron.indexer;
 
 import org.kohsuke.args4j.Option;
 

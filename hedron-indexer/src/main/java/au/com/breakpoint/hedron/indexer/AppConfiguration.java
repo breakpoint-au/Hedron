@@ -1,4 +1,4 @@
-package au.com.breakpoint.tools.indexer;
+package au.com.breakpoint.hedron.indexer;
 
 import au.com.breakpoint.hedron.core.JsonUtil;
 

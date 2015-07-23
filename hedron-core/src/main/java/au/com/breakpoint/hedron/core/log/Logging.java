@@ -17,12 +17,13 @@
 package au.com.breakpoint.hedron.core.log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
-import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.GenericFactory;
+import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.ResourceScope;
 import au.com.breakpoint.hedron.core.ShutdownPriority;
 import au.com.breakpoint.hedron.core.concurrent.CallingThreadExecutor;
@@ -511,8 +512,8 @@ public class Logging
         return GenericFactory.newArrayList (m_loggers);
     }
 
-    //    /** Default to fatal, error, warning, info */
-    //    public static final String DEFAULT_LOG_LEVEL_CONFIG = "fewi";
+    /** Default to fatal, error, warning, info */
+    public static final String DEFAULT_LOG_LEVEL_CONFIG = "fewi";
 
     private static final CallingThreadExecutor _SyncExecutor = new CallingThreadExecutor ();
 
@@ -526,7 +527,8 @@ public class Logging
      * CopyOnWriteArrayList is a thread-safe list that is efficient for mostly-iteration
      * usage.
      */
-    private static final List<ILogger> m_loggers = new CopyOnWriteArrayList<> ();
+    private static final List<ILogger> m_loggers =
+        new CopyOnWriteArrayList<> (Arrays.asList (new ConsoleLogger (DEFAULT_LOG_LEVEL_CONFIG)));
 
     /**
      * Executor used for logging. Defaults to synchronous operation (in calling thread)

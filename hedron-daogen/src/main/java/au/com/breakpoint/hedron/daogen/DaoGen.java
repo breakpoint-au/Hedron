@@ -41,8 +41,6 @@ import au.com.breakpoint.hedron.core.SmartFile;
 import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
-import au.com.breakpoint.hedron.core.log.ConsoleLogger;
-import au.com.breakpoint.hedron.core.log.Logging;
 import au.com.breakpoint.hedron.daogen.strategy.IOverrideStrategy;
 import au.com.breakpoint.hedron.daogen.strategy.IRelationCodeStrategy;
 import au.com.breakpoint.hedron.daogen.strategy.SpringJdbcTemplateCodeStrategy;
@@ -722,7 +720,6 @@ public class DaoGen
 
     public static void main (final String[] args)
     {
-        Logging.addLogger (new ConsoleLogger ("fewi"));
         ExecutionScopes.executeProgram ( () -> new DaoGen ().generateDaos (args));
     }
 

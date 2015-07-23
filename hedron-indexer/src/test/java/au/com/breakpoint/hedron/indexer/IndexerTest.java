@@ -1,4 +1,4 @@
-package au.com.breakpoint.tools.indexer;
+package au.com.breakpoint.hedron.indexer;
 
 import org.junit.Test;
 
