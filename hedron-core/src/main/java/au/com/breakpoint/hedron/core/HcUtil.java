@@ -1229,11 +1229,6 @@ public class HcUtil
         return m_applicationVersion;
     }
 
-    public static String getBputilProjectDirectoryName ()
-    {
-        return formFilepath (getProjectsDirectoryName (), "hedron-core");
-    }
-
     public static byte getByteValue (final Object obj)
     {
         final long v = getLongValue (obj);
@@ -1491,6 +1486,11 @@ public class HcUtil
             fullNestedFilepath = formFilepath (thisParentDirectory, nestedFilepath);
         }
         return fullNestedFilepath;
+    }
+
+    public static String getHcUtilProjectDirectoryName ()
+    {
+        return formFilepath (getProjectsDirectoryName (), "hedron-core");
     }
 
     public static String getHostName ()

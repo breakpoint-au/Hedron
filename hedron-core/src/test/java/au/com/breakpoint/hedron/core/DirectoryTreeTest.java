@@ -20,6 +20,8 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
+import au.com.breakpoint.hedron.core.value.IValue;
+import au.com.breakpoint.hedron.core.value.SafeLazyValue;
 
 public class DirectoryTreeTest
 {
@@ -142,7 +144,12 @@ public class DirectoryTreeTest
 
     private String projDirFilename (final String suffix)
     {
-        return HcUtil.formFilepath (PROJ_DIR, suffix);
+        return HcUtil.formFilepath (getProjectDir (), suffix);
+    }
+
+    private static String getProjectDir ()
+    {
+        return ProjectDir.get ();
     }
 
     private static String getProjectsPath (final String subpath)
@@ -204,5 +211,5 @@ public class DirectoryTreeTest
 
     private static final boolean m_performTest = true;
 
-    private static final String PROJ_DIR = HcUtil.getBputilProjectDirectoryName ();
+    private static final IValue<String> ProjectDir = SafeLazyValue.of ( () -> HcUtil.getHcUtilProjectDirectoryName ());
 }

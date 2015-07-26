@@ -23,9 +23,9 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.HcUtilFile;
-import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.SmartFile;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.daogen.Attribute;
@@ -128,7 +128,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 }
                 if (sp.getParameterCount (Parameter.ParameterDirection.OUT) > 0 || sp
                     .getParameterCount (Parameter.ParameterDirection.RETURN_AS_OUT) > 0 || sp
-                    .getParameterCount (Parameter.ParameterDirection.RETURN) > 0)
+                        .getParameterCount (Parameter.ParameterDirection.RETURN) > 0)
                 {
                     pw.printf ("import org.springframework.jdbc.core.SqlOutParameter;%n");
                 }
@@ -194,7 +194,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             {
                 pw.printf ("%n");
                 pw.printf ("    /**%n");
-                pw.printf ("     * Convenience overload using intrinsic values. You must make sure the parameter values%n");
+                pw.printf (
+                    "     * Convenience overload using intrinsic values. You must make sure the parameter values%n");
                 pw.printf ("     * will fit into the intrinsic parameters.%n");
                 pw.printf ("     */%n");
                 pw.printf ("    public %s execute (%s)%n", returnTypeString,
@@ -287,7 +288,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("        execute (%s);%n", EntityUtil.getStringParameterClassParameters (inParameters, "p"));
                 pw.printf ("    }%n");
                 pw.printf ("%n");
-                pw.printf ("    /** Create a subclass of Spring's StoredProcedure to use its protected execute () method */%n");
+                pw.printf (
+                    "    /** Create a subclass of Spring's StoredProcedure to use its protected execute () method */%n");
                 pw.printf ("    private static class TypesafeStoredProcedure extends StoredProcedure%n");
                 pw.printf ("    {%n");
                 pw.printf ("        public TypesafeStoredProcedure (final DataSource ds)%n");
@@ -355,7 +357,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 }
                 else
                 {
-                    pw.printf ("            final Map<?, ?> outParams = DaoUtil.performExecute (this, inParams, STORED_PROCEDURE_NAME);%n");
+                    pw.printf (
+                        "            final Map<?, ?> outParams = DaoUtil.performExecute (this, inParams, STORED_PROCEDURE_NAME);%n");
                     pw.printf ("%n");
                     pw.printf ("            final Result r = new Result ();%n");
                     for (final Parameter p : outParameters)
@@ -433,7 +436,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             final List<Column> columns = ir.getColumns ();
             final List<Column> nonIdentityColumns = EntityUtil.getNonIdentityColumns (columns);
             final List<Column> nonPrimaryKeyNonIdentityColumns = EntityUtil.getNonPrimaryKeyNonIdentityColumns (ir);
-            final Constraint pk = ir.getPrimaryConstraint (); // may be null
+            final Constraint pk = ir.getPrimaryConstraint ();// may be null
             final List<Column> pkColumns = pk != null ? pk.getColumns () : new ArrayList<Column> ();
             final String pkClassName = EntityUtil.getPrimaryKeyClass (ir);
             final String pkClassInstance = EntityUtil.getPrimaryKeyInstanceString (ir);
@@ -498,7 +501,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     case Duplicate:
                     {
-                        pw.printf ("        m_column%s = au.com.breakpoint.hedron.core.HcUtil.duplicate (rhs.m_column%s);%n",
+                        pw.printf (
+                            "        m_column%s = au.com.breakpoint.hedron.core.HcUtil.duplicate (rhs.m_column%s);%n",
                             columnName, columnName);
                         break;
                     }
@@ -603,6 +607,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("%n");
             pw.printf ("    /** IEntity implementation of getColumnValues () */%n");
             pw.printf ("    @Override%n");
+            pw.printf ("    @SuppressWarnings (\"incomplete-switch\")%n");
             pw.printf ("    public Object[] getColumnValues (final ColumnType columnType)%n");
             pw.printf ("    {%n");
             pw.printf ("        Object[] values = null;%n");
@@ -928,8 +933,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     int i = 0;
                     for (final EnumValue v : en.getEnumValues ())
                     {
-                        pw.printf ("        \"%s\"%s   // %s%n", v.getTitle (), i++ < en.getEnumValues ().size () - 1
-                            ? "," : "", v.getValue ());
+                        pw.printf ("        \"%s\"%s   // %s%n", v.getTitle (),
+                            i++ < en.getEnumValues ().size () - 1 ? "," : "", v.getValue ());
                     }
 
                     pw.printf ("    };%n");
@@ -968,7 +973,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw = new SmartFile (filepath);
 
             final List<Column> nonIdentityColumns = EntityUtil.getNonIdentityColumns (columns);
-            final Constraint pk = ir.getPrimaryConstraint (); // may be null
+            final Constraint pk = ir.getPrimaryConstraint ();// may be null
             final List<Column> pkColumns = pk != null ? pk.getColumns () : new ArrayList<Column> ();
             final List<Column> nonPkColumns = EntityUtil.getNonPrimaryKeyColumns (ir);
             final boolean canUpdate = capabilities.contains (Capability.UPDATE) && pkColumns.size () > 0;
@@ -1022,7 +1027,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 entityPhysicalName);
             pw.printf (" */%n");
             pw.printf ("@SuppressWarnings (\"unused\")%n");
-            pw.printf ("public class %s%sDao extends BaseEntityDao<%s, %s>%n", daoName, suffix, entityName, pkClassName);
+            pw.printf ("public class %s%sDao extends BaseEntityDao<%s, %s>%n", daoName, suffix, entityName,
+                pkClassName);
             pw.printf ("{%n");
             if (!capabilities.isEmpty ())
             {
@@ -1055,8 +1061,10 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         entityPhysicalName);
                     pw.printf ("     * %n");
                     pw.printf ("     * @param whereElements%n");
-                    pw.printf ("     *     Specified criteria to be added into the where clause. These result in SQL 'and' clauses. There is%n");
-                    pw.printf ("     *     currently no way to directly express 'or' clauses, or more complex expressions. Use a custom query or%n");
+                    pw.printf (
+                        "     *     Specified criteria to be added into the where clause. These result in SQL 'and' clauses. There is%n");
+                    pw.printf (
+                        "     *     currently no way to directly express 'or' clauses, or more complex expressions. Use a custom query or%n");
                     pw.printf ("     *     stored procedure instead.%n");
                     pw.printf ("     * %n");
                     pw.printf ("     * @return Collection of %s entities%n", entityName);
@@ -1077,7 +1085,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         entityPhysicalName);
                     pw.printf ("     * %n");
                     pw.printf ("     * @param sql%n");
-                    pw.printf ("     *     A convenient readable encapsulation of sql where clauses and order by statements.%n");
+                    pw.printf (
+                        "     *     A convenient readable encapsulation of sql where clauses and order by statements.%n");
                     pw.printf ("     * %n");
                     pw.printf ("     * @return Collection of %s entities%n", entityName);
                     pw.printf ("     */%n");
@@ -1092,7 +1101,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     {
                         pw.printf ("%n");
                         pw.printf ("    /**%n");
-                        pw.printf ("     * Convenience overload using intrinsic values. You must make sure the parameter values%n");
+                        pw.printf (
+                            "     * Convenience overload using intrinsic values. You must make sure the parameter values%n");
                         pw.printf ("     * will fit into the intrinsic parameters.%n");
                         pw.printf ("     */%n");
                         pw.printf ("    public List<%s> fetch (%s)%n", entityName,
@@ -1150,7 +1160,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     if (generateSeparateOverload)
                     {
                         pw.printf ("    /**%n");
-                        pw.printf ("     * IEntityDao implementation, fetches the row of the entity table for the specified primary key.%n");
+                        pw.printf (
+                            "     * IEntityDao implementation, fetches the row of the entity table for the specified primary key.%n");
                         pw.printf ("     *%n");
                         pw.printf ("     * @return The specified TEntity entity, or null if it does not exist%n");
                         pw.printf ("     */%n");
@@ -1206,7 +1217,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 if (m_shouldUseSimpleJdbcInsert)
                 {
                     /////////// NOT CURRENTLY USED //////////
-                    pw.printf ("        SimpleJdbcInsert sji = new SimpleJdbcInsert (m_dataSource).withTableName (ENTITY_NAME);%n");
+                    pw.printf (
+                        "        SimpleJdbcInsert sji = new SimpleJdbcInsert (m_dataSource).withTableName (ENTITY_NAME);%n");
                     pw.printf ("    %n");
                     pw.printf ("        final Map<String, Object> columnValues = new HashMap<String, Object> (%s);%n",
                         columns.size ());
@@ -1221,7 +1233,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 }
                 else
                 {
-                    pw.printf ("        final int updateCount = DaoUtil.performInsert (m_dataSource, e, SQL_INSERT);%n");
+                    pw.printf (
+                        "        final int updateCount = DaoUtil.performInsert (m_dataSource, e, SQL_INSERT);%n");
                     pw.printf ("        ThreadContext.assertError (updateCount == 1, \"%sDao insert failed\");%n",
                         entityName);
                 }
@@ -1250,18 +1263,23 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     entityPhysicalName);
                 pw.printf ("     * %n");
                 pw.printf ("     * @param newValues%n");
-                pw.printf ("     *     Collection of column/value pairs corresponding to the 'set' part of the update SQL.%n");
+                pw.printf (
+                    "     *     Collection of column/value pairs corresponding to the 'set' part of the update SQL.%n");
                 pw.printf ("     * @param whereElements%n");
-                pw.printf ("     *     Specified criteria to be added into the where clause. These result in SQL 'and' clauses. There is%n");
-                pw.printf ("     *     currently no way to directly express 'or' clauses, or more complex expressions. Use a custom query or%n");
+                pw.printf (
+                    "     *     Specified criteria to be added into the where clause. These result in SQL 'and' clauses. There is%n");
+                pw.printf (
+                    "     *     currently no way to directly express 'or' clauses, or more complex expressions. Use a custom query or%n");
                 pw.printf ("     *     stored procedure instead.%n");
                 pw.printf ("     * %n");
                 pw.printf ("     * @return the numbers of rows affected by the update%n");
                 pw.printf ("     */%n");
                 pw.printf ("    @Override%n");
-                pw.printf ("    public int update (final SetElement[] newValues, final WhereElement[] whereElements)%n");
+                pw.printf (
+                    "    public int update (final SetElement[] newValues, final WhereElement[] whereElements)%n");
                 pw.printf ("    {%n");
-                pw.printf ("        return DaoUtil.performUpdate (m_dataSource, ENTITY_NAME, COLUMN_NAMES, newValues, whereElements);%n");
+                pw.printf (
+                    "        return DaoUtil.performUpdate (m_dataSource, ENTITY_NAME, COLUMN_NAMES, newValues, whereElements);%n");
                 pw.printf ("    }%n");
                 pw.printf ("%n");
                 pw.printf ("    /**%n");
@@ -1270,7 +1288,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     entityPhysicalName);
                 pw.printf ("     * %n");
                 pw.printf ("     * @param sql%n");
-                pw.printf ("     *     A convenient readable encapsulation of update set statements and where clauses.%n");
+                pw.printf (
+                    "     *     A convenient readable encapsulation of update set statements and where clauses.%n");
                 pw.printf ("     * %n");
                 pw.printf ("     * @return the numbers of rows affected by the update%n");
                 pw.printf ("     */%n");
@@ -1325,8 +1344,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                             String.format ("final %s column%s", jti.m_javaType, optimisticLockColumnName);
                         pw.printf ("    public boolean update (final %s e, %s)%n", entityName, optimisticLockArg);
                         pw.printf ("    {%n");
-                        pw.printf ("%s%n", EntityUtil.getStringUpdateClauses (entityName, pkColumns, nonPkColumns,
-                            true, optimisticLockColumn, "sql"));
+                        pw.printf ("%s%n", EntityUtil.getStringUpdateClauses (entityName, pkColumns, nonPkColumns, true,
+                            optimisticLockColumn, "sql"));
                         pw.printf ("%n");
                         pw.printf ("        return update (sql.getSetElements (), sql.getWhereElements ()) == 1;%n");
                         pw.printf ("    }%n");
@@ -1355,8 +1374,10 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     entityPhysicalName);
                 pw.printf ("     * %n");
                 pw.printf ("     * @param whereElements%n");
-                pw.printf ("     *     Specified criteria to be added into the where clause. These result in SQL 'and' clauses. There is%n");
-                pw.printf ("     *     currently no way to directly express 'or' clauses, or more complex expressions. Use a custom query or%n");
+                pw.printf (
+                    "     *     Specified criteria to be added into the where clause. These result in SQL 'and' clauses. There is%n");
+                pw.printf (
+                    "     *     currently no way to directly express 'or' clauses, or more complex expressions. Use a custom query or%n");
                 pw.printf ("     *     stored procedure instead.%n");
                 pw.printf ("     * %n");
                 pw.printf ("     * @return number of rows affected by the delete%n");
@@ -1364,7 +1385,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("    @Override%n");
                 pw.printf ("    public int delete (final WhereElement[] whereElements)%n");
                 pw.printf ("    {%n");
-                pw.printf ("        return DaoUtil.performDelete (m_dataSource, SQL_FRAGMENT_DELETE, COLUMN_NAMES, whereElements);%n");
+                pw.printf (
+                    "        return DaoUtil.performDelete (m_dataSource, SQL_FRAGMENT_DELETE, COLUMN_NAMES, whereElements);%n");
                 pw.printf ("    }%n");
                 if (pk != null)
                 {
@@ -1601,7 +1623,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             {
                 pw.printf ("%n");
                 pw.printf ("    /**%n");
-                pw.printf ("     * Convenience overload using intrinsic values. You must make sure the parameter values%n");
+                pw.printf (
+                    "     * Convenience overload using intrinsic values. You must make sure the parameter values%n");
                 pw.printf ("     * will fit into the intrinsic parameters.%n");
                 pw.printf ("     */%n");
                 pw.printf ("    public int execute (%s)%n", EntityUtil.getStringConvenienceParametersArgs (parameters));
@@ -1787,7 +1810,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             // Ignore non alphanumeric.
             if (!Character.isLetterOrDigit (c))
             {
-                upperCaseNextOne = true;    // require case break
+                upperCaseNextOne = true;// require case break
             }
             else
             {
@@ -1804,13 +1827,13 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         return sb.toString ();
     }
 
-    private final List<Attribute> m_attributes = Collections.synchronizedList (new ArrayList<Attribute> ());    // accumulated during output of entities
+    private final List<Attribute> m_attributes = Collections.synchronizedList (new ArrayList<Attribute> ());// accumulated during output of entities
 
     private String m_daoDirectory;
 
     private String m_entityDirectory;
 
-    private final List<DbEnum> m_enums = Collections.synchronizedList (new ArrayList<DbEnum> ()); // accumulated during output of entities
+    private final List<DbEnum> m_enums = Collections.synchronizedList (new ArrayList<DbEnum> ());// accumulated during output of entities
 
     private Options m_options;
 
@@ -1818,7 +1841,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
     private static final String DIRECTORY_ENTITY = "entity";
 
-    private static boolean m_shouldUseSimpleJdbcCall; // false because doesn't work with Sybase
+    private static boolean m_shouldUseSimpleJdbcCall;// false because doesn't work with Sybase
 
     private static boolean m_shouldUseSimpleJdbcInsert;
 }

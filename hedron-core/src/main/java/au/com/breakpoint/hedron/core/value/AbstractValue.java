@@ -34,7 +34,6 @@ public abstract class AbstractValue<T> implements IValue<T>
 
             isEqual = get ().equals (eRhs.get ());
         }
-        //System.out.printf ("%s:%s isEqual %s%n", m_train.getName (), m_train.getInstance (), isEqual);
 
         return isEqual;
     }

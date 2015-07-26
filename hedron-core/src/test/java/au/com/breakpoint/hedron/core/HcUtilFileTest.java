@@ -28,11 +28,11 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import au.com.breakpoint.hedron.core.HcUtil;
-import au.com.breakpoint.hedron.core.HcUtilFile;
 import au.com.breakpoint.hedron.core.Tuple.E3;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.core.log.Logging;
+import au.com.breakpoint.hedron.core.value.IValue;
+import au.com.breakpoint.hedron.core.value.SafeLazyValue;
 
 public class HcUtilFileTest
 {
@@ -329,12 +329,12 @@ public class HcUtilFileTest
 
     private File projDirFile (final String suffix)
     {
-        return new File (HcUtil.formFilepath (PROJ_DIR, suffix));
+        return new File (HcUtil.formFilepath (getProjectDir (), suffix));
     }
 
     private String projDirFilename (final String suffix)
     {
-        return HcUtil.formFilepath (PROJ_DIR, suffix);
+        return HcUtil.formFilepath (getProjectDir (), suffix);
     }
 
     @BeforeClass
@@ -379,6 +379,11 @@ public class HcUtilFileTest
         }
     }
 
+    private static String getProjectDir ()
+    {
+        return m_projectDirValue.get ();
+    }
+
     private static String getTempPath (final String filename)
     {
         return HcUtil.formFilepath (HcUtil.getTempDirectoryName (), filename);
@@ -388,7 +393,8 @@ public class HcUtilFileTest
 
     private static final boolean m_performTest = true;
 
-    private static final String PROJ_DIR = HcUtil.getBputilProjectDirectoryName ();
+    private static final IValue<String> m_projectDirValue =
+        SafeLazyValue.of ( () -> HcUtil.getHcUtilProjectDirectoryName ());
 
     private static final String TEMP_FILEPATH_1 = getTempPath ("HcUtilTest-1.temp");
 
