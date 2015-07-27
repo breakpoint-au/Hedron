@@ -39,10 +39,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import org.junit.Test;
-import au.com.breakpoint.hedron.core.HcUtil;
-import au.com.breakpoint.hedron.core.GenericFactory;
-import au.com.breakpoint.hedron.core.IIdentifiable;
-import au.com.breakpoint.hedron.core.KeyValuePair;
 import au.com.breakpoint.hedron.core.Tuple.E2;
 import au.com.breakpoint.hedron.core.Tuple.E3;
 import au.com.breakpoint.hedron.core.context.AssertException;
@@ -51,8 +47,8 @@ import au.com.breakpoint.hedron.core.context.FaultException;
 import au.com.breakpoint.hedron.core.context.IScope;
 import au.com.breakpoint.hedron.core.context.LoggingSilenceScope;
 import au.com.breakpoint.hedron.core.context.OpResult;
-import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.core.context.OpResult.Severity;
+import au.com.breakpoint.hedron.core.context.ThreadContext;
 
 public class HcUtilTest
 {
@@ -761,8 +757,8 @@ public class HcUtilTest
             HcUtil.extractVersionString ("SomeApp 9.0#35 (20/05/2013 17:50) by Breakpoint Pty Limited"));
         assertEquals ("SomeApp 9.0#3",
             HcUtil.extractVersionString ("SomeApp 9.0#3 (20/05/2013 17:50) by Breakpoint Pty Limited"));
-        assertEquals ("TLS9.0#35",
-            HcUtil.extractVersionString ("TLS9.0#35 (20/05/2013 17:50) by Breakpoint Pty Limited"));
+        assertEquals ("WITR9.0#35",
+            HcUtil.extractVersionString ("WITR9.0#35 (20/05/2013 17:50) by Breakpoint Pty Limited"));
         assertEquals ("0#35", HcUtil.extractVersionString ("0#35 (20/05/2013 17:50) by Breakpoint Pty Limited"));
         assertEquals ("#35", HcUtil.extractVersionString ("#35 (20/05/2013 17:50) by Breakpoint Pty Limited"));
     }
