@@ -1053,6 +1053,21 @@ public class HcUtil
             .orElse (null);
     }
 
+    public static String findAncestralDirectory (final String startingDir, final String requiredDirName)
+    {
+        String s = null;
+
+        final String slashed = toSlashPath (startingDir) + "/";
+        final int i = slashed.toLowerCase ().lastIndexOf ("/" + requiredDirName.toLowerCase () + "/");
+
+        if (i != -1)
+        {
+            s = slashed.substring (0, i + requiredDirName.length () + 1);
+        }
+
+        return s;
+    }
+
     public static PropertyDescriptor findProperty (final String name, final PropertyDescriptor[] ps)
     {
         final PropertyDescriptor result = find (Arrays.asList (ps), v -> v.getName ().equals (name));
@@ -2898,12 +2913,6 @@ public class HcUtil
         return filepath.replace ('\\', '/');
     }
 
-    /** Varargs wrapper */
-    public static String toString (final Object... objects)
-    {
-        return Arrays.toString (objects);
-    }
-
     //    // Enhanced from Arrays.toString ()
     //    public static String toString (final boolean[][] a)
     //    {
@@ -2932,6 +2941,12 @@ public class HcUtil
     //            b.append (", ");
     //        }
     //    }
+
+    /** Varargs wrapper */
+    public static String toString (final Object... objects)
+    {
+        return Arrays.toString (objects);
+    }
 
     public static void transferProperties (final Object source, final Object target, final boolean strict)
     {
@@ -3166,21 +3181,6 @@ public class HcUtil
         }
 
         return s == null ? _UNKNOWN : s;
-    }
-
-    static String findAncestralDirectory (final String startingDir, final String requiredDirName)
-    {
-        String s = null;
-
-        final String slashed = toSlashPath (startingDir) + "/";
-        final int i = slashed.toLowerCase ().lastIndexOf ("/" + requiredDirName.toLowerCase () + "/");
-
-        if (i != -1)
-        {
-            s = slashed.substring (0, i + requiredDirName.length () + 1);
-        }
-
-        return s;
     }
 
     private static int countBits (long v)

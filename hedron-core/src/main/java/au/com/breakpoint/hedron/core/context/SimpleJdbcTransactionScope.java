@@ -44,7 +44,7 @@ public class SimpleJdbcTransactionScope extends JdbcConnectionCachingExecutionSc
                 Connection connection = null;
                 try
                 {
-                    connection = getLocalDataSource ().getConnection ();
+                    connection = getDataSource ().getConnection ();
                 }
                 catch (final SQLException e)
                 {
@@ -101,7 +101,7 @@ public class SimpleJdbcTransactionScope extends JdbcConnectionCachingExecutionSc
 
         // Turn off auto-commit. This connection will be held for the remainder of the transaction
         // by JdbcConnectionCachingDataSource.
-        final Connection connection = HcUtilJdbc.getConnection (getLocalDataSource ());
+        final Connection connection = HcUtilJdbc.getConnection (getDataSource ());
         HcUtilJdbc.setAutoCommit (connection, false);
     }
 
@@ -116,7 +116,7 @@ public class SimpleJdbcTransactionScope extends JdbcConnectionCachingExecutionSc
      * (which supports multiple data sources) by passing down the remembered name of the
      * data source.
      */
-    private DataSource getLocalDataSource ()
+    private DataSource getDataSource ()
     {
         return getDataSource (m_dataSourceName);
     }
