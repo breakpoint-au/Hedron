@@ -17,6 +17,8 @@
 package au.com.breakpoint.hedron.core.dao;
 
 import java.lang.reflect.Field;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,8 +28,9 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.object.StoredProcedure;
-import au.com.breakpoint.hedron.core.HcUtil;
+import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import au.com.breakpoint.hedron.core.GenericFactory;
+import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.TimedScope;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.core.dao.IEntity.ColumnType;
@@ -227,6 +230,12 @@ public class DaoUtil
     public static <T extends IEntity<?>> String dumpCreateEntityCode (final T[] entities)
     {
         return dumpCreateEntityCode (Arrays.asList (entities));
+    }
+
+    public static String getClobAsString (final ResultSet rs, final String columnName) throws SQLException
+    {
+        final String clobAsString = new DefaultLobHandler ().getClobAsString (rs, columnName);
+        return clobAsString;
     }
 
     public static <T> T getOutParameter (final Map<?, ?> outParams, final String parameterName,

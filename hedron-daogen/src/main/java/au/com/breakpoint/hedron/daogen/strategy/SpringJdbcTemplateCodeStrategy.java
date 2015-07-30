@@ -23,10 +23,12 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.HcUtilFile;
 import au.com.breakpoint.hedron.core.SmartFile;
+import au.com.breakpoint.hedron.core.Tuple.E3;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.daogen.Attribute;
 import au.com.breakpoint.hedron.daogen.Capability;
@@ -1485,11 +1487,17 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     final String columnName = c.getName ();
                     final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
 
+                    final Function<E3<String, String, String>, String> formatter =
+                        jti.m_jdbcResultSetAccessorFormatter != null ? jti.m_jdbcResultSetAccessorFormatter
+                            : m_accessorDefaultFormatter;// fall back to simple rs.getXxxx ()
+
+                    final String accessorCode =
+                        formatter.apply (E3.of (jti.m_jdbcResultSetAccessor, entityName, columnName));
+
                     if (c.isNullable ())
                     {
                         // Nullable.
-                        pw.printf ("        %s value%s = rs.%s (COLUMN_NAMES[%s.Columns.%s]);%n", jti.m_javaType,
-                            columnName, jti.m_jdbcResultSetAccessor, entityName, columnName);
+                        pw.printf ("        %s value%s = %s;%n", jti.m_javaType, columnName, accessorCode);
                         pw.printf ("        if (!rs.wasNull ())%n");
                         pw.printf ("        {%n");
                         pw.printf ("            e.set%s (value%s);%n", columnName, columnName);
@@ -1497,8 +1505,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     }
                     else
                     {
-                        pw.printf ("        e.set%s (rs.%s (COLUMN_NAMES[%s.Columns.%s]));%n", columnName,
-                            jti.m_jdbcResultSetAccessor, entityName, columnName);
+                        pw.printf ("        e.set%s (%s);%n", columnName, accessorCode);
                     }
                 }
                 pw.printf ("%n");
@@ -1788,6 +1795,9 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
         return sb.toString ();
     }
+
+    final Function<E3<String, String, String>, String> m_accessorDefaultFormatter =
+        e3 -> String.format ("rs.%s (COLUMN_NAMES[%s.Columns.%s])", e3.getE0 (), e3.getE1 (), e3.getE2 ());
 
     private final List<Attribute> m_attributes = Collections.synchronizedList (new ArrayList<Attribute> ());// accumulated during output of entities
 

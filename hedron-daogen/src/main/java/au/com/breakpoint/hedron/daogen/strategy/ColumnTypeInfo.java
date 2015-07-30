@@ -16,11 +16,14 @@
 //
 package au.com.breakpoint.hedron.daogen.strategy;
 
+import java.util.function.Function;
+import au.com.breakpoint.hedron.core.Tuple.E3;
+
 public class ColumnTypeInfo
 {
     public enum CopyStyle
     {
-        Duplicate, ShallowCopy; // Duplicate uses HcUtil.duplicate
+        Duplicate, ShallowCopy;// Duplicate uses HcUtil.duplicate
     }
 
     public CopyStyle m_copyStyle;
@@ -29,37 +32,39 @@ public class ColumnTypeInfo
 
     public String m_hashCodeExpression;
 
-    public String m_javaCastExpression; // eg (int) (Integer) xxx for integer type
+    public String m_javaCastExpression;// eg (int) (Integer) xxx for integer type
 
-    public String m_javaConvenienceType; // long for BigDecimal, etc
+    public String m_javaConvenienceType;// long for BigDecimal, etc
 
-    public String m_javaConversionMethod; // eg au.com.breakpoint.hedron.core.HcUtil.getLongValue
+    public String m_javaConversionMethod;// eg au.com.breakpoint.hedron.core.HcUtil.getLongValue
 
-    public String m_javaObjectType; // String, Integer, etc
+    public String m_javaObjectType;// String, Integer, etc
 
-    public String m_javaType; // String, int, Integer, etc
+    public String m_javaType;// String, int, Integer, etc
 
-    public String m_javaTypeConstantSuffix; // eg L for long values
+    public String m_javaTypeConstantSuffix;// eg L for long values
 
-    public String m_javaTypeOfLimitValue; // byte, int, etc, used for generating constants
+    public String m_javaTypeOfLimitValue;// byte, int, etc, used for generating constants
 
-    public String m_jdbcJavaSqlType; // eg INTEGER for Types.INTEGER, etc
+    public String m_jdbcJavaSqlType;// eg INTEGER for Types.INTEGER, etc
 
-    public String m_jdbcResultSetAccessor; // the java type to be used when retrieving from StoredProcedureResultSet etc
+    public String m_jdbcResultSetAccessor;// the java type to be used when retrieving from StoredProcedureResultSet etc
 
-    public String m_jdbcType; // the java type to be used when retrieving from StoredProcedureResultSet etc
+    public Function<E3<String, String, String>, String> m_jdbcResultSetAccessorFormatter;
 
-    public long m_maxValue = Long.MIN_VALUE; // used when storing in an intrinsic type rather than java.math.BigDecimal
+    public String m_jdbcType;// the java type to be used when retrieving from StoredProcedureResultSet etc
 
-    public long m_minValue = Long.MAX_VALUE; // used when storing in an intrinsic type rather than java.math.BigDecimal
+    public long m_maxValue = Long.MIN_VALUE;// used when storing in an intrinsic type rather than java.math.BigDecimal
 
-    public boolean m_nonPrimitiveTypeJavaLangType; // eg uses String/Integer etc
+    public long m_minValue = Long.MAX_VALUE;// used when storing in an intrinsic type rather than java.math.BigDecimal
 
-    public String m_precision; // for BigDecimal
+    public boolean m_nonPrimitiveTypeJavaLangType;// eg uses String/Integer etc
+
+    public String m_precision;// for BigDecimal
 
     public String m_rowMapperType;
 
-    public String m_scale; // for BigDecimal
+    public String m_scale;// for BigDecimal
 
-    public int m_size = -1; // for String (CHAR/VARCHAR)
+    public int m_size = -1;// for String (CHAR/VARCHAR)
 }

@@ -216,7 +216,8 @@ public class EntityUtil
                 jti.m_javaObjectType = jti.m_javaType = "String";
                 jti.m_nonPrimitiveTypeJavaLangType = true;
                 jti.m_jdbcType = "String";
-                jti.m_jdbcResultSetAccessor = "getString";
+                jti.m_jdbcResultSetAccessorFormatter = e3 -> String
+                    .format ("DaoUtil.getClobAsString (rs, COLUMN_NAMES[%s.Columns.%s])", e3.getE1 (), e3.getE2 ());
                 jti.m_jdbcJavaSqlType = "java.sql.Types.CLOB";
                 jti.m_javaCastExpression = "(String)";
                 jti.m_size = -1;
