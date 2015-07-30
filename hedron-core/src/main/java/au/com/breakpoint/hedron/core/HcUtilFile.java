@@ -942,7 +942,8 @@ public class HcUtilFile
         boolean updated = false;
         if (s != null)
         {
-            updated = s.close ();
+            s.close ();
+            updated = s.didUpdate ();
         }
 
         return updated;

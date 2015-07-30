@@ -32,7 +32,8 @@ public class SmartFileWriter extends Writer
     @Override
     public void close () throws IOException
     {
-        m_updated = m_smartFile.close ();
+        m_smartFile.close ();
+        m_updated = m_smartFile.didUpdate ();
     }
 
     public boolean didUpdate ()

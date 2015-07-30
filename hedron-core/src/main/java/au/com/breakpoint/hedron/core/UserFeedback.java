@@ -115,7 +115,7 @@ public class UserFeedback implements ICloseable
         if (s != null)
         {
             outputMessage (s, Position.TemporaryLine, m_lastIndentLevel + 1);
-            //HcUtil.pause (50);
+            //HcUtil.pause (250);
         }
     }
 

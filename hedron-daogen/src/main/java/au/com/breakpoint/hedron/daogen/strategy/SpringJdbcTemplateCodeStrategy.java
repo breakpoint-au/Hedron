@@ -41,6 +41,7 @@ import au.com.breakpoint.hedron.daogen.IRelation;
 import au.com.breakpoint.hedron.daogen.Options;
 import au.com.breakpoint.hedron.daogen.Parameter;
 import au.com.breakpoint.hedron.daogen.Schema;
+import au.com.breakpoint.hedron.daogen.SmartFileShowingProgress;
 import au.com.breakpoint.hedron.daogen.StoredProcedure;
 import au.com.breakpoint.hedron.daogen.StoredProcedureResultSet;
 
@@ -90,20 +91,18 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         final String filepath = getDaoFilepath (String.format ("%sStoredProcDao.java", sp.getName ()));
         final String outputPackage = m_options.m_outputPackage;
 
-        SmartFile pw = null;
-        try
-        {
-            final String storedProcedurePhysicalName = sp.getPhysicalName ();
-            final String storedProcedureName = sp.getName ();
-            final List<Parameter> parameters = sp.getParameters ();
-            final List<Parameter> inParameters = sp.getInputParameters ();
-            final List<Parameter> outParameters = sp.getOutputParameters ();
-            final List<StoredProcedureResultSet> resultSets = sp.getResultSets ();
-            final boolean shouldReturnValues = outParameters.size () > 0 || resultSets.size () > 0;
-            final String returnTypeString = shouldReturnValues ? "Result" : "void";
-            final String parametersClassName = EntityUtil.getParametersClass (inParameters);
+        final String storedProcedurePhysicalName = sp.getPhysicalName ();
+        final String storedProcedureName = sp.getName ();
+        final List<Parameter> parameters = sp.getParameters ();
+        final List<Parameter> inParameters = sp.getInputParameters ();
+        final List<Parameter> outParameters = sp.getOutputParameters ();
+        final List<StoredProcedureResultSet> resultSets = sp.getResultSets ();
+        final boolean shouldReturnValues = outParameters.size () > 0 || resultSets.size () > 0;
+        final String returnTypeString = shouldReturnValues ? "Result" : "void";
+        final String parametersClassName = EntityUtil.getParametersClass (inParameters);
 
-            pw = new SmartFile (filepath);
+        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
+        {
             pw.printf ("package %s.dao;%n", outputPackage);
             pw.printf ("%n");
             pw.printf ("import java.util.*;%n");
@@ -410,11 +409,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("    }%n");
             pw.printf ("}%n");
         }
-        finally
-        {
-            final boolean updated = HcUtilFile.safeClose (pw);
-            result.add (updated ? filepath : "");
-        }
 
         return result;
     }
@@ -428,11 +422,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         final String filepath = getEntityFilepath (String.format ("%s.java", entityName));
         final String outputPackage = m_options.m_outputPackage;
 
-        SmartFile pw = null;
-        try
+        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
         {
-            pw = new SmartFile (filepath);
-
             final List<Column> columns = ir.getColumns ();
             final List<Column> nonIdentityColumns = EntityUtil.getNonIdentityColumns (columns);
             final List<Column> nonPrimaryKeyNonIdentityColumns = EntityUtil.getNonPrimaryKeyNonIdentityColumns (ir);
@@ -815,11 +806,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("    private static final long serialVersionUID = 4508429214973765867L;%n");
             pw.printf ("}%n");
         }
-        finally
-        {
-            final boolean updated = HcUtilFile.safeClose (pw);
-            result.add (updated ? filepath : "");
-        }
 
         return result;
     }
@@ -861,11 +847,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
     {
         final List<String> result = GenericFactory.newArrayList ();
 
-        SmartFile pw = null;
-        try
+        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
         {
-            pw = new SmartFile (filepath);
-
             pw.printf ("package %s;%n", outputPackage);
             pw.printf ("%n");
             pw.printf ("/**%n");
@@ -943,11 +926,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
             pw.printf ("}%n");
         }
-        finally
-        {
-            final boolean updated = HcUtilFile.safeClose (pw);
-            result.add (updated ? filepath : "");
-        }
 
         return result;
     }
@@ -967,23 +945,20 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         final String filepath = getDaoFilepath (String.format ("%s%sDao.java", daoName, suffix));
         final String outputPackage = m_options.m_outputPackage;
 
-        SmartFile pw = null;
-        try
+        final List<Column> nonIdentityColumns = EntityUtil.getNonIdentityColumns (columns);
+        final Constraint pk = ir.getPrimaryConstraint ();// may be null
+        final List<Column> pkColumns = pk != null ? pk.getColumns () : new ArrayList<Column> ();
+        final List<Column> nonPkColumns = EntityUtil.getNonPrimaryKeyColumns (ir);
+        final boolean canUpdate = capabilities.contains (Capability.UPDATE) && pkColumns.size () > 0;
+        final boolean needUpdate = canUpdate && nonPkColumns.size () > 0;
+        final boolean canCreate = capabilities.contains (Capability.CREATE);
+        final boolean canRead = capabilities.contains (Capability.READ);
+        final boolean canDelete = capabilities.contains (Capability.DELETE);
+        //final boolean canCrud = canCreate && canRead && needUpdate && canDelete;
+        final String pkClassName = EntityUtil.getPrimaryKeyClass (ir);
+
+        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
         {
-            pw = new SmartFile (filepath);
-
-            final List<Column> nonIdentityColumns = EntityUtil.getNonIdentityColumns (columns);
-            final Constraint pk = ir.getPrimaryConstraint ();// may be null
-            final List<Column> pkColumns = pk != null ? pk.getColumns () : new ArrayList<Column> ();
-            final List<Column> nonPkColumns = EntityUtil.getNonPrimaryKeyColumns (ir);
-            final boolean canUpdate = capabilities.contains (Capability.UPDATE) && pkColumns.size () > 0;
-            final boolean needUpdate = canUpdate && nonPkColumns.size () > 0;
-            final boolean canCreate = capabilities.contains (Capability.CREATE);
-            final boolean canRead = capabilities.contains (Capability.READ);
-            final boolean canDelete = capabilities.contains (Capability.DELETE);
-            //final boolean canCrud = canCreate && canRead && needUpdate && canDelete;
-            final String pkClassName = EntityUtil.getPrimaryKeyClass (ir);
-
             pw.printf ("package %s.dao;%n", outputPackage);
             pw.printf ("%n");
             pw.printf ("import java.sql.ResultSet;%n");
@@ -1576,11 +1551,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             }
             pw.printf ("}%n");
         }
-        finally
-        {
-            final boolean updated = HcUtilFile.safeClose (pw);
-            result.add (updated ? filepath : "");
-        }
 
         return result;
     }
@@ -1594,11 +1564,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         final String filepath = getDaoFilepath (String.format ("%s%sDao.java", daoName, suffix));
         final String outputPackage = m_options.m_outputPackage;
 
-        SmartFile pw = null;
-        try
+        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
         {
-            pw = new SmartFile (filepath);
-
             pw.printf ("package %s.dao;%n", outputPackage);
             pw.printf ("%n");
             pw.printf ("import java.sql.SQLException;%n");
@@ -1650,11 +1617,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             final String sqlLines = prepareSqlOutputLines (sqlString, shouldPreserveNewLinesInSQL);
             pw.printf ("    private static final String SQL_STRING =%n%s;%n", sqlLines);
             pw.printf ("}%n");
-        }
-        finally
-        {
-            final boolean updated = HcUtilFile.safeClose (pw);
-            result.add (updated ? filepath : "");
         }
 
         return result;

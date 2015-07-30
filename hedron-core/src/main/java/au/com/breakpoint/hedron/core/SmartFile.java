@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 
-public class SmartFile
+public class SmartFile implements ICloseable
 {
     public SmartFile (final String filePath)
     {
@@ -39,19 +39,17 @@ public class SmartFile
         }
     }
 
-    public boolean close ()
+    @Override
+    public void close ()
     {
-        boolean updated = false;
         try
         {
-            updated = updateTargetFile ();
+            m_updated = updateTargetFile ();
         }
         finally
         {
             cleanupTemporaryFile ();
         }
-
-        return updated;
     }
 
     public void flush ()
@@ -62,6 +60,11 @@ public class SmartFile
     public boolean isCommitEnabled ()
     {
         return m_commitEnabled;
+    }
+
+    public boolean didUpdate ()
+    {
+        return m_updated;
     }
 
     public void print (final String s)
@@ -118,4 +121,6 @@ public class SmartFile
     private final String m_targetFilePath;
 
     private File m_tempFile;
+
+    private boolean m_updated;
 }

@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.GenericFactory;
+import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.daogen.strategy.ColumnTypeInfo;
 
@@ -70,14 +70,14 @@ public class EntityUtil
             }
             else if (columnType.equals ("integer"))
             {
-                setInt (c, jti, Integer.MIN_VALUE); // Integer.MIN_VALUE = no value checking
+                setInt (c, jti, Integer.MIN_VALUE);// Integer.MIN_VALUE = no value checking
             }
             else if (columnType.equalsIgnoreCase ("number") || columnType.equalsIgnoreCase ("decimal"))
             {
                 // If no fractional digits, map to byte / int / long if will fit.
                 if (c.getColumnAttributes ().getScale () == 0)
                 {
-                    final int wholeDigits = c.getColumnAttributes ().getPrecision (); // all whole digits
+                    final int wholeDigits = c.getColumnAttributes ().getPrecision ();// all whole digits
                     final BigDecimal upperLimitValue =
                         new BigDecimal (10).pow (wholeDigits).subtract (new BigDecimal (1));
 
@@ -211,9 +211,22 @@ public class EntityUtil
                 jti.m_hashCodeExpression = HASHCODE_OBJECT;
                 jti.m_copyStyle = ColumnTypeInfo.CopyStyle.Duplicate;
             }
+            else if (columnType.equalsIgnoreCase ("clob"))
+            {
+                jti.m_javaObjectType = jti.m_javaType = "String";
+                jti.m_nonPrimitiveTypeJavaLangType = true;
+                jti.m_jdbcType = "String";
+                jti.m_jdbcResultSetAccessor = "getString";
+                jti.m_jdbcJavaSqlType = "java.sql.Types.CLOB";
+                jti.m_javaCastExpression = "(String)";
+                jti.m_size = -1;
+                jti.m_equalityExpression = EQUALS_OBJECT;
+                jti.m_hashCodeExpression = HASHCODE_OBJECT;
+                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;// no size information
+            }
             else if (columnType.equalsIgnoreCase ("text"))
             {
-                setStringJavaType (true, -1, jti); // no size information
+                setStringJavaType (true, -1, jti);// no size information
             }
             else if (columnType.equalsIgnoreCase ("oracle-refcursor"))
             {
@@ -223,7 +236,7 @@ public class EntityUtil
                 jti.m_jdbcType = "TBD";
                 jti.m_jdbcResultSetAccessor = "getTBD";
                 jti.m_jdbcJavaSqlType = "oracle.jdbc.OracleTypes.CURSOR";
-                jti.m_javaCastExpression = null; // "(" + jti.m_javaType + ")"
+                jti.m_javaCastExpression = null;// "(" + jti.m_javaType + ")"
                 jti.m_equalityExpression = EQUALS_OBJECT;
                 jti.m_hashCodeExpression = HASHCODE_OBJECT;
                 jti.m_copyStyle = ColumnTypeInfo.CopyStyle.Duplicate;
@@ -322,7 +335,7 @@ public class EntityUtil
     {
         String s = null;
 
-        final Constraint pk = ir.getPrimaryConstraint (); // may be null
+        final Constraint pk = ir.getPrimaryConstraint ();// may be null
         if (pk == null)
         {
             s = "Void";
@@ -339,7 +352,7 @@ public class EntityUtil
     {
         String s = null;
 
-        final Constraint pk = ir.getPrimaryConstraint (); // may be null
+        final Constraint pk = ir.getPrimaryConstraint ();// may be null
         if (pk == null)
         {
             s = "null";
@@ -351,7 +364,7 @@ public class EntityUtil
             {
                 // Simple primary key.
                 final Column c = pkColumns.get (0);
-                s = String.format ("m_column%s", c.getName ()); // autoboxes
+                s = String.format ("m_column%s", c.getName ());// autoboxes
             }
             else
             {
@@ -455,8 +468,8 @@ public class EntityUtil
             final String columnName = c.getName ();
             final ColumnTypeInfo jti = getColumnTypeInfo (c);
 
-            sb.append (String.format ("final %s column%s%s", jti.m_javaType, columnName, i == columns.size () - 1 ? ""
-                : ", "));
+            sb.append (String.format ("final %s column%s%s", jti.m_javaType, columnName,
+                i == columns.size () - 1 ? "" : ", "));
             ++i;
         }
 
@@ -491,9 +504,8 @@ public class EntityUtil
             final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
             if (jti.m_javaConvenienceType != null)
             {
-                final String s =
-                    String.format ("value%s == null ? null : new %s (value%s)%s", c.getName (), jti.m_javaType,
-                        c.getName (), i == parameters.size () - 1 ? "" : ", ");
+                final String s = String.format ("value%s == null ? null : new %s (value%s)%s", c.getName (),
+                    jti.m_javaType, c.getName (), i == parameters.size () - 1 ? "" : ", ");
                 sb.append (s);
             }
             else
@@ -518,7 +530,8 @@ public class EntityUtil
             final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
 
             final String t = jti.m_javaConvenienceType != null ? jti.m_javaConvenienceType : jti.m_javaType;
-            sb.append (String.format ("final %s value%s%s", t, c.getName (), i == inParameters.size () - 1 ? "" : ", "));
+            sb.append (
+                String.format ("final %s value%s%s", t, c.getName (), i == inParameters.size () - 1 ? "" : ", "));
             ++i;
         }
 
@@ -552,8 +565,8 @@ public class EntityUtil
             final Column c = p.getColumn ();
             final ColumnTypeInfo jti = getColumnTypeInfo (c);
 
-            sb.append (String.format ("final %s value%s%s", jti.m_javaType, c.getName (), i == parameters.size () - 1
-                ? "" : ", "));
+            sb.append (String.format ("final %s value%s%s", jti.m_javaType, c.getName (),
+                i == parameters.size () - 1 ? "" : ", "));
             ++i;
         }
 
@@ -578,8 +591,8 @@ public class EntityUtil
 
     public static String getStringParameterValues (final List<Parameter> parameters)
     {
-        return parameters.size () == 0 ? "null" : String.format ("new Object[] { %s }",
-            getStringParametersArgsRef (parameters));
+        return parameters.size () == 0 ? "null"
+            : String.format ("new Object[] { %s }", getStringParametersArgsRef (parameters));
     }
 
     public static String getStringUpdateClauses (final String entityName, final List<Column> pkColumns,
@@ -599,8 +612,8 @@ public class EntityUtil
             final String columnName = c.getName ();
 
             final String s = String.format (getValueFormatString, columnName);
-            sb.append (String.format ("%n            %s (%s.Columns.%s).set (%s)", i == 0 ? "new UpdateSql"
-                : "    .and", entityName, columnName, s));
+            sb.append (String.format ("%n            %s (%s.Columns.%s).set (%s)",
+                i == 0 ? "new UpdateSql" : "    .and", entityName, columnName, s));
             ++i;
         }
 
@@ -681,7 +694,7 @@ public class EntityUtil
         jti.m_scale = String.valueOf (c.getColumnAttributes ().getScale ());
         jti.m_equalityExpression = EQUALS_OBJECT;
         jti.m_hashCodeExpression = HASHCODE_OBJECT;
-        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy; // BigDecimal is immutable so is safe to copy
+        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;// BigDecimal is immutable so is safe to copy
     }
 
     public static void setInt (final Column c, final ColumnTypeInfo jti, final int upperLimitValue)
@@ -696,7 +709,7 @@ public class EntityUtil
         jti.m_jdbcResultSetAccessor = "getInt";
         jti.m_jdbcJavaSqlType = "java.sql.Types.INTEGER";
         //        jti.m_javaCastExpression = "(int) (Integer)";
-        jti.m_javaCastExpression = "(Integer)"; // remove redundant cast
+        jti.m_javaCastExpression = "(Integer)";// remove redundant cast
         if (upperLimitValue > Integer.MIN_VALUE)
         {
             jti.m_maxValue = upperLimitValue;
@@ -792,7 +805,8 @@ public class EntityUtil
     // invoke hashCode on the field
     public static final String EQUALS_INTRINSIC = "m_column%s == eRhs.m_column%s";
 
-    public static final String EQUALS_OBJECT = "au.com.breakpoint.hedron.core.HcUtil.safeEquals (m_column%s, eRhs.m_column%s)";
+    public static final String EQUALS_OBJECT =
+        "au.com.breakpoint.hedron.core.HcUtil.safeEquals (m_column%s, eRhs.m_column%s)";
 
     public static final String HASHCODE_ALREADY_INT_COMPATIBLE = "m_column%s";
 

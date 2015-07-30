@@ -35,9 +35,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.HcUtil;
-import au.com.breakpoint.hedron.core.HcUtilFile;
 import au.com.breakpoint.hedron.core.JsonUtil;
 import au.com.breakpoint.hedron.core.SmartFile;
+import au.com.breakpoint.hedron.core.UserFeedback;
 import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
@@ -51,40 +51,37 @@ public class DaoGen
 {
     public void generateDaos (final String[] args)
     {
-        final CommandLine commandLine = new CommandLine ();
-
         // Check args & prepare usage string (in thrown AssertException).
-        HcUtilArgs4j.getProgramOptions (args, commandLine);
+        HcUtilArgs4j.getProgramOptions (args, m_commandLine);
+        m_feedback = new UserFeedback (m_commandLine.m_debug);
 
-        getOptionsFromFile (commandLine.m_optionsFile);
+        getOptionsFromFile (m_commandLine.m_optionsFile);
 
         getSchema ();
 
-        final List<String> feedback = GenericFactory.newArrayList ();
+        final List<String> messages = GenericFactory.newArrayList ();
 
         // Take any actions prior to generation.
-        feedback.addAll (m_options.m_codeStrategy.preGenerate (m_options));
+        messages.addAll (m_options.m_codeStrategy.preGenerate (m_options));
 
-        feedback.addAll (generateDaos ());
-        feedback.addAll (generateKeywordList ());
+        messages.addAll (generateDaos ());
+        messages.addAll (generateKeywordList ());
 
         // Take any actions after generation.
-        feedback.addAll (m_options.m_codeStrategy.postGenerate ());
+        messages.addAll (m_options.m_codeStrategy.postGenerate ());
 
-        for (final String s : feedback)
+        for (final String s : messages)
         {
             if (HcUtil.safeGetLength (s) > 0)
             {
                 System.out.printf ("%n  %s", s);
             }
-            else
-            {
-                System.out.print (".");
-            }
         }
 
         // Output any unused filter rules for info only.
         showUnusedFilterRules ();
+
+        m_feedback.outputMessage ("");
     }
 
     private void addOverrides (final Node parentNode)
@@ -282,16 +279,9 @@ public class DaoGen
         final Map<String, String[]> keywordMap = getSchemaKeywords ();
         final String json = JsonUtil.toJson (keywordMap);
 
-        SmartFile pw = null;
-        try
+        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
         {
-            pw = new SmartFile (filepath);
             pw.print (json);
-        }
-        finally
-        {
-            final boolean updated = HcUtilFile.safeClose (pw);
-            feedback.add (updated ? filepath : "");
         }
 
         return feedback;
@@ -521,11 +511,6 @@ public class DaoGen
             if (shouldGenerateDao (cv))
             {
                 final String customEntityName = cv.getCustomEntity ();
-                if (cv.getName ().equals ("OnTimeRunningCriteriaActivationDateStart"))
-                {
-                    System.out.println ();
-                }
-
                 if (customEntityName != null)
                 {
                     final IRelation ir = m_schema.getIRelationNoThrow (customEntityName);
@@ -534,7 +519,6 @@ public class DaoGen
                         cv.getName (), customEntityName, customEntityName);
 
                     // Synthesise the entity now.
-                    //System.out.println (customEntityName);
                     createCustomViewEntity (cv);
 
                     m_setAdditionalTypes.add (customEntityName);
@@ -626,7 +610,6 @@ public class DaoGen
 
     private boolean shouldGenerateDao (final CustomView o)
     {
-        //System.out.printf ("cv [%s] %s%n", o.getName (), shouldGenerateDao);
         return shouldGenerateDao ("customview", o.getName ());
     }
 
@@ -646,10 +629,6 @@ public class DaoGen
     {
         final BooleanHolder okHolder = new BooleanHolder ();
         final String name = ir.getName ();
-        if (name.equals ("OptionalActivationDate"))
-        {
-            System.out.println ();
-        }
 
         for (final Filter f : m_filters)
         {
@@ -682,7 +661,6 @@ public class DaoGen
             f.evaluateFilter (type, name, ok, capabilities);
         }
 
-        //      System.out.printf ("DaoGen: sproc %s pass: %s%n", sp.getName (), ok);
         return ok.getValue ();
     }
 
@@ -695,12 +673,12 @@ public class DaoGen
             unusedRules.addAll (f.getUnusedFilterRules ());
         }
 
-        if (unusedRules.size () > 0)
+        if (m_commandLine.m_debug && unusedRules.size () > 0)
         {
-            System.out.printf ("%nWarning - unused filter rules:%n");
+            m_feedback.outputMessage (true, 0, "%nWarning - unused filter rules:");
             for (final String s : unusedRules)
             {
-                System.out.printf ("  %s%n", s);
+                m_feedback.outputMessage (s, true, 1);
             }
         }
     }
@@ -714,14 +692,24 @@ public class DaoGen
 
     private class CommandLine
     {
+        @Option (name = "-debug", required = false)
+        private boolean m_debug;
+
         @Option (name = "-options", usage = "Specifies the name of the DAO generation options XML file *REQUIRED*", required = true)
         private String m_optionsFile;
+    }
+
+    public static UserFeedback getFeedback ()
+    {
+        return m_feedback;
     }
 
     public static void main (final String[] args)
     {
         ExecutionScopes.executeProgram ( () -> new DaoGen ().generateDaos (args));
     }
+
+    final CommandLine m_commandLine = new CommandLine ();
 
     private final List<Filter> m_filters = GenericFactory.newArrayList ();
 
@@ -731,5 +719,6 @@ public class DaoGen
 
     private final Set<String> m_setAdditionalTypes = GenericFactory.newHashSet ();
 
+    private static UserFeedback m_feedback;
     //    private static final List<Capability> m_readonlyCapabilities = GenericFactory.newArrayList (Capability.READ);
 }

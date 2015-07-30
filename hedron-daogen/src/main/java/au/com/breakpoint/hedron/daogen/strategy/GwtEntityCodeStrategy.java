@@ -18,7 +18,6 @@ package au.com.breakpoint.hedron.daogen.strategy;
 
 import java.io.File;
 import java.util.List;
-import au.com.breakpoint.hedron.core.HcUtilFile;
 import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.SmartFile;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
@@ -32,6 +31,7 @@ import au.com.breakpoint.hedron.daogen.EntityUtil;
 import au.com.breakpoint.hedron.daogen.IRelation;
 import au.com.breakpoint.hedron.daogen.Options;
 import au.com.breakpoint.hedron.daogen.Schema;
+import au.com.breakpoint.hedron.daogen.SmartFileShowingProgress;
 import au.com.breakpoint.hedron.daogen.StoredProcedure;
 
 public class GwtEntityCodeStrategy implements IRelationCodeStrategy
@@ -81,13 +81,10 @@ public class GwtEntityCodeStrategy implements IRelationCodeStrategy
         final String entityName = CLASSNAME_PREFIX + ir.getEntityName ();
         final String filepath = getEntityFilepath (String.format ("%s%s.java", CLASSNAME_PREFIX, entityName));
         final String outputPackage = m_options.m_outputPackage;
+        result = filepath;
 
-        SmartFile pw = null;
-        try
+        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
         {
-            result = filepath;
-            pw = new SmartFile (filepath);
-
             final List<Column> columns = ir.getColumns ();
             pw.printf ("package %s.%s;%n", outputPackage, DIRECTORY_ENTITY);
             pw.printf ("%n");
@@ -190,10 +187,6 @@ public class GwtEntityCodeStrategy implements IRelationCodeStrategy
             }
             pw.printf ("}%n");
         }
-        finally
-        {
-            HcUtilFile.safeClose (pw);
-        }
 
         return GenericFactory.newArrayList (result);
     }
@@ -203,12 +196,8 @@ public class GwtEntityCodeStrategy implements IRelationCodeStrategy
         final String filepath = EntityUtil.getFilepath (m_options.m_outputBaseFilepath, "GwtMapping.java");
         final String outputPackage = m_options.m_outputPackage;
 
-        SmartFile pw = null;
-        try
+        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
         {
-            System.out.printf ("  %s%n", filepath);
-            pw = new SmartFile (filepath);
-
             pw.printf ("package %s;%n", outputPackage);
             pw.printf ("%n");
             for (final IRelation ir : m_relations)
@@ -233,10 +222,6 @@ public class GwtEntityCodeStrategy implements IRelationCodeStrategy
             }
             pw.printf ("}%n");
         }
-        finally
-        {
-            HcUtilFile.safeClose (pw);
-        }
     }
 
     @Override
@@ -257,8 +242,8 @@ public class GwtEntityCodeStrategy implements IRelationCodeStrategy
             final File fileEntityDir = new File (m_entityDirectory);
             if (!fileEntityDir.exists ())
             {
-                ThreadContext
-                    .assertFault (fileEntityDir.mkdir (), "Could not create directory [%s]", m_entityDirectory);
+                ThreadContext.assertFault (fileEntityDir.mkdir (), "Could not create directory [%s]",
+                    m_entityDirectory);
             }
         }
 
@@ -272,8 +257,8 @@ public class GwtEntityCodeStrategy implements IRelationCodeStrategy
 
         pw.printf ("    public static %s%s[] transform (final %s[] rhs)%n", CLASSNAME_PREFIX, entityName, entityName);
         pw.printf ("    {%n");
-        pw.printf ("        final %s%s[] lhs = new %s%s[rhs.length];%n", CLASSNAME_PREFIX, entityName,
-            CLASSNAME_PREFIX, entityName);
+        pw.printf ("        final %s%s[] lhs = new %s%s[rhs.length];%n", CLASSNAME_PREFIX, entityName, CLASSNAME_PREFIX,
+            entityName);
         pw.printf ("        for (int i = 0; i < lhs.length; ++i)%n");
         pw.printf ("        {%n");
         pw.printf ("            lhs[i] = transform (rhs[i]);%n");
