@@ -982,7 +982,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 {
                     if (j++ > 0)
                     {
-                        pw.print (", ");
+                        pw.printf (",%n");
+                        pw.printf ("        ");
                     }
                     final String symbol = stringToSymbol (e.getTitle ());
                     pw.printf ("%s (%s)", symbol, e.getValue ());
