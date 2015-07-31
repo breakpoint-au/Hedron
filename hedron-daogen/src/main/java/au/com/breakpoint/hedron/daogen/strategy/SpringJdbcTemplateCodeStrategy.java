@@ -969,7 +969,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             {
                 if (i++ > 0)
                 {
-                    pw.print ("%n");
+                    pw.printf ("%n");
                 }
 
                 final String enumName = en.getName ();
@@ -988,14 +988,17 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     pw.printf ("%s (%s)", symbol, e.getValue ());
                 }
                 pw.printf (";%n");
+                pw.printf ("%n");
                 pw.printf ("        private %s (int value)%n", enumName);
                 pw.printf ("        {%n");
                 pw.printf ("            m_value = value;%n");
                 pw.printf ("        }%n");
+                pw.printf ("%n");
                 pw.printf ("        public int getValue ()%n");
                 pw.printf ("        {%n");
                 pw.printf ("            return m_value;%n");
                 pw.printf ("        }%n");
+                pw.printf ("%n");
                 pw.printf ("        private final int m_value;%n");
                 pw.printf ("    }%n");
             }
