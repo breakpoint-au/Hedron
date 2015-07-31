@@ -815,9 +815,23 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
     @Override
     public List<String> postGenerate ()
     {
-        // Generate Definitions.java
-        final String filepath = EntityUtil.getFilepath (m_options.m_outputBaseFilepath, "Definitions.java");
-        return generateDefinitions (filepath, m_options.m_outputPackage);
+        final List<String> feedback = GenericFactory.newArrayList ();
+
+        if (true)
+        {
+            // Generate Definitions.java
+            final String filepath = EntityUtil.getFilepath (m_options.m_outputBaseFilepath, "Definitions.java");
+            feedback.addAll (generateDefinitions (filepath, m_options.m_outputPackage));
+        }
+
+        if (true)
+        {
+            // Generate Enums.java
+            final String filepath = EntityUtil.getFilepath (m_options.m_outputBaseFilepath, "Enums.java");
+            feedback.addAll (generateEnums (filepath, m_options.m_outputPackage));
+        }
+
+        return feedback;
     }
 
     @Override
@@ -924,6 +938,66 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     pw.printf ("    };%n");
                 }
+            }
+
+            pw.printf ("}%n");
+        }
+
+        return result;
+    }
+
+    private List<String> generateEnums (final String filepath, final String outputPackage)
+    {
+        final List<String> result = GenericFactory.newArrayList ();
+
+        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
+        {
+            pw.printf ("package %s;%n", outputPackage);
+            pw.printf ("%n");
+            pw.printf ("/**%n");
+            pw.printf (" * Class containing database metrics as enums.%n");
+            pw.printf (" */%n");
+            pw.printf ("public class Enums%n");
+            pw.printf ("{%n");
+            pw.printf ("    // Selected entity properties for the schema.%n");
+
+            // Sort enums alphabetically, since m_enums is filled in asynchronously they are in any order.
+            Collections.sort (m_enums, comparing (DbEnum::getName));
+
+            int i = 0;
+            for (final DbEnum en : m_enums)
+            {
+                if (i++ > 0)
+                {
+                    pw.print ("%n");
+                }
+
+                final String enumName = en.getName ();
+                pw.printf ("    public static enum %s%n", enumName);
+                pw.printf ("    {%n");
+                pw.printf ("        ");
+
+                int j = 0;
+                for (final EnumValue e : en.getEnumValues ())
+                {
+                    if (j++ > 0)
+                    {
+                        pw.print (", ");
+                    }
+                    final String symbol = stringToSymbol (e.getTitle ());
+                    pw.printf ("%s (%s)", symbol, e.getValue ());
+                }
+                pw.printf (";%n");
+                pw.printf ("        private %s (int value)%n", enumName);
+                pw.printf ("        {%n");
+                pw.printf ("            m_value = value;%n");
+                pw.printf ("        }%n");
+                pw.printf ("        public int getValue ()%n");
+                pw.printf ("        {%n");
+                pw.printf ("            return m_value;%n");
+                pw.printf ("        }%n");
+                pw.printf ("        private final int m_value;%n");
+                pw.printf ("    }%n");
             }
 
             pw.printf ("}%n");
