@@ -81,7 +81,7 @@ public class DaoGen
         // Output any unused filter rules for info only.
         showUnusedFilterRules ();
 
-        m_feedback.outputMessage ("");
+        m_feedback.outputMessage (true, 0, "DAOs generated for %s", m_commandLine.m_optionsFile);
     }
 
     private void addOverrides (final Node parentNode)
