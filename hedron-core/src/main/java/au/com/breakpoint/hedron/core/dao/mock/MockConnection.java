@@ -1,4 +1,4 @@
-package au.com.breakpoint.hedron.core.dao;
+package au.com.breakpoint.hedron.core.dao.mock;
 
 import java.sql.Array;
 import java.sql.Blob;
@@ -25,207 +25,207 @@ public class MockConnection implements Connection
     @Override
     public void abort (final Executor executor) throws SQLException
     {
-        Logging.logInfo ("MockConnection.abort ()");
+        Logging.logDebug ("MockConnection.abort ()");
     }
 
     @Override
     public void clearWarnings () throws SQLException
     {
-        Logging.logInfo ("MockConnection.clearWarnings ()");
+        Logging.logDebug ("MockConnection.clearWarnings ()");
     }
 
     @Override
     public void close () throws SQLException
     {
-        Logging.logInfo ("MockConnection.close ()");
+        Logging.logDebug ("MockConnection.close ()");
     }
 
     @Override
     public void commit () throws SQLException
     {
-        Logging.logInfo ("MockConnection.commit ()");
+        Logging.logDebug ("MockConnection.commit ()");
     }
 
     @Override
     public Array createArrayOf (final String typeName, final Object[] elements) throws SQLException
     {
-        Logging.logInfo ("MockConnection.createArrayOf ()");
+        Logging.logDebug ("MockConnection.createArrayOf ()");
         return null;
     }
 
     @Override
     public Blob createBlob () throws SQLException
     {
-        Logging.logInfo ("MockConnection.createBlob ()");
+        Logging.logDebug ("MockConnection.createBlob ()");
         return null;
     }
 
     @Override
     public Clob createClob () throws SQLException
     {
-        Logging.logInfo ("MockConnection.createClob ()");
+        Logging.logDebug ("MockConnection.createClob ()");
         return null;
     }
 
     @Override
     public NClob createNClob () throws SQLException
     {
-        Logging.logInfo ("MockConnection.createNClob ()");
+        Logging.logDebug ("MockConnection.createNClob ()");
         return null;
     }
 
     @Override
     public SQLXML createSQLXML () throws SQLException
     {
-        Logging.logInfo ("MockConnection.createSQLXML ()");
+        Logging.logDebug ("MockConnection.createSQLXML ()");
         return null;
     }
 
     @Override
     public Statement createStatement () throws SQLException
     {
-        Logging.logInfo ("MockConnection.createStatement ()");
-        return null;
+        Logging.logDebug ("MockConnection.createStatement ()");
+        return new MockPreparedStatement ();
     }
 
     @Override
     public Statement createStatement (final int resultSetType, final int resultSetConcurrency) throws SQLException
     {
-        Logging.logInfo ("MockConnection.createStatement ()");
-        return null;
+        Logging.logDebug ("MockConnection.createStatement ()");
+        return new MockPreparedStatement ();
     }
 
     @Override
     public Statement createStatement (final int resultSetType, final int resultSetConcurrency,
         final int resultSetHoldability) throws SQLException
     {
-        Logging.logInfo ("MockConnection.createStatement ()");
-        return null;
+        Logging.logDebug ("MockConnection.createStatement ()");
+        return new MockPreparedStatement ();
     }
 
     @Override
     public Struct createStruct (final String typeName, final Object[] attributes) throws SQLException
     {
-        Logging.logInfo ("MockConnection.createStruct ()");
+        Logging.logDebug ("MockConnection.createStruct ()");
         return null;
     }
 
     @Override
     public boolean getAutoCommit () throws SQLException
     {
-        Logging.logInfo ("MockConnection.getAutoCommit ()");
+        Logging.logDebug ("MockConnection.getAutoCommit ()");
         return false;
     }
 
     @Override
     public String getCatalog () throws SQLException
     {
-        Logging.logInfo ("MockConnection.getCatalog ()");
+        Logging.logDebug ("MockConnection.getCatalog ()");
         return null;
     }
 
     @Override
     public Properties getClientInfo () throws SQLException
     {
-        Logging.logInfo ("MockConnection.getClientInfo ()");
+        Logging.logDebug ("MockConnection.getClientInfo ()");
         return null;
     }
 
     @Override
     public String getClientInfo (final String name) throws SQLException
     {
-        Logging.logInfo ("MockConnection.getClientInfo ()");
+        Logging.logDebug ("MockConnection.getClientInfo ()");
         return null;
     }
 
     @Override
     public int getHoldability () throws SQLException
     {
-        Logging.logInfo ("MockConnection.getHoldability ()");
+        Logging.logDebug ("MockConnection.getHoldability ()");
         return 0;
     }
 
     @Override
     public DatabaseMetaData getMetaData () throws SQLException
     {
-        Logging.logInfo ("MockConnection.getMetaData ()");
+        Logging.logDebug ("MockConnection.getMetaData ()");
         return null;
     }
 
     @Override
     public int getNetworkTimeout () throws SQLException
     {
-        Logging.logInfo ("MockConnection.getNetworkTimeout ()");
+        Logging.logDebug ("MockConnection.getNetworkTimeout ()");
         return 0;
     }
 
     @Override
     public String getSchema () throws SQLException
     {
-        Logging.logInfo ("MockConnection.getSchema ()");
+        Logging.logDebug ("MockConnection.getSchema ()");
         return null;
     }
 
     @Override
     public int getTransactionIsolation () throws SQLException
     {
-        Logging.logInfo ("MockConnection.getTransactionIsolation ()");
+        Logging.logDebug ("MockConnection.getTransactionIsolation ()");
         return 0;
     }
 
     @Override
     public Map<String, Class<?>> getTypeMap () throws SQLException
     {
-        Logging.logInfo ("MockConnection.getTypeMap ()");
+        Logging.logDebug ("MockConnection.getTypeMap ()");
         return null;
     }
 
     @Override
     public SQLWarning getWarnings () throws SQLException
     {
-        Logging.logInfo ("MockConnection.getWarnings ()");
+        Logging.logDebug ("MockConnection.getWarnings ()");
         return null;
     }
 
     @Override
     public boolean isClosed () throws SQLException
     {
-        Logging.logInfo ("MockConnection.isClosed ()");
+        Logging.logDebug ("MockConnection.isClosed ()");
         return false;
     }
 
     @Override
     public boolean isReadOnly () throws SQLException
     {
-        Logging.logInfo ("MockConnection.isReadOnly ()");
+        Logging.logDebug ("MockConnection.isReadOnly ()");
         return false;
     }
 
     @Override
     public boolean isValid (final int timeout) throws SQLException
     {
-        Logging.logInfo ("MockConnection.isValid ()");
+        Logging.logDebug ("MockConnection.isValid ()");
         return false;
     }
 
     @Override
     public boolean isWrapperFor (final Class<?> iface) throws SQLException
     {
-        Logging.logInfo ("MockConnection.isWrapperFor ()");
+        Logging.logDebug ("MockConnection.isWrapperFor ()");
         return false;
     }
 
     @Override
     public String nativeSQL (final String sql) throws SQLException
     {
-        Logging.logInfo ("MockConnection.nativeSQL ()");
+        Logging.logDebug ("MockConnection.nativeSQL ()");
         return null;
     }
 
     @Override
     public CallableStatement prepareCall (final String sql) throws SQLException
     {
-        Logging.logInfo ("MockConnection.prepareCall ()");
+        Logging.logDebug ("MockConnection.prepareCall ()");
         return null;
     }
 
@@ -233,7 +233,7 @@ public class MockConnection implements Connection
     public CallableStatement prepareCall (final String sql, final int resultSetType, final int resultSetConcurrency)
         throws SQLException
     {
-        Logging.logInfo ("MockConnection.prepareCall ()");
+        Logging.logDebug ("MockConnection.prepareCall ()");
         return null;
     }
 
@@ -241,150 +241,150 @@ public class MockConnection implements Connection
     public CallableStatement prepareCall (final String sql, final int resultSetType, final int resultSetConcurrency,
         final int resultSetHoldability) throws SQLException
     {
-        Logging.logInfo ("MockConnection.prepareCall ()");
+        Logging.logDebug ("MockConnection.prepareCall ()");
         return null;
     }
 
     @Override
     public PreparedStatement prepareStatement (final String sql) throws SQLException
     {
-        Logging.logInfo ("MockConnection.prepareStatement ()");
-        return null;
+        Logging.logDebug ("MockConnection.prepareStatement ()");
+        return new MockPreparedStatement ();
     }
 
     @Override
     public PreparedStatement prepareStatement (final String sql, final int autoGeneratedKeys) throws SQLException
     {
-        Logging.logInfo ("MockConnection.prepareStatement ()");
-        return null;
+        Logging.logDebug ("MockConnection.prepareStatement ()");
+        return new MockPreparedStatement ();
     }
 
     @Override
     public PreparedStatement prepareStatement (final String sql, final int resultSetType,
         final int resultSetConcurrency) throws SQLException
     {
-        Logging.logInfo ("MockConnection.prepareStatement ()");
-        return null;
+        Logging.logDebug ("MockConnection.prepareStatement ()");
+        return new MockPreparedStatement ();
     }
 
     @Override
     public PreparedStatement prepareStatement (final String sql, final int resultSetType,
         final int resultSetConcurrency, final int resultSetHoldability) throws SQLException
     {
-        Logging.logInfo ("MockConnection.prepareStatement ()");
-        return null;
+        Logging.logDebug ("MockConnection.prepareStatement ()");
+        return new MockPreparedStatement ();
     }
 
     @Override
     public PreparedStatement prepareStatement (final String sql, final int[] columnIndexes) throws SQLException
     {
-        Logging.logInfo ("MockConnection.prepareStatement ()");
-        return null;
+        Logging.logDebug ("MockConnection.prepareStatement ()");
+        return new MockPreparedStatement ();
     }
 
     @Override
     public PreparedStatement prepareStatement (final String sql, final String[] columnNames) throws SQLException
     {
-        Logging.logInfo ("MockConnection.prepareStatement ()");
-        return null;
+        Logging.logDebug ("MockConnection.prepareStatement ()");
+        return new MockPreparedStatement ();
     }
 
     @Override
     public void releaseSavepoint (final Savepoint savepoint) throws SQLException
     {
-        Logging.logInfo ("MockConnection.releaseSavepoint ()");
+        Logging.logDebug ("MockConnection.releaseSavepoint ()");
     }
 
     @Override
     public void rollback () throws SQLException
     {
-        Logging.logInfo ("MockConnection.rollback ()");
+        Logging.logDebug ("MockConnection.rollback ()");
     }
 
     @Override
     public void rollback (final Savepoint savepoint) throws SQLException
     {
-        Logging.logInfo ("MockConnection.rollback ()");
+        Logging.logDebug ("MockConnection.rollback ()");
     }
 
     @Override
     public void setAutoCommit (final boolean autoCommit) throws SQLException
     {
-        Logging.logInfo ("MockConnection.setAutoCommit ()");
+        Logging.logDebug ("MockConnection.setAutoCommit ()");
     }
 
     @Override
     public void setCatalog (final String catalog) throws SQLException
     {
-        Logging.logInfo ("MockConnection.setCatalog ()");
+        Logging.logDebug ("MockConnection.setCatalog ()");
     }
 
     @Override
     public void setClientInfo (final Properties properties) throws SQLClientInfoException
     {
-        Logging.logInfo ("MockConnection.setClientInfo ()");
+        Logging.logDebug ("MockConnection.setClientInfo ()");
     }
 
     @Override
     public void setClientInfo (final String name, final String value) throws SQLClientInfoException
     {
-        Logging.logInfo ("MockConnection.setClientInfo ()");
+        Logging.logDebug ("MockConnection.setClientInfo ()");
     }
 
     @Override
     public void setHoldability (final int holdability) throws SQLException
     {
-        Logging.logInfo ("MockConnection.setHoldability ()");
+        Logging.logDebug ("MockConnection.setHoldability ()");
     }
 
     @Override
     public void setNetworkTimeout (final Executor executor, final int milliseconds) throws SQLException
     {
-        Logging.logInfo ("MockConnection.setNetworkTimeout ()");
+        Logging.logDebug ("MockConnection.setNetworkTimeout ()");
     }
 
     @Override
     public void setReadOnly (final boolean readOnly) throws SQLException
     {
-        Logging.logInfo ("MockConnection.setReadOnly ()");
+        Logging.logDebug ("MockConnection.setReadOnly ()");
     }
 
     @Override
     public Savepoint setSavepoint () throws SQLException
     {
-        Logging.logInfo ("MockConnection.setSavepoint ()");
+        Logging.logDebug ("MockConnection.setSavepoint ()");
         return null;
     }
 
     @Override
     public Savepoint setSavepoint (final String name) throws SQLException
     {
-        Logging.logInfo ("MockConnection.setSavepoint ()");
+        Logging.logDebug ("MockConnection.setSavepoint ()");
         return null;
     }
 
     @Override
     public void setSchema (final String schema) throws SQLException
     {
-        Logging.logInfo ("MockConnection.setSchema ()");
+        Logging.logDebug ("MockConnection.setSchema ()");
     }
 
     @Override
     public void setTransactionIsolation (final int level) throws SQLException
     {
-        Logging.logInfo ("MockConnection.setTransactionIsolation ()");
+        Logging.logDebug ("MockConnection.setTransactionIsolation ()");
     }
 
     @Override
     public void setTypeMap (final Map<String, Class<?>> map) throws SQLException
     {
-        Logging.logInfo ("MockConnection.setTypeMap ()");
+        Logging.logDebug ("MockConnection.setTypeMap ()");
     }
 
     @Override
     public <T> T unwrap (final Class<T> iface) throws SQLException
     {
-        Logging.logInfo ("MockConnection.unwrap ()");
+        Logging.logDebug ("MockConnection.unwrap ()");
         return null;
     }
 }
