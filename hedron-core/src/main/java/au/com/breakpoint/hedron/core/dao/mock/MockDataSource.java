@@ -14,6 +14,7 @@ public class MockDataSource implements DataSource
     public Connection getConnection () throws SQLException
     {
         Logging.logDebug ("MockDataSource.getConnection ()");
+        ++m_countAction;
         return new MockConnection ();
     }
 
@@ -21,7 +22,13 @@ public class MockDataSource implements DataSource
     public Connection getConnection (final String username, final String password) throws SQLException
     {
         Logging.logDebug ("MockDataSource.getConnection ()");
+        ++m_countAction;
         return new MockConnection ();
+    }
+
+    public int getCountAction ()
+    {
+        return m_countAction;
     }
 
     @Override
@@ -52,6 +59,11 @@ public class MockDataSource implements DataSource
         return false;
     }
 
+    public void reset ()
+    {
+        m_countAction = 0;
+    }
+
     @Override
     public void setLoginTimeout (final int seconds) throws SQLException
     {
@@ -70,4 +82,6 @@ public class MockDataSource implements DataSource
         Logging.logDebug ("MockDataSource.unwrap ()");
         return null;
     }
+
+    private volatile int m_countAction;
 }
