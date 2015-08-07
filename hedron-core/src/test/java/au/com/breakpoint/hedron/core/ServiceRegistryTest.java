@@ -19,12 +19,11 @@ package au.com.breakpoint.hedron.core;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.context.FaultException;
 import au.com.breakpoint.hedron.core.context.LoggingSilenceScope;
 import au.com.breakpoint.hedron.core.service.ServiceRegistry;
 
-public class ServiceLocatorTest
+public class ServiceRegistryTest
 {
     @Test
     public void testGetInstance ()
@@ -49,6 +48,48 @@ public class ServiceLocatorTest
         }
     }
 
+    @Test
+    public void testGetInstanceChained ()
+    {
+        if (true)
+        {
+            final ServiceRegistry sl0 = new ServiceRegistry ();
+            sl0.register (ITest.class, STest.class);
+            final ServiceRegistry sl1 = new ServiceRegistry (sl0);
+
+            if (true)
+            {
+                final ITest o = sl0.of (ITest.class);
+                assertTrue (o instanceof STest);
+            }
+            if (true)
+            {
+                final ITest o = sl1.of (ITest.class);
+                assertTrue (o instanceof STest);
+            }
+        }
+
+        if (true)
+        {
+            final ServiceRegistry sl0 = new ServiceRegistry ();
+            sl0.register (ITest.class, ETest.class);
+            final ServiceRegistry sl1 = new ServiceRegistry (sl0);
+
+            if (true)
+            {
+                final ITest o = sl0.of (ITest.class);
+                assertTrue (o instanceof STest);
+                assertTrue (o instanceof ETest);
+            }
+            if (true)
+            {
+                final ITest o = sl1.of (ITest.class);
+                assertTrue (o instanceof STest);
+                assertTrue (o instanceof ETest);
+            }
+        }
+    }
+
     @Test (expected = FaultException.class)
     public void testGetInstanceDouble ()
     {
@@ -67,7 +108,7 @@ public class ServiceLocatorTest
         final ServiceRegistry sl = new ServiceRegistry ();
 
         final ETest impl = new ETest ();
-        sl.register (ITest.class, ETest.class, () -> impl);
+        sl.register (ITest.class, () -> impl);
 
         assertEquals (impl, sl.of (ITest.class));
         assertEquals (impl, sl.of (ITest.class));
@@ -80,7 +121,7 @@ public class ServiceLocatorTest
         final ServiceRegistry sl = new ServiceRegistry ();
 
         final ETest impl = new ETest ();
-        sl.register ("key", ETest.class, () -> impl);
+        sl.register ("key", () -> impl);
 
         assertEquals (impl, sl.of ("key"));
         assertEquals (impl, sl.of ("key"));

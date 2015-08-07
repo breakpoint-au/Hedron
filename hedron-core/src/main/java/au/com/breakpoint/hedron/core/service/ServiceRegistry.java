@@ -18,8 +18,8 @@ package au.com.breakpoint.hedron.core.service;
 
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
-import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.GenericFactory;
+import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.IFactory;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.core.value.IValue;
@@ -33,6 +33,16 @@ import au.com.breakpoint.hedron.core.value.TimeLimitedLazyValue;
  */
 public class ServiceRegistry
 {
+    public ServiceRegistry ()
+    {
+        this (null);
+    }
+
+    public ServiceRegistry (final ServiceRegistry chainedRegistry)
+    {
+        m_chainedRegistry = chainedRegistry;
+    }
+
     /**
      * Clear registered services.
      */
@@ -50,10 +60,23 @@ public class ServiceRegistry
      */
     public <T> T of (final Object key)
     {
-        final IFactory<Object> factory = m_registry.get (key);
-        ThreadContext.assertFault (factory != null, "No implementation has been registered for key[%s]", key);
+        T t = null;
 
-        return HcUtil.uncheckedCast (factory.newInstance ());
+        final IFactory<Object> factory = m_registry.get (key);
+
+        if (factory == null && m_chainedRegistry != null)
+        {
+            // Not in this registry. See if the chained registry has it registered. Recurse
+            // the chain.
+            t = m_chainedRegistry.of (key);
+        }
+        else
+        {
+            ThreadContext.assertFault (factory != null, "No implementation has been registered for key[%s]", key);
+            t = HcUtil.uncheckedCast (factory.newInstance ());
+        }
+
+        return t;
     }
 
     /**
@@ -67,7 +90,7 @@ public class ServiceRegistry
      */
     public void register (final Object key, final Class<?> implClass)
     {
-        register (key, implClass, getReflectionFactory (implClass));
+        register (key, getReflectionFactory (implClass));
     }
 
     /**
@@ -76,19 +99,11 @@ public class ServiceRegistry
      *
      * @param key
      *            specified key
-     * @param implClass
-     *            class name used to instantiate an object on request
      * @param factory
      */
-    public void register (final Object key, final Class<?> implClass, final IFactory<Object> factory)
+    public void register (final Object key, final IFactory<Object> factory)
     {
         checkAndPut (key, factory);
-
-        // Allow the concrete class to be instantiated too.
-        if (implClass != key)
-        {
-            checkAndPut (implClass, factory);
-        }
     }
 
     /**
@@ -97,15 +112,13 @@ public class ServiceRegistry
      *
      * @param key
      *            specified key
-     * @param implClass
-     *            class name used to instantiate an object on request
      * @param factory
      *            a factory object that will be used to lazy-instantiate the singleton on
      *            first use
      */
-    public <T> void registerSingleton (final Object key, final Class<? extends T> implClass, final IFactory<T> factory)
+    public <T> void registerSingleton (final Object key, final IFactory<T> factory)
     {
-        doRegisterSingleton (key, implClass, factory, -1);
+        doRegisterSingleton (key, factory, -1);
     }
 
     /**
@@ -120,7 +133,7 @@ public class ServiceRegistry
      */
     public void registerSingleton (final Object key, final Class<?> implClass)
     {
-        registerSingleton (key, implClass, getReflectionFactory (implClass));
+        registerSingleton (key, getReflectionFactory (implClass));
     }
 
     /**
@@ -129,18 +142,16 @@ public class ServiceRegistry
      *
      * @param key
      *            specified key
-     * @param implClass
-     *            class name used to instantiate an object on request
      * @param factory
      *            a factory object that will be used to lazy-instantiate the singleton on
      *            first use
      * @param lifetimeMsec
      *            lifetime of the singleton in milliseconds
      */
-    public <T> void registerTimeLimitedSingleton (final Object key, final Class<? extends T> implClass,
-        final IFactory<T> factory, final long lifetimeMsec)
+    public <T> void registerTimeLimitedSingleton (final Object key, final IFactory<T> factory,
+        final long lifetimeMsec)
     {
-        doRegisterSingleton (key, implClass, factory, lifetimeMsec);
+        doRegisterSingleton (key, factory, lifetimeMsec);
     }
 
     /**
@@ -157,7 +168,7 @@ public class ServiceRegistry
      */
     public void registerTimeLimitedSingleton (final Object key, final Class<?> implClass, final long lifetimeMsec)
     {
-        registerTimeLimitedSingleton (key, implClass, getReflectionFactory (implClass), lifetimeMsec);
+        registerTimeLimitedSingleton (key, getReflectionFactory (implClass), lifetimeMsec);
     }
 
     /**
@@ -182,16 +193,13 @@ public class ServiceRegistry
      *
      * @param key
      *            specified key
-     * @param implClass
-     *            class name used to instantiate an object on request
      * @param factory
      *            a factory object that will be used to lazy-instantiate the singleton on
      *            first use
      * @param lifetimeMsec
      *            lifetime of the singleton in milliseconds, or -1 for non-time-limited
      */
-    private <T> void doRegisterSingleton (final Object key, final Class<? extends T> implClass,
-        final IFactory<T> factory, final long lifetimeMsec)
+    private <T> void doRegisterSingleton (final Object key, final IFactory<T> factory, final long lifetimeMsec)
     {
         // Create a threadsafe singleton creator that uses the supplied factory once.
         final Supplier<T> singletonInstantiator = factory::newInstance;
@@ -205,12 +213,6 @@ public class ServiceRegistry
         final IFactory<Object> factoryWrapper = singletonValue::get;
 
         checkAndPut (key, factoryWrapper);
-
-        // Allow the concrete class to be instantiated too.
-        if (implClass != key)
-        {
-            checkAndPut (implClass, factoryWrapper);
-        }
     }
 
     /**
@@ -224,6 +226,9 @@ public class ServiceRegistry
     {
         return () -> HcUtil.instantiate (implClass);
     }
+
+    /** For a hierarchy of registries from most to least specific */
+    private final ServiceRegistry m_chainedRegistry;
 
     /** The key-factory registry */
     private final ConcurrentMap<Object, IFactory<Object>> m_registry = GenericFactory.newConcurrentHashMap ();

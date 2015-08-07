@@ -491,14 +491,7 @@ public class ThreadContext
     }
 
     /** Make the ContextData thread-local */
-    private static ThreadLocal<ContextData> m_contextData = new ThreadLocal<ContextData> ()
-    {
-        @Override
-        protected ContextData initialValue ()
-        {
-            return new ContextData ();
-        }
-    };
+    private static ThreadLocal<ContextData> m_contextData = ThreadLocal.withInitial (ContextData::new);
 
     /** Sequence counter used to allocate outmost context id */
     private static AtomicLong m_idSequenceOuter = new AtomicLong (-1L);
