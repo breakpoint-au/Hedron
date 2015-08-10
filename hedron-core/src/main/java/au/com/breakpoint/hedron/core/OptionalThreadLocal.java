@@ -10,13 +10,19 @@ public class OptionalThreadLocal<T> extends ThreadLocal<T>
     public T get ()
     {
         m_isInitalised = true;
-
         return super.get ();
     }
 
     public boolean isInitalised ()
     {
         return m_isInitalised;
+    }
+
+    @Override
+    public void remove ()
+    {
+        super.remove ();
+        m_isInitalised = false;
     }
 
     /**

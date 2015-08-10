@@ -33,8 +33,6 @@ public class ExecutionScopes
      * Implements the execution scope pattern for a system entry point (such as thread or
      * timer task) that should not emit exceptions.
      *
-     * @param <TOutput>
-     *            Type of the returned item of data
      * @param service
      *            Instance of the service to call
      */
