@@ -26,11 +26,6 @@ public class MockDataSource implements DataSource
         return new MockConnection ();
     }
 
-    public int getCountAction ()
-    {
-        return m_countAction;
-    }
-
     @Override
     public int getLoginTimeout () throws SQLException
     {
@@ -50,6 +45,11 @@ public class MockDataSource implements DataSource
     {
         Logging.logDebug ("MockDataSource.getParentLogger ()");
         return null;
+    }
+
+    public boolean hasBeenActive ()
+    {
+        return m_countAction > 0;
     }
 
     @Override

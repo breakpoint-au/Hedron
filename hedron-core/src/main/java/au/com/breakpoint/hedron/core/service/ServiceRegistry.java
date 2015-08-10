@@ -40,7 +40,7 @@ public class ServiceRegistry
 
     public ServiceRegistry (final ServiceRegistry chainedRegistry)
     {
-        m_chainedRegistry = chainedRegistry;
+        m_chainedServiceRegistry = chainedRegistry;
     }
 
     /**
@@ -49,6 +49,11 @@ public class ServiceRegistry
     public void clear ()
     {
         m_registry.clear ();
+    }
+
+    public ServiceRegistry getChainedServiceRegistry ()
+    {
+        return m_chainedServiceRegistry;
     }
 
     /**
@@ -64,11 +69,11 @@ public class ServiceRegistry
 
         final IFactory<Object> factory = m_registry.get (key);
 
-        if (factory == null && m_chainedRegistry != null)
+        if (factory == null && m_chainedServiceRegistry != null)
         {
             // Not in this registry. See if the chained registry has it registered. Recurse
             // the chain.
-            t = m_chainedRegistry.of (key);
+            t = m_chainedServiceRegistry.of (key);
         }
         else
         {
@@ -108,21 +113,6 @@ public class ServiceRegistry
 
     /**
      * Register a lazy-singleton factory against the specified key. Register the concrete
-     * class also so that it can also be used as key.
-     *
-     * @param key
-     *            specified key
-     * @param factory
-     *            a factory object that will be used to lazy-instantiate the singleton on
-     *            first use
-     */
-    public <T> void registerSingleton (final Object key, final IFactory<T> factory)
-    {
-        doRegisterSingleton (key, factory, -1);
-    }
-
-    /**
-     * Register a lazy-singleton factory against the specified key. Register the concrete
      * class also so that it can also be used as key. The object factory instantiates a
      * new object using reflection and the specified Class.
      *
@@ -137,21 +127,18 @@ public class ServiceRegistry
     }
 
     /**
-     * Register a time-limited lazy-singleton factory against the specified key. Register
-     * the concrete class also so that it can also be used as key.
+     * Register a lazy-singleton factory against the specified key. Register the concrete
+     * class also so that it can also be used as key.
      *
      * @param key
      *            specified key
      * @param factory
      *            a factory object that will be used to lazy-instantiate the singleton on
      *            first use
-     * @param lifetimeMsec
-     *            lifetime of the singleton in milliseconds
      */
-    public <T> void registerTimeLimitedSingleton (final Object key, final IFactory<T> factory,
-        final long lifetimeMsec)
+    public <T> void registerSingleton (final Object key, final IFactory<T> factory)
     {
-        doRegisterSingleton (key, factory, lifetimeMsec);
+        doRegisterSingleton (key, factory, -1);
     }
 
     /**
@@ -169,6 +156,23 @@ public class ServiceRegistry
     public void registerTimeLimitedSingleton (final Object key, final Class<?> implClass, final long lifetimeMsec)
     {
         registerTimeLimitedSingleton (key, getReflectionFactory (implClass), lifetimeMsec);
+    }
+
+    /**
+     * Register a time-limited lazy-singleton factory against the specified key. Register
+     * the concrete class also so that it can also be used as key.
+     *
+     * @param key
+     *            specified key
+     * @param factory
+     *            a factory object that will be used to lazy-instantiate the singleton on
+     *            first use
+     * @param lifetimeMsec
+     *            lifetime of the singleton in milliseconds
+     */
+    public <T> void registerTimeLimitedSingleton (final Object key, final IFactory<T> factory, final long lifetimeMsec)
+    {
+        doRegisterSingleton (key, factory, lifetimeMsec);
     }
 
     /**
@@ -228,7 +232,7 @@ public class ServiceRegistry
     }
 
     /** For a hierarchy of registries from most to least specific */
-    private final ServiceRegistry m_chainedRegistry;
+    private final ServiceRegistry m_chainedServiceRegistry;
 
     /** The key-factory registry */
     private final ConcurrentMap<Object, IFactory<Object>> m_registry = GenericFactory.newConcurrentHashMap ();

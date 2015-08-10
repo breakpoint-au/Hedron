@@ -90,6 +90,25 @@ public class ServiceRegistryTest
         }
     }
 
+    @Test
+    public void testGetInstanceChainedMulti ()
+    {
+        if (true)
+        {
+            final ServiceRegistry sl0 = new ServiceRegistry ();
+            sl0.register (ITest.class, STest.class);
+            final ServiceRegistry sl1 = new ServiceRegistry (sl0);
+            final ServiceRegistry sl2 = new ServiceRegistry (sl1);
+            final ServiceRegistry sl3 = new ServiceRegistry (sl2);
+            sl3.register (ITest.class, ETest.class);
+
+            assertTrue (sl0.of (ITest.class) instanceof STest);
+            assertTrue (sl1.of (ITest.class) instanceof STest);
+            assertTrue (sl2.of (ITest.class) instanceof STest);
+            assertTrue (sl3.of (ITest.class) instanceof ETest);
+        }
+    }
+
     @Test (expected = FaultException.class)
     public void testGetInstanceDouble ()
     {
