@@ -38,16 +38,22 @@ public class ExecutionScopes
      */
     public static void executeFaultBarrier (final Runnable service)
     {
+        // NOTE: Java try-with-resources closes the AutoCloseable scope before
+        // executing the catch () block, thus losing ThreadContext's context id.
+        // Thus any exception logging needs to be done in an inner scope.
         try (final IScope scope = new ExecutionScope ())
         {
-            // Execute the business service method.
-            service.run ();
-        }
-        catch (final Throwable e)
-        {
-            // ThreadContext.assertXxxx methods already log details at time of assertion,
-            // but ThreadContext.logException does not re-log them.
-            ThreadContext.logException (e);
+            try
+            {
+                // Execute the business service method.
+                service.run ();
+            }
+            catch (final Throwable e)
+            {
+                // ThreadContext.assertXxxx methods already log details at time of assertion,
+                // but ThreadContext.logException does not re-log them.
+                ThreadContext.logException (e);
+            }
         }
     }
 
@@ -65,16 +71,22 @@ public class ExecutionScopes
     {
         TOutput output = null;
 
+        // NOTE: Java try-with-resources closes the AutoCloseable scope before
+        // executing the catch () block, thus losing ThreadContext's context id.
+        // Thus any exception logging needs to be done in an inner scope.
         try (final IScope scope = new ExecutionScope ())
         {
-            // Execute the business service method.
-            output = service.get ();
-        }
-        catch (final Throwable e)
-        {
-            // ThreadContext.assertXxxx methods already log details at time of assertion,
-            // but ThreadContext.logException does not re-log them.
-            ThreadContext.logException (e);
+            try
+            {
+                // Execute the business service method.
+                output = service.get ();
+            }
+            catch (final Throwable e)
+            {
+                // ThreadContext.assertXxxx methods already log details at time of assertion,
+                // but ThreadContext.logException does not re-log them.
+                ThreadContext.logException (e);
+            }
         }
 
         return output;
@@ -91,16 +103,22 @@ public class ExecutionScopes
      */
     public static void executeProgram (final Runnable service)
     {
+        // NOTE: Java try-with-resources closes the AutoCloseable scope before
+        // executing the catch () block, thus losing ThreadContext's context id.
+        // Thus any exception logging needs to be done in an inner scope.
         try (final IScope scope = new ExecutionScope ())
         {
-            // Execute the business service method.
-            service.run ();
-        }
-        catch (final Throwable e)
-        {
-            // ThreadContext.assertXxxx methods already log details at time of assertion,
-            // but ThreadContext.logException does not re-log them.
-            ThreadContext.logException (e);
+            try
+            {
+                // Execute the business service method.
+                service.run ();
+            }
+            catch (final Throwable e)
+            {
+                // ThreadContext.assertXxxx methods already log details at time of assertion,
+                // but ThreadContext.logException does not re-log them.
+                ThreadContext.logException (e);
+            }
         }
         finally
         {

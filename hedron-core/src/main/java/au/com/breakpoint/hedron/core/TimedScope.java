@@ -128,6 +128,9 @@ public class TimedScope implements Serializable
         // This establishes a scoped ThreadContext.getContextId () value. If there is already
         // an outer scope then this just creates a nested scope and doesn't affect the outer
         // context id.
+        // NOTE: Java try-with-resources closes the AutoCloseable scope before
+        // executing the catch () block, thus losing ThreadContext's context id.
+        // Thus any exception logging needs to be done in an inner scope.
         try (final IScope scope = new ExecutionScope (m_name))
         {
             final ScopeOutcome<TOutput> o = new ScopeOutcome<TOutput> (m_name);
