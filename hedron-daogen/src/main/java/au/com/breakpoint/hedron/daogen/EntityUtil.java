@@ -683,16 +683,21 @@ public class EntityUtil
 
     public static void setBigDecimal (final ColumnTypeInfo jti, final Column c)
     {
-        jti.m_javaObjectType = jti.m_javaType = "java.math.BigDecimal";
+        final int scale = c.getColumnAttributes ().getScale ();
+
+        // TODO 0 Map to BigInteger if scale = 0?
+        final String bigType = "java.math.BigDecimal";
+
+        jti.m_javaObjectType = jti.m_javaType = bigType;
         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
         jti.m_javaConvenienceType = c.isNullable () ? "Long" : "long";
 
-        jti.m_jdbcType = "java.math.BigDecimal";
+        jti.m_jdbcType = bigType;
         jti.m_jdbcResultSetAccessor = "getBigDecimal";
         jti.m_jdbcJavaSqlType = "java.sql.Types.DECIMAL";
-        jti.m_javaCastExpression = "(java.math.BigDecimal)";
+        jti.m_javaCastExpression = "(" + bigType + ")";
         jti.m_precision = String.valueOf (c.getColumnAttributes ().getPrecision ());
-        jti.m_scale = String.valueOf (c.getColumnAttributes ().getScale ());
+        jti.m_scale = String.valueOf (scale);
         jti.m_equalityExpression = EQUALS_OBJECT;
         jti.m_hashCodeExpression = HASHCODE_OBJECT;
         jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;// BigDecimal is immutable so is safe to copy

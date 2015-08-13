@@ -16,6 +16,7 @@
 //
 package au.com.breakpoint.hedron.core.concurrent;
 
+import java.net.DatagramPacket;
 import java.util.function.Consumer;
 import au.com.breakpoint.hedron.core.HcUtilFile;
 import au.com.breakpoint.hedron.core.Tuple.E2;
@@ -41,9 +42,11 @@ public class ObjectDatagramProcessor<TRequest> extends DatagramProcessor
     }
 
     @Override
-    protected void onRequest (final String clientIpAddress, final byte[] data)
+    protected void onRequest (final String clientIpAddress, final DatagramPacket packet)
     {
-        // The datagram bytes are raw json string. Unmarshall back to the
+        final byte[] data = packet.getData ();
+
+        // The datagram bytes are raw bytes of a serialised object. Unmarshall back to the
         // expected object type.
         final TRequest r = HcUtilFile.deserialiseBytesAsObject (data);
 

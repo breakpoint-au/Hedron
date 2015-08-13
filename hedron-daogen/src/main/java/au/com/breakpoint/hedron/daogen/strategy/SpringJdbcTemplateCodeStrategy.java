@@ -600,7 +600,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("%n");
             pw.printf ("    /** IEntity implementation of getColumnValues () */%n");
             pw.printf ("    @Override%n");
-            pw.printf ("    @SuppressWarnings (\"incomplete-switch\")%n");
+            //pw.printf ("    @SuppressWarnings (\"incomplete-switch\")%n");
             pw.printf ("    public Object[] getColumnValues (final ColumnType columnType)%n");
             pw.printf ("    {%n");
             pw.printf ("        Object[] values = null;%n");

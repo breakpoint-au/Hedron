@@ -147,10 +147,10 @@ public abstract class DatagramProcessor implements IProcessor
      *
      * @param clientIpAddress
      *            IP address of the datagram sender
-     * @param data
+     * @param packet
      *            raw bytes from the datagram
      */
-    protected abstract void onRequest (final String clientIpAddress, final byte[] data);
+    protected abstract void onRequest (final String clientIpAddress, final DatagramPacket packet);
 
     /**
      * Deferred handling of datagram packet.
@@ -165,11 +165,8 @@ public abstract class DatagramProcessor implements IProcessor
             final InetAddress address = packet.getAddress ();
             final String clientIpAddress = address.getHostAddress ();
 
-            // Can't use ObjectInputStream since the request comes in as a datagram packet.
-            final byte[] data = packet.getData ();
-
             // Handle polymorphically.
-            onRequest (clientIpAddress, data);
+            onRequest (clientIpAddress, packet);
             return null;
         });
     }
