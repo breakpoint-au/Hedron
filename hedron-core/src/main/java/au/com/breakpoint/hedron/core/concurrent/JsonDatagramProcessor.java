@@ -17,39 +17,48 @@
 package au.com.breakpoint.hedron.core.concurrent;
 
 import java.util.function.Consumer;
-import au.com.breakpoint.hedron.core.HcUtilFile;
+import au.com.breakpoint.hedron.core.JsonUtil;
 import au.com.breakpoint.hedron.core.Tuple.E2;
 
 /**
  * DatagramProcessor which deserialises the incoming message as a TRequest object and
  * despatches for handling.
  */
-public class ObjectDatagramProcessor<TRequest> extends DatagramProcessor
+public class JsonDatagramProcessor<TRequest> extends DatagramProcessor
 {
-    public ObjectDatagramProcessor (final Class<?> c, final int port, final int threads,
-        final Consumer<E2<String, TRequest>> messageHandler)
+    public JsonDatagramProcessor (final Class<?> c, final int port, final int threads,
+        final Consumer<E2<String, TRequest>> messageHandler, final Class<TRequest> classOfTRequest)
     {
         super (c, port, threads);
+
         m_messageHandler = messageHandler;
+        m_classOfTRequest = classOfTRequest;
     }
 
-    public ObjectDatagramProcessor (final String name, final int port, final int threads,
-        final Consumer<E2<String, TRequest>> messageHandler)
+    public JsonDatagramProcessor (final String name, final int port, final int threads,
+        final Consumer<E2<String, TRequest>> messageHandler, final Class<TRequest> classOfTRequest)
     {
         super (name, port, threads);
+
         m_messageHandler = messageHandler;
+        m_classOfTRequest = classOfTRequest;
     }
 
     @Override
     protected void onRequest (final String clientIpAddress, final byte[] data)
     {
-        // The datagram bytes are raw json string. Unmarshall back to the
-        // expected object type.
-        final TRequest r = HcUtilFile.deserialiseBytesAsObject (data);
+        // The datagram bytes are raw json string.
+        final String jsonString = new String (data);
+
+        // Unmarshall back to the expected object type.
+        final TRequest r = JsonUtil.fromJson (jsonString, m_classOfTRequest);
 
         // Pass to the handler.
         m_messageHandler.accept (E2.of (clientIpAddress, r));
     }
+
+    /** Holds the class details of the request for Gson unmarshalling */
+    private final Class<TRequest> m_classOfTRequest;
 
     /**
      * Handler for incoming datagrams. Takes IP address + deserialised request object. It
