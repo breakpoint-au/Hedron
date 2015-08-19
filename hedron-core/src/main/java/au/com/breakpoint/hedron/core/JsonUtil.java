@@ -39,19 +39,34 @@ public class JsonUtil
             JsonValidation
         }
 
-        @Option (name = "-classname", usage = "Class name", required = true)
+        @Option (name = "-c", aliases =
+        {
+                "--classname"
+        }, usage = "Class name", required = true)
         public String m_className;
 
-        @Option (name = "-infile", usage = "Specifies the name of the input file", required = true)
+        @Option (name = "-i", aliases =
+        {
+                "--infile"
+        }, usage = "Specifies the name of the input file", required = true)
         public String m_inputFilename;
 
-        @Option (name = "-listJsonOnError", usage = "Whether to output comment-stripped json on error for line number correlation with the GSON messages")
+        @Option (name = "-l", aliases =
+        {
+                "--listJsonOnError"
+        }, usage = "Whether to output comment-stripped json on error for line number correlation with the GSON messages")
         public boolean m_listJsonOnError = true;
 
-        @Option (name = "-mode", usage = "Program mode; default is JsonValidation")
+        @Option (name = "-m", aliases =
+        {
+                "--mode"
+        }, usage = "Program mode; default is JsonValidation")
         public Mode m_mode = Mode.JsonValidation;
 
-        @Option (name = "-pauseOnError", usage = "Whether to wait for user input on error")
+        @Option (name = "-p", aliases =
+        {
+                "--pauseOnError"
+        }, usage = "Whether to wait for user input on error")
         public boolean m_pauseOnError;
     }
 

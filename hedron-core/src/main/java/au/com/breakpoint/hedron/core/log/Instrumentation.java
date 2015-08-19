@@ -35,7 +35,6 @@ import au.com.breakpoint.hedron.core.ShutdownPriority;
 import au.com.breakpoint.hedron.core.TimedScope;
 import au.com.breakpoint.hedron.core.TimedScope.ScopeResult;
 import au.com.breakpoint.hedron.core.Tuple.E2;
-import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.concurrent.CallingThreadExecutor;
 import au.com.breakpoint.hedron.core.concurrent.Concurrency;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
@@ -252,7 +251,6 @@ public class Instrumentation
         final Options options = new Options ();
 
         // Check args & prepare usage string (in thrown AssertException).
-        HcUtilArgs4j.getProgramOptions (args, options);
         executeProgram ("TestApp", "SomeApp 10.0#13 (27/02/2014 14:02) by Breakpoint Pty Limited", () ->
         {
             ThreadContext.assertWarning (false, "Warning: %s", "xxx");

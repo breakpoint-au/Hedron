@@ -106,10 +106,16 @@ public class ArchiveUtil
 
     private static class Options
     {
-        @Option (name = "-dest", usage = "Specifies the destination path for file comparison", required = true)
+        @Option (name = "-d", aliases =
+        {
+                "--dest"
+        }, usage = "Specifies the destination path for file comparison", required = true)
         public String m_destinationPath;
 
-        @Option (name = "-src", usage = "Specifies the source path for file comparison", required = true)
+        @Option (name = "-s", aliases =
+        {
+                "--src"
+        }, usage = "Specifies the source path for file comparison", required = true)
         public String m_sourcePath;
     }
 

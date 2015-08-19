@@ -692,10 +692,16 @@ public class DaoGen
 
     private class CommandLine
     {
-        @Option (name = "-debug", required = false)
+        @Option (name = "-d", aliases =
+        {
+                "--debug"
+        }, required = false)
         private boolean m_debug;
 
-        @Option (name = "-options", usage = "Specifies the name of the DAO generation options XML file *REQUIRED*", required = true)
+        @Option (name = "-o", aliases =
+        {
+                "--options"
+        }, usage = "Specifies the name of the DAO generation options XML file *REQUIRED*", required = true)
         private String m_optionsFile;
     }
 

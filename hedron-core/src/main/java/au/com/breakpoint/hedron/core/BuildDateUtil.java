@@ -33,19 +33,34 @@ public class BuildDateUtil
             BuildDate
         }
 
-        @Option (name = "-classname", usage = "Class name", required = true)
+        @Option (name = "-c", aliases =
+        {
+                "--classname"
+        }, usage = "Class name", required = true)
         public String m_className;
 
-        @Option (name = "-echo", usage = "Echo contents of generated file to console")
+        @Option (name = "-e", aliases =
+        {
+                "--echo"
+        }, usage = "Echo contents of generated file to console")
         public boolean m_echo;
 
-        @Option (name = "-mode", usage = "Program mode; default is BuildDate")
+        @Option (name = "-m", aliases =
+        {
+                "--mode"
+        }, usage = "Program mode; default is BuildDate")
         public Mode m_mode = Mode.BuildDate;
 
-        @Option (name = "-outfile", usage = "Specifies the name of the output file ** MANDATORY for Summary **")
+        @Option (name = "-o", aliases =
+        {
+                "--outfile"
+        }, usage = "Specifies the name of the output file ** MANDATORY for Summary **")
         public String m_outputFilename;
 
-        @Option (name = "-package", usage = "Package name ()")
+        @Option (name = "-p", aliases =
+        {
+                "--package"
+        }, usage = "Package name ()")
         public String m_packageName;
     }
 
