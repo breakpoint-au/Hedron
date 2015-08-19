@@ -350,12 +350,20 @@ public class HcUtilFileTest
         HcUtilFile.safeDeleteFileNoThrow (TEMP_FILEPATH_2);
     }
 
-    public static void writeSampleFile (final String filepath, final int lines)
+    private static String getProjectDir ()
     {
-        PrintWriter pw = null;
-        try
+        return m_projectDirValue.get ();
+    }
+
+    private static String getTempPath (final String filename)
+    {
+        return HcUtil.formFilepath (HcUtil.getTempDirectoryName (), filename);
+    }
+
+    private static void writeSampleFile (final String filepath, final int lines)
+    {
+        try (final PrintWriter pw = new PrintWriter (new FileWriter (filepath)))
         {
-            pw = new PrintWriter (new FileWriter (filepath));
             for (int i = 0; i < lines; ++i)
             {
                 for (int j = 0; j < i; ++j)
@@ -370,23 +378,6 @@ public class HcUtilFileTest
             // Translate the exception.
             ThreadContext.throwFault (e);
         }
-        finally
-        {
-            if (pw != null)
-            {
-                pw.close ();
-            }
-        }
-    }
-
-    private static String getProjectDir ()
-    {
-        return m_projectDirValue.get ();
-    }
-
-    private static String getTempPath (final String filename)
-    {
-        return HcUtil.formFilepath (HcUtil.getTempDirectoryName (), filename);
     }
 
     private static final int LINE_COUNT = 100;

@@ -44,7 +44,6 @@ public class SmartFileWriter extends Writer
     @Override
     public void flush () throws IOException
     {
-        m_smartFile.flush ();
     }
 
     @Override
