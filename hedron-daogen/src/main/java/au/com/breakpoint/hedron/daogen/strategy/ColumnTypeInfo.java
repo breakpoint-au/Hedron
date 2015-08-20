@@ -38,6 +38,8 @@ public class ColumnTypeInfo
 
     public List<String> m_importsJavaSqlType = GenericFactory.newArrayList ();
 
+    public List<String> m_importsJavaType = GenericFactory.newArrayList ();
+
     public List<String> m_importsResultSetAccessorFormatter = GenericFactory.newArrayList ();
 
     public String m_javaCastExpression;// eg (int) (Integer) xxx for integer type

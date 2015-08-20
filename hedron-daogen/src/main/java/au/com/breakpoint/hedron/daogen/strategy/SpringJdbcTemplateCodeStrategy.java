@@ -138,6 +138,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 {
                     final Column c = p.getColumn ();
                     final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
+                    pw.addClassImports (jti.m_importsJavaType);
 
                     pw.printf ("        public %s m_value%s;%n", jti.m_javaType, c.getName ());
                 }
@@ -481,6 +482,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             {
                 final String columnName = c.getName ();
                 final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
+                pw.addClassImports (jti.m_importsJavaType);
 
                 pw.printf ("    /**%n");
                 pw.printf ("     * Column %s accessors.%n", columnName);
@@ -655,6 +657,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             {
                 final String columnName = c.getName ();
                 final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
+                pw.addClassImports (jti.m_importsJavaType);
 
                 pw.printf ("%n");
                 pw.printf ("    /**%n", columnName);
@@ -946,9 +949,20 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("package %s.dao;%n", outputPackage);
 
             pw.addClassImport ("javax.sql.DataSource");
-            if (pk != null && pk.getColumns ().size () > 1)
+            if (pk != null)
             {
-                pw.addClassImport ("au.com.breakpoint.hedron.core.Tuple");
+                if (pk.getColumns ().size () > 0)
+                {
+                    for (final Column pkc : pk.getColumns ())
+                    {
+                        final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (pkc);
+                        pw.addClassImports (jti.m_importsJavaType);
+                    }
+                }
+                if (pk.getColumns ().size () > 1)
+                {
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.Tuple");
+                }
             }
             pw.addClassImport ("au.com.breakpoint.hedron.core.dao.BaseEntityDao");
             pw.addClassImport ("%s.entity.%s", outputPackage, entityName);
@@ -1142,6 +1156,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         else
                         {
                             final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (pkColumns.get (0));
+                            pw.addClassImports (jti.m_importsJavaType);
 
                             // Only 1 arg: must be casting an intrinsic.
                             pw.printf ("        return fetchByPrimaryKey ((%s) id);%n", jti.m_javaType);
@@ -1294,6 +1309,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     {
                         final String optimisticLockColumnName = optimisticLockColumn.getName ();
                         final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (optimisticLockColumn);
+                        pw.addClassImports (jti.m_importsJavaType);
 
                         pw.printf ("%n");
                         pw.printf ("    /**%n");
@@ -1426,6 +1442,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         else
                         {
                             final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (pkColumns.get (0));
+                            pw.addClassImports (jti.m_importsJavaType);
 
                             // Only 1 arg: must be casting an intrinsic.
                             pw.printf ("        return deleteByPrimaryKey ((%s) id);%n", jti.m_javaType);
@@ -1496,6 +1513,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     if (c.isNullable ())
                     {
+                        pw.addClassImports (jti.m_importsJavaType);
+
                         // Nullable.
                         pw.printf ("        %s value%s = %s;%n", jti.m_javaType, columnName, accessorCode);
                         pw.printf ("        if (!rs.wasNull ())%n");

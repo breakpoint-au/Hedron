@@ -187,7 +187,8 @@ public class EntityUtil
             else if (columnType.equalsIgnoreCase ("datetime") || columnType.equalsIgnoreCase ("date"))
             {
                 // java.sql.Date truncates time component
-                jti.m_javaObjectType = jti.m_javaType = "java.sql.Timestamp";
+                jti.m_javaObjectType = jti.m_javaType = "Timestamp";
+                jti.m_importsJavaType.add ("java.sql.Timestamp");
                 jti.m_nonPrimitiveTypeJavaLangType = true;
                 jti.m_jdbcType = "Timestamp";
                 jti.m_jdbcResultSetAccessor = "getTimestamp";
@@ -232,7 +233,8 @@ public class EntityUtil
             else if (columnType.equalsIgnoreCase ("oracle-refcursor"))
             {
                 final String refcursorType = c.getColumnAttributes ().getRefcursorType ();
-                jti.m_javaObjectType = jti.m_javaType = "java.util.List<" + refcursorType + ">";
+                jti.m_javaObjectType = jti.m_javaType = "List<" + refcursorType + ">";
+                jti.m_importsJavaType.add ("java.util.List");
                 jti.m_nonPrimitiveTypeJavaLangType = true;
                 jti.m_jdbcType = "TBD";
                 jti.m_jdbcResultSetAccessor = "getTBD";
@@ -685,17 +687,15 @@ public class EntityUtil
     {
         final int scale = c.getColumnAttributes ().getScale ();
 
-        // TODO 0 Map to BigInteger if scale = 0?
-        final String bigType = "java.math.BigDecimal";
-
-        jti.m_javaObjectType = jti.m_javaType = bigType;
+        jti.m_javaObjectType = jti.m_javaType = "BigDecimal";
+        jti.m_importsJavaType.add ("java.math.BigDecimal");
         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
         jti.m_javaConvenienceType = c.isNullable () ? "Long" : "long";
 
-        jti.m_jdbcType = bigType;
+        jti.m_jdbcType = "BigDecimal";
         jti.m_jdbcResultSetAccessor = "getBigDecimal";
         setJavaSqlType (jti, "DECIMAL");
-        jti.m_javaCastExpression = "(" + bigType + ")";
+        jti.m_javaCastExpression = "(" + "BigDecimal" + ")";
         jti.m_precision = String.valueOf (c.getColumnAttributes ().getPrecision ());
         jti.m_scale = String.valueOf (scale);
         jti.m_equalityExpression = EQUALS_OBJECT;
