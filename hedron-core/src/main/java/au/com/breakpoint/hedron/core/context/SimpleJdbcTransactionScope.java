@@ -67,6 +67,9 @@ public class SimpleJdbcTransactionScope extends JdbcConnectionCachingExecutionSc
                             m_dataSourceName);
                         connection.rollback ();
                     }
+
+                    // Return connection to original state to allow pooling reuse.
+                    HcUtilJdbc.setAutoCommit (connection, true);
                 }
             }
         }

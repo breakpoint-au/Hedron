@@ -9,8 +9,8 @@ dependencies {
     compile group: 'org.springframework',   name: 'spring-web',         version: '+'
     compile group: 'javax',                 name: 'javaee-api',         version: '7.+'
 
-    // [no good] compile group: 'com.oracle', name: 'ojdbc6', version: '+'
-    compile                                 name: 'ojdbc6'
+    // [no good] compile group: 'com.oracle', name: 'ojdbc7', version: '+'
+    compile                                 name: 'ojdbc7'
 
     testCompile 'junit:junit-dep:4.10'
 }
