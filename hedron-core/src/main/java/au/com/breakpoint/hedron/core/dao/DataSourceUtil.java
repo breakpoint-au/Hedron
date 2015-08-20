@@ -46,7 +46,7 @@ public class DataSourceUtil
     }
 
     /**
-     * Configurable policy for creating the data source (defaults to DBCP
+     * Configurable policy for creating the data source (defaults to DBCP2
      * BasicDataSource).
      */
     private static volatile IFactoryArg<DatabaseDefinition, DataSource> m_dataSourceFactory = d ->
