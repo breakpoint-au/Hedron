@@ -92,12 +92,19 @@ public class SmartFile implements ICloseable
 
         if (m_commitEnabled)
         {
-            final String prevContents = HcUtilFile.readTextFile (m_targetFilePath);
             final String newContents = getFileContents ();
 
-            updated = !prevContents.equals (newContents);
-            //System.out.printf ("prevContents %s%n[%s]%n", prevContents.length (), prevContents);
-            //System.out.printf ("newContents %s%n[%s]%n", newContents.length (), newContents);
+            if (!HcUtilFile.doesFileExist (m_targetFilePath))
+            {
+                updated = true;
+            }
+            else
+            {
+                final String prevContents = HcUtilFile.readTextFile (m_targetFilePath);
+                updated = !prevContents.equals (newContents);
+                //System.out.printf ("prevContents %s%n[%s]%n", prevContents.length (), prevContents);
+                //System.out.printf ("newContents %s%n[%s]%n", newContents.length (), newContents);
+            }
 
             if (updated)
             {

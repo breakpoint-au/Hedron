@@ -804,10 +804,8 @@ public class HcUtilFile
         //
         //        try (final Stream<String> lines = Files.lines (Paths.get (filename)))
         //        {
-//            // @formatter:off
-//            fileContents = lines
-//                .collect (joining (HcUtil.NewLine));
-//            // @formatter:on
+        //            fileContents = lines
+        //                .collect (joining (HcUtil.NewLine));
         //        }
         //        catch (final IOException e)
         //        {

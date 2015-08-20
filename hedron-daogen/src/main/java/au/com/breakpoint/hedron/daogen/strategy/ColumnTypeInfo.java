@@ -16,7 +16,9 @@
 //
 package au.com.breakpoint.hedron.daogen.strategy;
 
+import java.util.List;
 import java.util.function.Function;
+import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.Tuple.E3;
 
 public class ColumnTypeInfo
@@ -31,6 +33,12 @@ public class ColumnTypeInfo
     public String m_equalityExpression;
 
     public String m_hashCodeExpression;
+
+    public List<String> m_importsConversionMethod = GenericFactory.newArrayList ();
+
+    public List<String> m_importsJavaSqlType = GenericFactory.newArrayList ();
+
+    public List<String> m_importsResultSetAccessorFormatter = GenericFactory.newArrayList ();
 
     public String m_javaCastExpression;// eg (int) (Integer) xxx for integer type
 
