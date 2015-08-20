@@ -1,5 +1,5 @@
 //                       __________________________________
-//                ______|         Copyright 2008           |______
+//                ______|      Copyright 2008-2015         |______
 //                \     |     Breakpoint Pty Limited       |     /
 //                 \    |   http://www.breakpoint.com.au   |    /
 //                 /    |__________________________________|    \
@@ -88,11 +88,11 @@ public class EntityUtil
                         jti.m_javaObjectType = "Byte";
                         jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "byte";
                         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                        jti.m_javaConversionMethod = "au.com.breakpoint.hedron.core.HcUtil.getByteValue";
+                        setHcUtilConversionMethod (jti, "getByteValue");
                         jti.m_javaTypeOfLimitValue = "byte";
                         jti.m_jdbcType = "Byte";
                         jti.m_jdbcResultSetAccessor = "getByte";
-                        jti.m_jdbcJavaSqlType = "java.sql.Types.TINYINT";
+                        setJavaSqlType (jti, "TINYINT");
                         jti.m_javaCastExpression = "(Byte)";
                         jti.m_maxValue = upperLimitValue.longValue ();
                         jti.m_minValue = -jti.m_maxValue;
@@ -107,11 +107,11 @@ public class EntityUtil
                         jti.m_javaObjectType = "Short";
                         jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "short";
                         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                        jti.m_javaConversionMethod = "au.com.breakpoint.hedron.core.HcUtil.getShortValue";
+                        setHcUtilConversionMethod (jti, "getShortValue");
                         jti.m_javaTypeOfLimitValue = "short";
                         jti.m_jdbcType = "Short";
                         jti.m_jdbcResultSetAccessor = "getShort";
-                        jti.m_jdbcJavaSqlType = "java.sql.Types.SMALLINT";
+                        setJavaSqlType (jti, "SMALLINT");
                         jti.m_javaCastExpression = "(Short)";
                         jti.m_maxValue = upperLimitValue.longValue ();
                         jti.m_minValue = -jti.m_maxValue;
@@ -130,11 +130,11 @@ public class EntityUtil
                         jti.m_javaObjectType = "Long";
                         jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "long";
                         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                        jti.m_javaConversionMethod = "au.com.breakpoint.hedron.core.HcUtil.getLongValue";
+                        setHcUtilConversionMethod (jti, "getLongValue");
                         jti.m_javaTypeOfLimitValue = "long";
                         jti.m_jdbcType = "Long";
                         jti.m_jdbcResultSetAccessor = "getLong";
-                        jti.m_jdbcJavaSqlType = "java.sql.Types.BIGINT";
+                        setJavaSqlType (jti, "BIGINT");
                         jti.m_javaCastExpression = "(Long)";
                         jti.m_maxValue = upperLimitValue.longValue ();
                         jti.m_minValue = -jti.m_maxValue;
@@ -162,7 +162,7 @@ public class EntityUtil
                 jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
                 jti.m_jdbcType = "Double";
                 jti.m_jdbcResultSetAccessor = "getDouble";
-                jti.m_jdbcJavaSqlType = "java.sql.Types.DOUBLE";
+                setJavaSqlType (jti, "DOUBLE");
                 jti.m_javaCastExpression = "(Double)";
                 jti.m_equalityExpression = getEqualsExpression (c);
                 jti.m_hashCodeExpression =
@@ -176,8 +176,7 @@ public class EntityUtil
                 jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
                 jti.m_jdbcType = "Boolean";
                 jti.m_jdbcResultSetAccessor = "getBoolean";
-                //jti.m_jdbcJavaSqlType = "java.sql.Types.BOOLEAN"; // no good with Oracle stored proc
-                jti.m_jdbcJavaSqlType = "java.sql.Types.BIT";
+                setJavaSqlType (jti, "BIT");
                 jti.m_javaCastExpression = "(Boolean)";
                 jti.m_equalityExpression = getEqualsExpression (c);
                 jti.m_hashCodeExpression =
@@ -188,11 +187,12 @@ public class EntityUtil
             else if (columnType.equalsIgnoreCase ("datetime") || columnType.equalsIgnoreCase ("date"))
             {
                 // java.sql.Date truncates time component
-                jti.m_javaObjectType = jti.m_javaType = "java.sql.Timestamp";
+                jti.m_javaObjectType = jti.m_javaType = "Timestamp";
+                jti.m_importsJavaType.add ("java.sql.Timestamp");
                 jti.m_nonPrimitiveTypeJavaLangType = true;
                 jti.m_jdbcType = "Timestamp";
                 jti.m_jdbcResultSetAccessor = "getTimestamp";
-                jti.m_jdbcJavaSqlType = "java.sql.Types.TIMESTAMP";
+                setJavaSqlType (jti, "TIMESTAMP");
                 jti.m_javaCastExpression = "(java.sql.Timestamp)";
                 jti.m_equalityExpression = EQUALS_OBJECT;
                 jti.m_hashCodeExpression = HASHCODE_OBJECT;
@@ -205,7 +205,7 @@ public class EntityUtil
                 jti.m_nonPrimitiveTypeJavaLangType = true;
                 jti.m_jdbcType = "Bytes";
                 jti.m_jdbcResultSetAccessor = "getBytes";
-                jti.m_jdbcJavaSqlType = "java.sql.Types.BLOB";
+                setJavaSqlType (jti, "BLOB");
                 jti.m_javaCastExpression = "(byte[])";
                 jti.m_equalityExpression = EQUALS_OBJECT;
                 jti.m_hashCodeExpression = HASHCODE_OBJECT;
@@ -218,7 +218,8 @@ public class EntityUtil
                 jti.m_jdbcType = "String";
                 jti.m_jdbcResultSetAccessorFormatter = e3 -> String
                     .format ("DaoUtil.getClobAsString (rs, COLUMN_NAMES[%s.Columns.%s])", e3.getE1 (), e3.getE2 ());
-                jti.m_jdbcJavaSqlType = "java.sql.Types.CLOB";
+                jti.m_importsResultSetAccessorFormatter.add ("au.com.breakpoint.hedron.core.dao.DaoUtil");
+                setJavaSqlType (jti, "CLOB");
                 jti.m_javaCastExpression = "(String)";
                 jti.m_size = -1;
                 jti.m_equalityExpression = EQUALS_OBJECT;
@@ -232,11 +233,13 @@ public class EntityUtil
             else if (columnType.equalsIgnoreCase ("oracle-refcursor"))
             {
                 final String refcursorType = c.getColumnAttributes ().getRefcursorType ();
-                jti.m_javaObjectType = jti.m_javaType = "java.util.List<" + refcursorType + ">";
+                jti.m_javaObjectType = jti.m_javaType = "List<" + refcursorType + ">";
+                jti.m_importsJavaType.add ("java.util.List");
                 jti.m_nonPrimitiveTypeJavaLangType = true;
                 jti.m_jdbcType = "TBD";
                 jti.m_jdbcResultSetAccessor = "getTBD";
-                jti.m_jdbcJavaSqlType = "oracle.jdbc.OracleTypes.CURSOR";
+                jti.m_jdbcJavaSqlType = "OracleTypes.CURSOR";
+                jti.m_importsJavaSqlType.add ("oracle.jdbc.OracleTypes");
                 jti.m_javaCastExpression = null;// "(" + jti.m_javaType + ")"
                 jti.m_equalityExpression = EQUALS_OBJECT;
                 jti.m_hashCodeExpression = HASHCODE_OBJECT;
@@ -592,8 +595,7 @@ public class EntityUtil
 
     public static String getStringParameterValues (final List<Parameter> parameters)
     {
-        return parameters.size () == 0 ? "null"
-            : String.format ("new Object[] { %s }", getStringParametersArgsRef (parameters));
+        return String.format ("new Object[] { %s }", getStringParametersArgsRef (parameters));
     }
 
     public static String getStringUpdateClauses (final String entityName, final List<Column> pkColumns,
@@ -683,16 +685,19 @@ public class EntityUtil
 
     public static void setBigDecimal (final ColumnTypeInfo jti, final Column c)
     {
-        jti.m_javaObjectType = jti.m_javaType = "java.math.BigDecimal";
+        final int scale = c.getColumnAttributes ().getScale ();
+
+        jti.m_javaObjectType = jti.m_javaType = "BigDecimal";
+        jti.m_importsJavaType.add ("java.math.BigDecimal");
         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
         jti.m_javaConvenienceType = c.isNullable () ? "Long" : "long";
 
-        jti.m_jdbcType = "java.math.BigDecimal";
+        jti.m_jdbcType = "BigDecimal";
         jti.m_jdbcResultSetAccessor = "getBigDecimal";
-        jti.m_jdbcJavaSqlType = "java.sql.Types.DECIMAL";
-        jti.m_javaCastExpression = "(java.math.BigDecimal)";
+        setJavaSqlType (jti, "DECIMAL");
+        jti.m_javaCastExpression = "(" + "BigDecimal" + ")";
         jti.m_precision = String.valueOf (c.getColumnAttributes ().getPrecision ());
-        jti.m_scale = String.valueOf (c.getColumnAttributes ().getScale ());
+        jti.m_scale = String.valueOf (scale);
         jti.m_equalityExpression = EQUALS_OBJECT;
         jti.m_hashCodeExpression = HASHCODE_OBJECT;
         jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;// BigDecimal is immutable so is safe to copy
@@ -704,11 +709,11 @@ public class EntityUtil
         jti.m_javaObjectType = "Integer";
         jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "int";
         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-        jti.m_javaConversionMethod = "au.com.breakpoint.hedron.core.HcUtil.getIntValue";
+        setHcUtilConversionMethod (jti, "getIntValue");
         jti.m_javaTypeOfLimitValue = "int";
         jti.m_jdbcType = "Int";
         jti.m_jdbcResultSetAccessor = "getInt";
-        jti.m_jdbcJavaSqlType = "java.sql.Types.INTEGER";
+        setJavaSqlType (jti, "INTEGER");
         //        jti.m_javaCastExpression = "(int) (Integer)";
         jti.m_javaCastExpression = "(Integer)";// remove redundant cast
         if (upperLimitValue > Integer.MIN_VALUE)
@@ -729,8 +734,7 @@ public class EntityUtil
         jti.m_nonPrimitiveTypeJavaLangType = true;
         jti.m_jdbcType = "String";
         jti.m_jdbcResultSetAccessor = "getString";
-        jti.m_jdbcJavaSqlType = isVarchar ? "java.sql.Types.VARCHAR" : "java.sql.Types.CHAR";
-        //            jti.m_javaCastExpression = String.format ("(%s)", jti.m_javaType);
+        setJavaSqlType (jti, isVarchar ? "VARCHAR" : "CHAR");
         jti.m_javaCastExpression = "(String)";
         jti.m_size = size;
         jti.m_equalityExpression = EQUALS_OBJECT;
@@ -793,6 +797,18 @@ public class EntityUtil
         }
 
         return sb.toString ();
+    }
+
+    private static void setHcUtilConversionMethod (final ColumnTypeInfo jti, final String methodName)
+    {
+        jti.m_javaConversionMethod = "HcUtil." + methodName;
+        jti.m_importsConversionMethod.add ("au.com.breakpoint.hedron.core.HcUtil");
+    }
+
+    private static void setJavaSqlType (final ColumnTypeInfo jti, final String typesType)
+    {
+        jti.m_jdbcJavaSqlType = "Types." + typesType;
+        jti.m_importsJavaSqlType.add ("java.sql.Types");
     }
 
     // i. If the field is a boolean, compute (f ? 1 : 0).

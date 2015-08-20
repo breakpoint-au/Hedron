@@ -1,5 +1,5 @@
 //                       __________________________________
-//                ______|         Copyright 2008           |______
+//                ______|      Copyright 2008-2015         |______
 //                \     |     Breakpoint Pty Limited       |     /
 //                 \    |   http://www.breakpoint.com.au   |    /
 //                 /    |__________________________________|    \
@@ -17,14 +17,16 @@
 package au.com.breakpoint.hedron.core.log;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.Counter;
 import au.com.breakpoint.hedron.core.CounterRange;
 import au.com.breakpoint.hedron.core.CounterThroughput;
 import au.com.breakpoint.hedron.core.GenericFactory;
+import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.ICloseable;
 import au.com.breakpoint.hedron.core.MaxCounter;
 import au.com.breakpoint.hedron.core.NullFormatter;
@@ -33,7 +35,6 @@ import au.com.breakpoint.hedron.core.ShutdownPriority;
 import au.com.breakpoint.hedron.core.TimedScope;
 import au.com.breakpoint.hedron.core.TimedScope.ScopeResult;
 import au.com.breakpoint.hedron.core.Tuple.E2;
-import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
 import au.com.breakpoint.hedron.core.concurrent.CallingThreadExecutor;
 import au.com.breakpoint.hedron.core.concurrent.Concurrency;
 import au.com.breakpoint.hedron.core.context.ExecutionScopes;
@@ -80,9 +81,6 @@ public class Instrumentation
             m_instrumentationListeners.add (remoteInstrumentationLogger);
             Logging.addLogger (remoteInstrumentationLogger);
         }
-
-        // Publish stats periodically to the instrumentation handlers.
-        HcUtil.schedulePeriodically (Instrumentation::publishExecutionSummary, EXECUTION_SUMMMARY_SEND_PERIOD_MSEC);
     }
 
     public static void execute (final String name, final long msecLimit, final Runnable r,
@@ -152,8 +150,8 @@ public class Instrumentation
      * Implements the execution scope pattern for a program main (). This implements a top
      * level fault barrier, with a nested ExecutionScope.
      */
-    public static void executeProgram (final String[] args, final String appname, final String buildString,
-        final Runnable service, final ILogConfiguration cfg)
+    public static void executeProgram (final String appname, final String buildString, final Runnable service,
+        final ILogConfiguration logConfiguration)
     {
         // TODO _ review JSW alternatives ... eg 64 bit capable ... docker etc
         // This scope handles HcUtil.onShutdown () at the end to shutdown background threads.
@@ -169,23 +167,28 @@ public class Instrumentation
                 shutdown ();
             } , ShutdownPriority.ExecutionSummaryWriting, "execution summary writing");// higher priority than threadpool, less than IProcessor shutdowns
 
-            // Check args & prepare usage string (in thrown AssertException).
-            HcUtilArgs4j.getProgramOptions (args, cfg);
-
             HcUtil.setApplicationName (appname, buildString);
 
-            final List<E2<String, String>> symbols = HcUtil.getStandardSubstitutions ();
-            final String localLogFolder = HcUtil.substituteSymbols (cfg.getLogFolder (), symbols);
+            if (logConfiguration != null)
+            {
+                final List<E2<String, String>> symbols = HcUtil.getStandardSubstitutions ();
+                final String localLogFolder = HcUtil.substituteSymbols (logConfiguration.getLogFolder (), symbols);
 
-            // TODO _ instantiate proper remote IInstrumentationLogger
-            final IInstrumentionListenerLogger remoteInstrumentatorLogger =
-                new MockInstrumentionRemoteLogger (new NullFormatter (), cfg.getLevelsConfigRemote ());
+                // TODO _ instantiate proper remote IInstrumentationLogger
+                final IInstrumentionListenerLogger remoteInstrumentatorLogger =
+                    new MockInstrumentionRemoteLogger (new NullFormatter (), logConfiguration.getLevelsConfigRemote ());
 
-            configure (localLogFolder, cfg.getLevelsConfigLocal (), cfg.getLogDaysToKeep (), cfg.shouldLogConsole (),
-                remoteInstrumentatorLogger);
+                configure (localLogFolder, logConfiguration.getLevelsConfigLocal (),
+                    logConfiguration.getLogDaysToKeep (), logConfiguration.shouldLogConsole (),
+                    remoteInstrumentatorLogger);
 
-            Logging.logInfo ("Configured Instrumentation for %s; local logging folder [%s] [%s]; remote logging [%s]",
-                appname, localLogFolder, cfg.getLevelsConfigLocal (), cfg.getLevelsConfigRemote ());
+                Logging.logInfo (
+                    "Configured Instrumentation for %s; local logging folder [%s] [%s]; remote logging [%s]", appname,
+                    localLogFolder, logConfiguration.getLevelsConfigLocal (),
+                    logConfiguration.getLevelsConfigRemote ());
+            }
+
+            schedulePublishExecutionSummary ();
 
             // Make logging happen asychronously for the duration of this try scope.
             try (final ICloseable loggingScope = Logging.enableAsyncLogging ())
@@ -246,7 +249,9 @@ public class Instrumentation
         }
 
         final Options options = new Options ();
-        executeProgram (args, "TestApp", "SomeApp 10.0#13 (27/02/2014 14:02) by Breakpoint Pty Limited", () ->
+
+        // Check args & prepare usage string (in thrown AssertException).
+        executeProgram ("TestApp", "SomeApp 10.0#13 (27/02/2014 14:02) by Breakpoint Pty Limited", () ->
         {
             ThreadContext.assertWarning (false, "Warning: %s", "xxx");
             HcUtil.pause (2000);
@@ -267,6 +272,24 @@ public class Instrumentation
 
         m_instrumentationListeners.forEach (inst -> inst.onExecutionSummary (contextId, listTimedScope,
             listCounterThroughput, listCounter, listCounterRange, listMaxCounter));
+    }
+
+    public static void scheduleShutdown (final int runForMsec)
+    {
+        final Timer timer = new Timer ();
+        final TimerTask task = new TimerTask ()
+        {
+            @Override
+            public void run ()
+            {
+                ExecutionScopes.executeFaultBarrier ( () ->
+                {
+                    timer.cancel ();
+                    HcUtil.systemExit (0);// shutdown hook will terminate processors
+                });
+            }
+        };
+        timer.schedule (task, runForMsec);
     }
 
     public static void setPolicyAsyncInstrumentation (final boolean policyAsyncInstrumentation)
@@ -354,6 +377,12 @@ public class Instrumentation
     private static void executeAsyncProtected (final Runnable task)
     {
         ExecutionScopes.executeTaskProtected (m_threadPool.get (), task);
+    }
+
+    private static void schedulePublishExecutionSummary ()
+    {
+        // Publish stats periodically to the instrumentation handlers.
+        HcUtil.schedulePeriodically (Instrumentation::publishExecutionSummary, EXECUTION_SUMMMARY_SEND_PERIOD_MSEC);
     }
 
     private static final int EXECUTION_SUMMMARY_SEND_PERIOD_MSEC = 15 * 60 * 1000;

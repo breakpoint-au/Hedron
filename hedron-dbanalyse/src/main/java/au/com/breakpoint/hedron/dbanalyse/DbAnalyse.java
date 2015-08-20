@@ -1,5 +1,5 @@
 //                       __________________________________
-//                ______|         Copyright 2008           |______
+//                ______|      Copyright 2008-2015         |______
 //                \     |     Breakpoint Pty Limited       |     /
 //                 \    |   http://www.breakpoint.com.au   |    /
 //                 /    |__________________________________|    \
@@ -35,6 +35,17 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import com.sun.org.apache.xml.internal.serialize.OutputFormat;
+import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+import au.com.breakpoint.hedron.core.HcUtil;
+import au.com.breakpoint.hedron.core.Tuple.E2;
+import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
+import au.com.breakpoint.hedron.core.context.ExecutionScopes;
+import au.com.breakpoint.hedron.core.context.ThreadContext;
+import au.com.breakpoint.hedron.dbanalyse.strategy.AllPassSchemaObjectFilterStrategy;
+import au.com.breakpoint.hedron.dbanalyse.strategy.MixedCaseLogicalNameStrategy;
+import au.com.breakpoint.hedron.dbanalyse.strategy.PhysicalAsLogicalNameStrategy;
+import au.com.breakpoint.hedron.dbanalyse.strategy.SybaseStyleLogicalNameStrategy;
 import schemacrawler.schema.BaseColumn;
 import schemacrawler.schema.Catalog;
 import schemacrawler.schema.Column;
@@ -60,17 +71,6 @@ import schemacrawler.schemacrawler.SchemaCrawlerException;
 import schemacrawler.schemacrawler.SchemaCrawlerOptions;
 import schemacrawler.schemacrawler.SchemaInfoLevel;
 import schemacrawler.utility.SchemaCrawlerUtility;
-import au.com.breakpoint.hedron.core.HcUtil;
-import au.com.breakpoint.hedron.core.Tuple.E2;
-import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
-import au.com.breakpoint.hedron.core.context.ExecutionScopes;
-import au.com.breakpoint.hedron.core.context.ThreadContext;
-import au.com.breakpoint.hedron.dbanalyse.strategy.AllPassSchemaObjectFilterStrategy;
-import au.com.breakpoint.hedron.dbanalyse.strategy.MixedCaseLogicalNameStrategy;
-import au.com.breakpoint.hedron.dbanalyse.strategy.PhysicalAsLogicalNameStrategy;
-import au.com.breakpoint.hedron.dbanalyse.strategy.SybaseStyleLogicalNameStrategy;
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 
 public class DbAnalyse
 {
@@ -113,47 +113,46 @@ public class DbAnalyse
             final InclusionRule procRule = s ->
             {
                 //System.out.println (s);
-                final String[] a =
-                    new String[]
-                    {
-                            ".*" + "\\$" + ".*",
-                            ".*" + "_RETRIGGER_EXPRESSION" + ".*",
-                            ".*" + "BITOR" + ".*",
-                            ".*" + "CENTRED" + ".*",
-                            ".*" + "COMPLEMENT" + ".*",
-                            ".*" + "D2" + ".*",
-                            ".*" + "DDMMYYYYHHMMMSS" + ".*",
-                            ".*" + "DOW" + ".*",
-                            ".*" + "DSM" + ".*",
-                            ".*" + "ENABLE" + ".*",
-                            ".*" + "F2" + ".*",
-                            ".*" + "GET_LAST_CHANGE_NUMBER" + ".*",
-                            ".*" + "GROOM" + ".*",
-                            ".*" + "IS_EVEN" + ".*",
-                            ".*" + "IS_ODD" + ".*",
-                            ".*" + "LEFT_PADDED" + ".*",
-                            ".*" + "LOGICAL_" + ".*",
-                            ".*" + "M2" + ".*",
-                            ".*" + "MD5" + ".*",
-                            ".*" + "MERGE_OSS_TRIP_LOCATION" + ".*",
-                            ".*" + "MODF" + ".*",
-                            ".*" + "NEXT_TIME_ABSOLUTE" + ".*",
-                            ".*" + "NEXT_TIME_RELATIVE" + ".*",
-                            ".*" + "RESERVE_FARM_STATUS" + ".*",
-                            ".*" + "RIGHT_PADDED" + ".*",
-                            ".*" + "S2" + ".*",
-                            ".*" + "SCHEDULE_JOB" + ".*",
-                            ".*" + "SNDF" + ".*",
-                            ".*" + "SSM" + ".*",
-                            ".*" + "XOR" + ".*",
-                            ".*" + "XSD_TIMESTAMP" + ".*",
-                            ".*" + "//dummy//" + ".*"
-                    };
+                final String[] a = new String[]
+                {
+                        ".*" + "\\$" + ".*",
+                        ".*" + "_RETRIGGER_EXPRESSION" + ".*",
+                        ".*" + "BITOR" + ".*",
+                        ".*" + "CENTRED" + ".*",
+                        ".*" + "COMPLEMENT" + ".*",
+                        ".*" + "D2" + ".*",
+                        ".*" + "DDMMYYYYHHMMMSS" + ".*",
+                        ".*" + "DOW" + ".*",
+                        ".*" + "DSM" + ".*",
+                        ".*" + "ENABLE" + ".*",
+                        ".*" + "F2" + ".*",
+                        ".*" + "GET_LAST_CHANGE_NUMBER" + ".*",
+                        ".*" + "GROOM" + ".*",
+                        ".*" + "IS_EVEN" + ".*",
+                        ".*" + "IS_ODD" + ".*",
+                        ".*" + "LEFT_PADDED" + ".*",
+                        ".*" + "LOGICAL_" + ".*",
+                        ".*" + "M2" + ".*",
+                        ".*" + "MD5" + ".*",
+                        ".*" + "MERGE_OSS_TRIP_LOCATION" + ".*",
+                        ".*" + "MODF" + ".*",
+                        ".*" + "NEXT_TIME_ABSOLUTE" + ".*",
+                        ".*" + "NEXT_TIME_RELATIVE" + ".*",
+                        ".*" + "RESERVE_FARM_STATUS" + ".*",
+                        ".*" + "RIGHT_PADDED" + ".*",
+                        ".*" + "S2" + ".*",
+                        ".*" + "SCHEDULE_JOB" + ".*",
+                        ".*" + "SNDF" + ".*",
+                        ".*" + "SSM" + ".*",
+                        ".*" + "XOR" + ".*",
+                        ".*" + "XSD_TIMESTAMP" + ".*",
+                        ".*" + "//dummy//" + ".*"
+                };
                 return !HcUtil.containsWildcard (a, s);
             };
             options.setTableInclusionRule (tableRule);
 
-            options.setRoutineInclusionRule (procRule); // new ExcludeAll ()
+            options.setRoutineInclusionRule (procRule);// new ExcludeAll ()
 
             // Get the schema definition
             final Catalog catalog = SchemaCrawlerUtility.getCatalog (connection, options);
@@ -225,7 +224,7 @@ public class DbAnalyse
         {
             switch ((FunctionColumnType) columnType)
             {
-                case unknown: // default to in
+                case unknown:// default to in
                 case in:
                 {
                     direction = "in";
@@ -261,7 +260,7 @@ public class DbAnalyse
         {
             switch ((ProcedureColumnType) columnType)
             {
-                case unknown: // default to in
+                case unknown:// default to in
                 case in:
                 {
                     direction = "in";
@@ -540,7 +539,7 @@ public class DbAnalyse
                     final String filter = value;
                     if (filter.equals ("AllPass"))
                     {
-                        m_options.m_schemaObjectFilterStrategy = new AllPassSchemaObjectFilterStrategy (); // set filter strategy
+                        m_options.m_schemaObjectFilterStrategy = new AllPassSchemaObjectFilterStrategy ();// set filter strategy
                     }
                     else
                     {
@@ -659,8 +658,8 @@ public class DbAnalyse
         final Element eRoot = dom.createElement ("schema");
         eRoot.setAttribute ("name", m_options.m_schemaName);
         dom.appendChild (eRoot);
-        eRoot.appendChild (dom.createComment (String.format (
-            " This file is generated by Breakpoint tool DbAnalyse from [%s] ", m_options.m_optionsFilename)));
+        eRoot.appendChild (dom.createComment (String
+            .format (" This file is generated by Breakpoint tool DbAnalyse from [%s] ", m_options.m_optionsFilename)));
 
         createTableElements (dom, catalog, schema, eRoot);
         createStoredProcedureElements (dom, catalog, eRoot);
@@ -713,7 +712,10 @@ public class DbAnalyse
 
     private class CommandLine
     {
-        @Option (name = "-options", usage = "Specifies the name of the database analysis options XML file *REQUIRED*", required = true)
+        @Option (name = "-o", aliases =
+        {
+                "--options"
+        }, usage = "Specifies the name of the database analysis options XML file *REQUIRED*", required = true)
         private String m_optionsFile;
     }
 
@@ -942,8 +944,8 @@ public class DbAnalyse
         final String typeName = cdt.getLocalTypeName ();
         if (typeName == null)
         {
-            ThreadContext.assertInformation (false, "Unknown column type (null) for %s[%s] column[%s]", description, bc
-                .getParent ().getName (), bc.getName ());
+            ThreadContext.assertInformation (false, "Unknown column type (null) for %s[%s] column[%s]", description,
+                bc.getParent ().getName (), bc.getName ());
             e.setAttribute ("type", "(unknown)");
         }
         else if (typeName.equalsIgnoreCase ("char"))

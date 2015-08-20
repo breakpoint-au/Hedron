@@ -1,5 +1,5 @@
 //                       __________________________________
-//                ______|         Copyright 2008           |______
+//                ______|      Copyright 2008-2015         |______
 //                \     |     Breakpoint Pty Limited       |     /
 //                 \    |   http://www.breakpoint.com.au   |    /
 //                 /    |__________________________________|    \
@@ -800,14 +800,25 @@ public class HcUtilFile
 
     public static String readTextFile (final String filename)
     {
-        String fileContents = null;
+        //        String fileContents = null;
+        //
+        //        try (final Stream<String> lines = Files.lines (Paths.get (filename)))
+        //        {
+        //            fileContents = lines
+        //                .collect (joining (HcUtil.NewLine));
+        //        }
+        //        catch (final IOException e)
+        //        {
+        //            // Propagate exception as unchecked fault up to the fault barrier.
+        //            ThreadContext.throwFault (e);
+        //        }
+        //
+        //        return fileContents;
 
-        try (final Stream<String> lines = Files.lines (Paths.get (filename)))
+        byte[] encoded = null;
+        try
         {
-            // @formatter:off
-            fileContents = lines
-                .collect (joining (HcUtil.NewLine));
-            // @formatter:on
+            encoded = Files.readAllBytes (Paths.get (filename));
         }
         catch (final IOException e)
         {
@@ -815,7 +826,8 @@ public class HcUtilFile
             ThreadContext.throwFault (e);
         }
 
-        return fileContents;
+        return new String (encoded);
+
     }
 
     public static void recurseFileObjects (final File dir, final String[] pathsToIgnore,

@@ -1,5 +1,5 @@
 //                       __________________________________
-//                ______|         Copyright 2008           |______
+//                ______|      Copyright 2008-2015         |______
 //                \     |     Breakpoint Pty Limited       |     /
 //                 \    |   http://www.breakpoint.com.au   |    /
 //                 /    |__________________________________|    \
@@ -16,50 +16,22 @@
 //
 package au.com.breakpoint.hedron.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import au.com.breakpoint.hedron.core.context.ThreadContext;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SmartFile implements ICloseable
 {
     public SmartFile (final String filePath)
     {
         m_targetFilePath = filePath;
-        try
-        {
-            m_tempFile = File.createTempFile ("SmartFile", ".tmp");
-            m_tempFile.deleteOnExit ();
-            m_printwriter = new PrintWriter (m_tempFile);
-        }
-        catch (final IOException e)
-        {
-            // Propagate exception as unchecked fault up to the fault barrier.
-            ThreadContext.throwFault (e);
-        }
     }
 
     @Override
     public void close ()
     {
-        try
-        {
-            m_updated = updateTargetFile ();
-        }
-        finally
-        {
-            cleanupTemporaryFile ();
-        }
-    }
-
-    public void flush ()
-    {
-        m_printwriter.flush ();
-    }
-
-    public boolean isCommitEnabled ()
-    {
-        return m_commitEnabled;
+        m_updated = updateTargetFile ();
     }
 
     public boolean didUpdate ()
@@ -67,15 +39,25 @@ public class SmartFile implements ICloseable
         return m_updated;
     }
 
+    public int getSectionNumber ()
+    {
+        return m_sectionNumber;
+    }
+
+    public boolean isCommitEnabled ()
+    {
+        return m_commitEnabled;
+    }
+
     public void print (final String s)
     {
-        m_printwriter.print (s);
+        getBuffer ().add (s);
     }
 
     public void printf (final String format, final Object... args)
     {
         final String s = String.format (format, args);
-        m_printwriter.print (s);
+        print (s);
     }
 
     public void setCommitEnabled (final boolean commitEnabled)
@@ -83,44 +65,66 @@ public class SmartFile implements ICloseable
         m_commitEnabled = commitEnabled;
     }
 
-    private void cleanupTemporaryFile ()
+    public void setSectionNumber (final int sectionNumber)
     {
-        if (m_tempFile != null)
-        {
-            // Always get rid of the temporary file.
-            final boolean ok = m_tempFile.delete ();
-            ThreadContext.assertWarning (ok, "Error deleting temporary file");
-            m_tempFile = null;
-        }
+        m_sectionNumber = sectionNumber;
+    }
+
+    private List<String> getBuffer ()
+    {
+        return m_buffers.computeIfAbsent (m_sectionNumber, ArrayList::new);
+    }
+
+    private String getFileContents ()
+    {
+        // Append all the strings from the map of arrays.
+        final String s = m_buffers.values ()//
+            .stream ()//
+            .flatMap (List::stream)//
+            .collect (Collectors.joining ());
+
+        return s;
     }
 
     private boolean updateTargetFile ()
     {
         boolean updated = false;
 
-        if (m_printwriter != null)
+        if (m_commitEnabled)
         {
-            m_printwriter.flush ();
-            m_printwriter.close ();
-            m_printwriter = null;
+            final String newContents = getFileContents ();
 
-            if (m_commitEnabled)
+            if (!HcUtilFile.doesFileExist (m_targetFilePath))
             {
-                final String tempFilePath = m_tempFile.getAbsolutePath ();
-                updated = HcUtilFile.copyFileIfDifferent (tempFilePath, m_targetFilePath);
+                updated = true;
+            }
+            else
+            {
+                final String prevContents = HcUtilFile.readTextFile (m_targetFilePath);
+                updated = !prevContents.equals (newContents);
+                //System.out.printf ("prevContents %s%n[%s]%n", prevContents.length (), prevContents);
+                //System.out.printf ("newContents %s%n[%s]%n", newContents.length (), newContents);
+            }
+
+            if (updated)
+            {
+                HcUtilFile.writeTextFile (m_targetFilePath, newContents);
             }
         }
 
         return updated;
     }
 
+    /** Ordered collection of buffers that are appended in order at the end */
+    private final Map<Integer, List<String>> m_buffers = GenericFactory.newTreeMap ();
+
     private boolean m_commitEnabled = true;
 
-    private PrintWriter m_printwriter;
+    private int m_sectionNumber = DEFAULT_SECTION_NUMBER;
 
     private final String m_targetFilePath;
 
-    private File m_tempFile;
-
     private boolean m_updated;
+
+    private static final int DEFAULT_SECTION_NUMBER = 1_000;
 }

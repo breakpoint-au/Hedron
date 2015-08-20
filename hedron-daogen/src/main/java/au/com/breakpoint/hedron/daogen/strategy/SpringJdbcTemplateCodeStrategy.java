@@ -1,5 +1,5 @@
 //                       __________________________________
-//                ______|         Copyright 2008           |______
+//                ______|      Copyright 2008-2015         |______
 //                \     |     Breakpoint Pty Limited       |     /
 //                 \    |   http://www.breakpoint.com.au   |    /
 //                 /    |__________________________________|    \
@@ -20,9 +20,7 @@ import static java.util.Comparator.comparing;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.HcUtil;
@@ -43,7 +41,7 @@ import au.com.breakpoint.hedron.daogen.IRelation;
 import au.com.breakpoint.hedron.daogen.Options;
 import au.com.breakpoint.hedron.daogen.Parameter;
 import au.com.breakpoint.hedron.daogen.Schema;
-import au.com.breakpoint.hedron.daogen.SmartFileShowingProgress;
+import au.com.breakpoint.hedron.daogen.SmartFileJavaClass;
 import au.com.breakpoint.hedron.daogen.StoredProcedure;
 import au.com.breakpoint.hedron.daogen.StoredProcedureResultSet;
 
@@ -103,67 +101,26 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         final String returnTypeString = shouldReturnValues ? "Result" : "void";
         final String parametersClassName = EntityUtil.getParametersClass (inParameters);
 
-        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
+        try (final SmartFileJavaClass pw = new SmartFileJavaClass (filepath))
         {
+            pw.setSectionPackage ();
             pw.printf ("package %s.dao;%n", outputPackage);
-            pw.printf ("%n");
-            pw.printf ("import java.util.*;%n");
-            pw.printf ("import javax.sql.*;%n");
 
-            final List<String> es = sp.getEntityStrings ();
-            for (final String e : es)
+            pw.addClassImport ("javax.sql.DataSource");
+            if (inParameters.size () > 1)
             {
-                pw.printf ("import %s.entity.%s;%n", outputPackage, e);
+                pw.addClassImport ("au.com.breakpoint.hedron.core.Tuple");
             }
 
-            if (m_shouldUseSimpleJdbcCall)
-            {
-                pw.printf ("import org.springframework.jdbc.core.namedparam.*;%n");
-                pw.printf ("import org.springframework.jdbc.core.simple.*;%n");
-            }
-            else
-            {
-                if (sp.getParameterCount (Parameter.ParameterDirection.IN) > 0)
-                {
-                    pw.printf ("import org.springframework.jdbc.core.*;%n");
-                }
-                if (sp.getParameterCount (Parameter.ParameterDirection.OUT) > 0 || sp
-                    .getParameterCount (Parameter.ParameterDirection.RETURN_AS_OUT) > 0 || sp
-                        .getParameterCount (Parameter.ParameterDirection.RETURN) > 0)
-                {
-                    pw.printf ("import org.springframework.jdbc.core.SqlOutParameter;%n");
-                }
-                if (sp.getParameterCount (Parameter.ParameterDirection.IN_OUT) > 0)
-                {
-                    pw.printf ("import org.springframework.jdbc.core.*;%n");
-                }
-                if (resultSets.size () > 0)
-                {
-                    pw.printf ("import java.util.List;%n");
-                    pw.printf ("import org.springframework.jdbc.core.*;%n");
-                    final Set<String> specifiedEntityNames = new HashSet<String> ();
-                    for (final StoredProcedureResultSet sprs : resultSets)
-                    {
-                        final String type = sprs.getType ();
-                        if (!specifiedEntityNames.contains (type))
-                        {
-                            pw.printf ("import %s.entity.%s;%n", outputPackage, type);
-                            specifiedEntityNames.add (type);
-                        }
-                    }
-                }
-                pw.printf ("import org.springframework.jdbc.object.*;%n");
-            }
-            pw.printf ("import au.com.breakpoint.hedron.core.*;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.*;%n");
-
-            pw.printf ("%n");
+            pw.setSectionClassCode ();
             pw.printf ("/**%n");
             pw.printf (" * Low-level DAO object encapsulating the %s stored procedure. Encapsulates%n",
                 storedProcedurePhysicalName);
             pw.printf (" * Spring JDBC template database access.%n");
             pw.printf (" */%n");
             // TODO 1 implement Function too if shouldReturnValues
+
+            pw.addClassImport ("au.com.breakpoint.hedron.core.dao.BaseExecutableDao");
             pw.printf ("public class %sStoredProcDao extends BaseExecutableDao<%s>%n", storedProcedureName,
                 parametersClassName);
             pw.printf ("{%n");
@@ -181,6 +138,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 {
                     final Column c = p.getColumn ();
                     final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
+                    pw.addClassImports (jti.m_importsJavaType);
 
                     pw.printf ("        public %s m_value%s;%n", jti.m_javaType, c.getName ());
                 }
@@ -261,6 +219,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                         if (jti.m_javaConversionMethod != null)
                         {
+                            pw.addClassImports (jti.m_importsConversionMethod);
                             pw.printf ("        r.m_value%s = %s (outValues.get (\"%s\"));%n", c.getName (),
                                 jti.m_javaConversionMethod, c.getPhysicalName ());
                         }
@@ -291,6 +250,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("%n");
                 pw.printf (
                     "    /** Create a subclass of Spring's StoredProcedure to use its protected execute () method */%n");
+                pw.addClassImport ("org.springframework.jdbc.object.StoredProcedure");
                 pw.printf ("    private static class TypesafeStoredProcedure extends StoredProcedure%n");
                 pw.printf ("    {%n");
                 pw.printf ("        public TypesafeStoredProcedure (final DataSource ds)%n");
@@ -319,9 +279,12 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         final Column c = p.getColumn ();
 
                         final String sqlParameterTypeName = EntityUtil.getSqlParameterTypeName (p.getDirection ());
+                        pw.addClassImport ("org.springframework.jdbc.core.%s", sqlParameterTypeName);
+
                         if (sqlParameterTypeName != null)
                         {
                             final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
+                            pw.addClassImports (jti.m_importsJavaSqlType);
                             if (jti.m_rowMapperType != null)
                             {
                                 pw.printf (
@@ -343,6 +306,9 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("        public %s execute (%s)%n", returnTypeString,
                     EntityUtil.getStringParametersArgs (inParameters));
                 pw.printf ("        {%n");
+
+                pw.addClassImport ("java.util.Map");
+                pw.addClassImport ("java.util.HashMap");
                 pw.printf ("            final Map<String, Object> inParams = new HashMap<String, Object> ();%n");
                 for (final Parameter p : inParameters)
                 {
@@ -354,10 +320,12 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("%n");
                 if (!shouldReturnValues)
                 {
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                     pw.printf ("            DaoUtil.performExecute (this, inParams, STORED_PROCEDURE_NAME);%n");
                 }
                 else
                 {
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                     pw.printf (
                         "            final Map<?, ?> outParams = DaoUtil.performExecute (this, inParams, STORED_PROCEDURE_NAME);%n");
                     pw.printf ("%n");
@@ -424,7 +392,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         final String filepath = getEntityFilepath (String.format ("%s.java", entityName));
         final String outputPackage = m_options.m_outputPackage;
 
-        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
+        try (final SmartFileJavaClass pw = new SmartFileJavaClass (filepath))
         {
             final List<Column> columns = ir.getColumns ();
             final List<Column> nonIdentityColumns = EntityUtil.getNonIdentityColumns (columns);
@@ -434,17 +402,17 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             final String pkClassName = EntityUtil.getPrimaryKeyClass (ir);
             final String pkClassInstance = EntityUtil.getPrimaryKeyInstanceString (ir);
 
+            pw.setSectionPackage ();
             pw.printf ("package %s.entity;%n", outputPackage);
-            pw.printf ("%n");
-            //            pw.printf ("import java.io.Serializable;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.HcUtil;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.IEntity;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.BaseEntity;%n");
+
+            pw.addClassImport ("au.com.breakpoint.hedron.core.dao.IEntity");
+            pw.addClassImport ("au.com.breakpoint.hedron.core.dao.BaseEntity");
             if (pk != null && pk.getColumns ().size () > 1)
             {
-                pw.printf ("import au.com.breakpoint.hedron.core.Tuple;%n");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.Tuple");
             }
-            pw.printf ("%n");
+
+            pw.setSectionClassCode ();
             pw.printf ("/**%n");
             pw.printf (" * Low-level entity object encapsulating a %s row.%n", ir.getPhysicalName ());
             pw.printf (" */%n");
@@ -514,6 +482,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             {
                 final String columnName = c.getName ();
                 final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
+                pw.addClassImports (jti.m_importsJavaType);
 
                 pw.printf ("    /**%n");
                 pw.printf ("     * Column %s accessors.%n", columnName);
@@ -600,7 +569,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("%n");
             pw.printf ("    /** IEntity implementation of getColumnValues () */%n");
             pw.printf ("    @Override%n");
-            pw.printf ("    @SuppressWarnings (\"incomplete-switch\")%n");
             pw.printf ("    public Object[] getColumnValues (final ColumnType columnType)%n");
             pw.printf ("    {%n");
             pw.printf ("        Object[] values = null;%n");
@@ -661,82 +629,14 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("                break;%n");
                 pw.printf ("            }%n");
             }
+            pw.printf ("%n");
+            pw.printf ("            default:%n");
+            pw.printf ("            {%n");
+            pw.printf ("                break;%n");
+            pw.printf ("            }%n");
             pw.printf ("        }%n");
             pw.printf ("        return values;%n");
             pw.printf ("    }%n");
-            ////// now in BaseEntity
-            //pw.printf ("%n");
-            //pw.printf ("    @Override%n");
-            //pw.printf ("    public boolean equals (final Object o)%n");
-            //pw.printf ("    {%n");
-            //pw.printf ("        boolean isEqual = false;%n");
-            //pw.printf ("        if (this == o)%n");
-            //pw.printf ("        {%n");
-            //pw.printf ("            isEqual = true;%n");
-            //pw.printf ("        }%n");
-            //pw.printf ("        else if (o != null && getClass () == o.getClass ())%n");
-            //pw.printf ("        {%n");
-            //pw.printf ("            final %s eRhs = (%s) o;%n", entityName, entityName);
-            //pw.printf ("            isEqual = ");
-            //
-            //if (true)
-            //{
-            //    int i = 0;
-            //    for (final Column c : columns)
-            //    {
-            //        final String columnName = c.getName ();
-            //        final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
-            //
-            //        if (i > 0)
-            //        {
-            //            pw.printf (" &&%n                ");
-            //        }
-            //        pw.printf (jti.m_equalityExpression, columnName, columnName);
-            //        ++i;
-            //    }
-            //}
-            //
-            //pw.printf (";%n");
-            //pw.printf ("        }%n");
-            //pw.printf ("        return isEqual;%n");
-            //pw.printf ("    }%n");
-            //pw.printf ("%n");
-            //pw.printf ("    @Override%n");
-            //pw.printf ("    public int hashCode ()%n");
-            //pw.printf ("    {%n");
-            //pw.printf ("        // See Effective Java 2nd edition Item 9.%n");
-            //pw.printf ("        int result = 17;%n");
-            //for (final Column c : columns)
-            //{
-            //    final String columnName = c.getName ();
-            //    final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
-            //
-            //    pw.printf ("        result = 31 * result + %s;%n",
-            //        String.format (jti.m_hashCodeExpression, columnName, columnName));
-            //}
-            //pw.printf ("        return result;%n");
-            //pw.printf ("    }%n");
-
-            // Change to generic tostring in BaseEntity
-            //pw.printf ("%n");
-            //pw.printf ("    @Override%n");
-            //pw.printf ("    public String toString ()%n");
-            //pw.printf ("    {%n");
-            //pw.printf ("        return String.format (\"%s =", entityName);
-            //for (final Column c : columns)
-            //{
-            //    final String columnName = c.getName ();
-            //    pw.printf (" %s[%%s]", columnName);
-            //}
-            //pw.printf ("\"");
-            //for (final Column c : columns)
-            //{
-            //    final String columnName = c.getName ();
-            //    pw.printf (", m_column%s", columnName);
-            //}
-            //pw.printf (");%n");
-            //pw.printf ("    }%n");
-            //pw.printf ("%n");
 
             pw.printf ("%n");
             pw.printf ("    /** Logical identifiers for the columns, used in WhereElement, SetElement, etc */%n");
@@ -757,6 +657,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             {
                 final String columnName = c.getName ();
                 final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
+                pw.addClassImports (jti.m_importsJavaType);
 
                 pw.printf ("%n");
                 pw.printf ("    /**%n", columnName);
@@ -863,10 +764,12 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
     {
         final List<String> result = GenericFactory.newArrayList ();
 
-        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
+        try (final SmartFileJavaClass pw = new SmartFileJavaClass (filepath))
         {
+            pw.setSectionPackage ();
             pw.printf ("package %s;%n", outputPackage);
-            pw.printf ("%n");
+
+            pw.setSectionClassCode ();
             pw.printf ("/**%n");
             pw.printf (" * Class containing database metrics as properties.%n");
             pw.printf (" */%n");
@@ -950,9 +853,12 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
     {
         final List<String> result = GenericFactory.newArrayList ();
 
-        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
+        try (final SmartFileJavaClass pw = new SmartFileJavaClass (filepath))
         {
+            pw.setSectionPackage ();
             pw.printf ("package %s;%n", outputPackage);
+
+            pw.setSectionClassCode ();
             pw.printf ("%n");
             pw.printf ("/**%n");
             pw.printf (" * Class containing database metrics as enums.%n");
@@ -1037,51 +943,46 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         //final boolean canCrud = canCreate && canRead && needUpdate && canDelete;
         final String pkClassName = EntityUtil.getPrimaryKeyClass (ir);
 
-        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
+        try (final SmartFileJavaClass pw = new SmartFileJavaClass (filepath))
         {
+            pw.setSectionPackage ();
             pw.printf ("package %s.dao;%n", outputPackage);
-            pw.printf ("%n");
-            pw.printf ("import java.sql.ResultSet;%n");
-            pw.printf ("import java.sql.SQLException;%n");
-            pw.printf ("import javax.sql.DataSource;%n");
-            pw.printf ("import java.util.List;%n");
-            pw.printf ("import org.springframework.jdbc.core.RowMapper;%n");
-            if (pk != null && pk.getColumns ().size () > 1)
+
+            pw.addClassImport ("javax.sql.DataSource");
+            if (pk != null)
             {
-                pw.printf ("import au.com.breakpoint.hedron.core.Tuple;%n");
-            }
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.OrderByElement;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.WhereElement;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.FetchSql;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.UpdateSql;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.BaseEntityDao;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.DaoUtil;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.DaoUtil.SqlData;%n");
-            pw.printf ("import %s.entity.%s;%n", outputPackage, entityName);
-            if (canUpdate)
-            {
-                pw.printf ("import au.com.breakpoint.hedron.core.dao.SetElement;%n");
-            }
-            if (canCreate)
-            {
-                if (m_shouldUseSimpleJdbcInsert)
+                if (pk.getColumns ().size () > 0)
                 {
-                    pw.printf ("import java.util.HashMap;%n");
-                    pw.printf ("import java.util.Map;%n");
-                    pw.printf ("import org.springframework.jdbc.core.simple.SimpleJdbcInsert;%n");
+                    for (final Column pkc : pk.getColumns ())
+                    {
+                        final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (pkc);
+                        pw.addClassImports (jti.m_importsJavaType);
+                    }
                 }
-                else
+                if (pk.getColumns ().size () > 1)
                 {
-                    pw.printf ("import au.com.breakpoint.hedron.core.context.ThreadContext;%n");
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.Tuple");
                 }
             }
-            pw.printf ("%n");
+            pw.addClassImport ("au.com.breakpoint.hedron.core.dao.BaseEntityDao");
+            pw.addClassImport ("%s.entity.%s", outputPackage, entityName);
+
+            //            if (canCreate)
+            //            {
+            //                if (m_shouldUseSimpleJdbcInsert)
+            //                {
+            //                    pw.addClassImport ("java.util.HashMap");
+            //                    pw.addClassImport ("java.util.Map");
+            //                    pw.addClassImport ("org.springframework.jdbc.core.simple.SimpleJdbcInsert");
+            //                }
+            //            }
+
+            pw.setSectionClassCode ();
             pw.printf ("/**%n");
             pw.printf (
                 " * Low-level DAO object encapsulating the %s relation. Encapsulates Spring JDBC template database access.%n",
                 entityPhysicalName);
             pw.printf (" */%n");
-            pw.printf ("@SuppressWarnings (\"unused\")%n");
             pw.printf ("public class %s%sDao extends BaseEntityDao<%s, %s>%n", daoName, suffix, entityName,
                 pkClassName);
             pw.printf ("{%n");
@@ -1096,6 +997,12 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             {
                 if (parameters == null)
                 {
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.WhereElement");
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.FetchSql");
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.OrderByElement");
+                    pw.addClassImport ("java.util.List");
+
                     pw.printf ("%n");
                     pw.printf ("    /**%n");
                     pw.printf ("     * Fetches all rows of the %s relation.%n", entityPhysicalName);
@@ -1152,6 +1059,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 }
                 else
                 {
+                    pw.addClassImport ("java.util.List");
                     if (EntityUtil.hasConvenienceTypes (parameters))
                     {
                         pw.printf ("%n");
@@ -1177,13 +1085,24 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     pw.printf ("    public List<%s> fetch (%s)%n", entityName,
                         EntityUtil.getStringParametersArgs (parameters));
                     pw.printf ("    {%n");
-                    pw.printf (
-                        "        return DaoUtil.performFetch (m_dataSource, %sDao.ROW_MAPPER, SQL_FRAGMENT_SELECT_FROM, %s);%n",
-                        entityName, EntityUtil.getStringParameterValues (parameters));
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
+                    if (parameters.size () == 0)
+                    {
+                        pw.printf (
+                            "        return DaoUtil.performFetch (m_dataSource, %sDao.ROW_MAPPER, SQL_FRAGMENT_SELECT_FROM);%n",
+                            entityName);
+                    }
+                    else
+                    {
+                        pw.printf (
+                            "        return DaoUtil.performFetch (m_dataSource, %sDao.ROW_MAPPER, SQL_FRAGMENT_SELECT_FROM, %s);%n",
+                            entityName, EntityUtil.getStringParameterValues (parameters));
+                    }
                     pw.printf ("    }%n");
                 }
                 if (pk != null)
                 {
+                    pw.addClassImport ("java.util.List");
                     final boolean canOverload = EntityUtil.allowsOverloadDisambiguation (pkColumns);
                     final boolean generateSeparateOverload = canOverload || pkColumns.size () > 1;
 
@@ -1237,6 +1156,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         else
                         {
                             final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (pkColumns.get (0));
+                            pw.addClassImports (jti.m_importsJavaType);
 
                             // Only 1 arg: must be casting an intrinsic.
                             pw.printf ("        return fetchByPrimaryKey ((%s) id);%n", jti.m_javaType);
@@ -1248,6 +1168,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             }
             if (canCreate)
             {
+                pw.addClassImport ("java.util.List");
                 pw.printf ("%n");
                 pw.printf ("    /**%n");
                 pw.printf ("     * Inserts multiple rows into the %s table.%n", entityPhysicalName);
@@ -1256,6 +1177,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("    @Override%n");
                 pw.printf ("    public void insert (final List<%s> es)%n", entityName);
                 pw.printf ("    {%n");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                 pw.printf (
                     "        DaoUtil.performInsertBatch (m_dataSource, es.toArray (new %s[es.size ()]), SQL_INSERT);%n",
                     entityName);
@@ -1288,8 +1210,10 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 }
                 else
                 {
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                     pw.printf (
                         "        final int updateCount = DaoUtil.performInsert (m_dataSource, e, SQL_INSERT);%n");
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
                     pw.printf ("        ThreadContext.assertError (updateCount == 1, \"%sDao insert failed\");%n",
                         entityName);
                 }
@@ -1297,6 +1221,9 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             }
             if (needUpdate)
             {
+                pw.addClassImport ("java.util.List");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
+
                 pw.printf ("%n");
                 pw.printf ("    /**%n");
                 pw.printf ("     * Updates multiple rows in the %s table.%n", entityPhysicalName);
@@ -1330,6 +1257,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("     * @return the numbers of rows affected by the update%n");
                 pw.printf ("     */%n");
                 pw.printf ("    @Override%n");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.SetElement");
                 pw.printf (
                     "    public int update (final SetElement[] newValues, final WhereElement[] whereElements)%n");
                 pw.printf ("    {%n");
@@ -1348,6 +1276,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("     * %n");
                 pw.printf ("     * @return the numbers of rows affected by the update%n");
                 pw.printf ("     */%n");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.UpdateSql");
                 pw.printf ("    public int update (final UpdateSql sql)%n");
                 pw.printf ("    {%n");
                 pw.printf ("        return update (sql.getSetElements (), sql.getWhereElements ());%n");
@@ -1380,6 +1309,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     {
                         final String optimisticLockColumnName = optimisticLockColumn.getName ();
                         final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (optimisticLockColumn);
+                        pw.addClassImports (jti.m_importsJavaType);
 
                         pw.printf ("%n");
                         pw.printf ("    /**%n");
@@ -1409,6 +1339,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             }
             if (canDelete)
             {
+                pw.addClassImport ("java.util.List");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                 pw.printf ("%n");
                 pw.printf ("    /**%n");
                 pw.printf ("     * Deletes multiple rows from the %s table.%n", entityPhysicalName);
@@ -1510,6 +1442,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         else
                         {
                             final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (pkColumns.get (0));
+                            pw.addClassImports (jti.m_importsJavaType);
 
                             // Only 1 arg: must be casting an intrinsic.
                             pw.printf ("        return deleteByPrimaryKey ((%s) id);%n", jti.m_javaType);
@@ -1556,6 +1489,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("    /**%n");
                 pw.printf ("     * Function to map %s entities from %s result sets.%n", entityName, entityPhysicalName);
                 pw.printf ("     */%n");
+                pw.addClassImport ("org.springframework.jdbc.core.RowMapper");
                 pw.printf ("    public static final RowMapper<%s> ROW_MAPPER = (rs, rowNum) ->%n", entityName);
                 pw.printf ("    {%n");
                 pw.printf ("        final %s e = new %s ();%n", entityName, entityName);
@@ -1564,6 +1498,11 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 {
                     final String columnName = c.getName ();
                     final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
+
+                    if (jti.m_jdbcResultSetAccessorFormatter != null)
+                    {
+                        pw.addClassImports (jti.m_importsResultSetAccessorFormatter);
+                    }
 
                     final Function<E3<String, String, String>, String> formatter =
                         jti.m_jdbcResultSetAccessorFormatter != null ? jti.m_jdbcResultSetAccessorFormatter
@@ -1574,6 +1513,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     if (c.isNullable ())
                     {
+                        pw.addClassImports (jti.m_importsJavaType);
+
                         // Nullable.
                         pw.printf ("        %s value%s = %s;%n", jti.m_javaType, columnName, accessorCode);
                         pw.printf ("        if (!rs.wasNull ())%n");
@@ -1649,21 +1590,22 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         final String filepath = getDaoFilepath (String.format ("%s%sDao.java", daoName, suffix));
         final String outputPackage = m_options.m_outputPackage;
 
-        try (final SmartFile pw = new SmartFileShowingProgress (filepath))
+        try (final SmartFileJavaClass pw = new SmartFileJavaClass (filepath))
         {
+            pw.setSectionPackage ();
             pw.printf ("package %s.dao;%n", outputPackage);
-            pw.printf ("%n");
-            pw.printf ("import java.sql.SQLException;%n");
-            pw.printf ("import javax.sql.DataSource;%n");
-            pw.printf ("import java.util.List;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.Tuple;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.DaoUtil;%n");
-            pw.printf ("import au.com.breakpoint.hedron.core.dao.BaseExecutableDao;%n");
-            pw.printf ("%n");
+
+            pw.addClassImport ("javax.sql.DataSource");
+            pw.addClassImport ("au.com.breakpoint.hedron.core.dao.BaseExecutableDao");
+            if (parameters.size () > 1)
+            {
+                pw.addClassImport ("au.com.breakpoint.hedron.core.Tuple");
+            }
+
+            pw.setSectionClassCode ();
             pw.printf ("/**%n");
             pw.printf (" * Low-level DAO object encapsulating the %s SQL action%n", daoName);
             pw.printf (" */%n");
-            pw.printf ("@SuppressWarnings (\"unused\")%n");
             final String parametersClassName = EntityUtil.getParametersClass (parameters);
             pw.printf ("public class %s%sDao extends BaseExecutableDao<%s>%n", daoName, suffix, parametersClassName);
             pw.printf ("{%n");
@@ -1688,6 +1630,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("    /** Executes the SQL action */%n");
             pw.printf ("    public int execute (%s)%n", EntityUtil.getStringParametersArgs (parameters));
             pw.printf ("    {%n");
+            pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
             pw.printf ("        return DaoUtil.performExecuteSql (m_dataSource, SQL_STRING, %s);%n",
                 EntityUtil.getStringParametersArgsRef (parameters));
             pw.printf ("    }%n");

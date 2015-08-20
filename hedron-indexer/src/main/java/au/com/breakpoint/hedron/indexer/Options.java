@@ -1,5 +1,5 @@
 //                       __________________________________
-//                ______|         Copyright 2008           |______
+//                ______|      Copyright 2008-2015         |______
 //                \     |     Breakpoint Pty Limited       |     /
 //                 \    |   http://www.breakpoint.com.au   |    /
 //                 /    |__________________________________|    \
@@ -25,12 +25,21 @@ public class Options
         Index
     }
 
-    @Option (name = "-config", usage = "Specifies the name of an application-specific configuration file ** MANDATORY **", required = true)
+    @Option (name = "-c", aliases =
+    {
+            "--config"
+    }, usage = "Specifies the name of an application-specific configuration file ** MANDATORY **", required = true)
     public String m_configFilename;
 
-    @Option (name = "-debug", usage = "If true, outputs debug information; default is false")
+    @Option (name = "-d", aliases =
+    {
+            "--debug"
+    }, usage = "If true, outputs debug information; default is false")
     public boolean m_debug;
 
-    @Option (name = "-mode", usage = "Program mode; default is Archive")
+    @Option (name = "-m", aliases =
+    {
+            "--mode"
+    }, usage = "Program mode; default is Archive")
     public Mode m_mode = Mode.Index;
 }

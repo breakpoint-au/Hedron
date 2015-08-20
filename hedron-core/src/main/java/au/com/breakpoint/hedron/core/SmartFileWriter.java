@@ -1,5 +1,5 @@
 //                       __________________________________
-//                ______|         Copyright 2008           |______
+//                ______|      Copyright 2008-2015         |______
 //                \     |     Breakpoint Pty Limited       |     /
 //                 \    |   http://www.breakpoint.com.au   |    /
 //                 /    |__________________________________|    \
@@ -44,7 +44,6 @@ public class SmartFileWriter extends Writer
     @Override
     public void flush () throws IOException
     {
-        m_smartFile.flush ();
     }
 
     @Override
