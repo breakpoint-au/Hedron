@@ -34,7 +34,4 @@ public interface ITransactionScopedService<TOutput>
      *         data is required, return null.
      */
     TOutput execute (final ITransactionScope scope);
-
-    /** A symbolic value to use as void return from ITransactionScopedService<Void> */
-    public static Void VOID_RETURN = null;
 }

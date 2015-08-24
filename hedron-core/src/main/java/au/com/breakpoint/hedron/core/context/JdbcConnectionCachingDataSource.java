@@ -77,15 +77,13 @@ public class JdbcConnectionCachingDataSource implements SmartDataSource
     @Override
     public int getLoginTimeout () throws SQLException
     {
-        // Return 0, indicating the default system timeout is to be used.
-        return 0;
+        return m_realDataSource.getLoginTimeout ();
     }
 
     @Override
     public PrintWriter getLogWriter () throws SQLException
     {
-        ThreadContext.assertFault (false, "Unimplemented method getLogWriter ()");
-        return null;
+        return m_realDataSource.getLogWriter ();
     }
 
     @Override
@@ -95,21 +93,21 @@ public class JdbcConnectionCachingDataSource implements SmartDataSource
     }
 
     @Override
-    public boolean isWrapperFor (final Class<?> arg0) throws SQLException
+    public boolean isWrapperFor (final Class<?> iface) throws SQLException
     {
-        return false;
+        return m_realDataSource.isWrapperFor (iface);
     }
 
     @Override
-    public void setLoginTimeout (final int arg0) throws SQLException
+    public void setLoginTimeout (final int seconds) throws SQLException
     {
-        ThreadContext.assertFault (false, "Unimplemented method setLoginTimeout (int arg0)");
+        m_realDataSource.setLoginTimeout (seconds);
     }
 
     @Override
-    public void setLogWriter (final PrintWriter arg0) throws SQLException
+    public void setLogWriter (final PrintWriter out) throws SQLException
     {
-        ThreadContext.assertFault (false, "Unimplemented method setLogWriter (PrintWriter arg0)");
+        m_realDataSource.setLogWriter (out);
     }
 
     /**
@@ -128,8 +126,7 @@ public class JdbcConnectionCachingDataSource implements SmartDataSource
         if (m_realDataSource instanceof BasicDataSource)
         {
             final BasicDataSource bds = (BasicDataSource) m_realDataSource;
-
-            s = String.format ("[%s, %s, %s]", bds.getUrl (), bds.getUsername (), bds.getPassword ());
+            s = String.format ("[%s, %s]", bds.getUsername (), bds.getUrl ());
         }
         else
         {
@@ -139,9 +136,14 @@ public class JdbcConnectionCachingDataSource implements SmartDataSource
     }
 
     @Override
-    public <T> T unwrap (final Class<T> arg0) throws SQLException
+    public <T> T unwrap (final Class<T> iface) throws SQLException
     {
-        return null;
+        return m_realDataSource.unwrap (iface);
+    }
+
+    Connection getConnectionCached ()
+    {
+        return m_connection;
     }
 
     private Connection m_connection;
