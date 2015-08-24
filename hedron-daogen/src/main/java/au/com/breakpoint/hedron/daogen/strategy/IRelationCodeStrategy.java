@@ -36,7 +36,7 @@ public interface IRelationCodeStrategy
 
     List<String> generateDao (final IRelation ir, final Schema schema, final List<Capability> capabilities);
 
-    List<String> generateDao (final StoredProcedure sp, final Schema schema);
+    List<String> generateStoredProcDao (final StoredProcedure sp, final Schema schema);
 
     List<String> generateEntity (final IRelation ir, final Schema schema);
 

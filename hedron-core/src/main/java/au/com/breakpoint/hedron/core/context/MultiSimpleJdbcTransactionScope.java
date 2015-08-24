@@ -34,6 +34,8 @@ public class MultiSimpleJdbcTransactionScope extends JdbcConnectionCachingExecut
         super ("MultiSimpleJdbc");
     }
 
+    // TODO _ lose the multi stuff and simplify the Simple stuff
+
     @Override
     public void close ()
     {

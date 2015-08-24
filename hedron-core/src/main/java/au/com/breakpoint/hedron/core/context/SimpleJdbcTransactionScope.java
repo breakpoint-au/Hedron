@@ -103,8 +103,9 @@ public class SimpleJdbcTransactionScope extends JdbcConnectionCachingExecutionSc
         m_dataSourceName = dataSource.getName ();// remember the name of the one data source
 
         // Turn off auto-commit. This connection will be held for the remainder of the transaction
-        // by JdbcConnectionCachingDataSource.
+        // by JdbcConnectionCachingDataSource. This starts a transaction. Set the isolation level before.
         final Connection connection = HcUtilJdbc.getConnection (getDataSource ());
+        //HcUtilJdbc.setTransactionIsolationLevel (connection, Connection.TRANSACTION_SERIALIZABLE);
         HcUtilJdbc.setAutoCommit (connection, false);
     }
 

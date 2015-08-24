@@ -36,6 +36,8 @@ public class ColumnTypeInfo
 
     public List<String> m_importsConversionMethod = GenericFactory.newArrayList ();
 
+    public List<String> m_importsEntityType = GenericFactory.newArrayList ();
+
     public List<String> m_importsJavaSqlType = GenericFactory.newArrayList ();
 
     public List<String> m_importsJavaType = GenericFactory.newArrayList ();

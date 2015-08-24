@@ -289,7 +289,7 @@ public class DaoGen
 
     private List<String> generateStoredProcedureCode (final StoredProcedure o)
     {
-        return m_options.m_codeStrategy.generateDao (o, m_schema);
+        return m_options.m_codeStrategy.generateStoredProcDao (o, m_schema);
     }
 
     private IRelation getIRelation (final String typeName)
