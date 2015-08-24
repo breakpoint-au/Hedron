@@ -34,7 +34,7 @@ public class SimpleJdbcTransactionScope extends ExecutionScope implements ITrans
         m_connectionCachingDataSource = new JdbcConnectionCachingDataSource (realDataSource);
 
         final Connection connection = HcUtilJdbc.getConnection (m_connectionCachingDataSource);
-        System.out.printf ("Create connection [%s]%n", connection);
+        //System.out.printf ("Create connection [%s]%n", connection);
 
         // Set the isolation level before starting the transaction.
         //HcUtilJdbc.setTransactionIsolationLevel (connection, Connection.TRANSACTION_SERIALIZABLE);
@@ -48,7 +48,7 @@ public class SimpleJdbcTransactionScope extends ExecutionScope implements ITrans
     public void close ()
     {
         final Connection connection = m_connectionCachingDataSource.getConnectionCached ();
-        System.out.printf ("Closing connection [%s]%n", connection);
+        //System.out.printf ("Closing connection [%s]%n", connection);
 
         if (connection != null)
         {
@@ -79,6 +79,8 @@ public class SimpleJdbcTransactionScope extends ExecutionScope implements ITrans
                 m_connectionCachingDataSource.closeConnection ();
             }
         }
+
+        super.close ();
     }
 
     @Override
