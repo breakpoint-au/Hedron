@@ -23,89 +23,70 @@ import au.com.breakpoint.hedron.core.HcUtilJdbc;
 import au.com.breakpoint.hedron.core.log.Logging;
 
 /**
- * Builds upon JdbcConnectionCachingExecutionScope.
+ * Scopes a simple (single) JDBC transaction.
  */
-public class SimpleJdbcTransactionScope extends JdbcConnectionCachingExecutionScope implements ITransactionScope
+public class SimpleJdbcTransactionScope extends ExecutionScope implements ITransactionScope
 {
-    public SimpleJdbcTransactionScope ()
+    public SimpleJdbcTransactionScope (final DataSource realDataSource)
     {
         super ("SimpleJdbc");
+
+        m_connectionCachingDataSource = new JdbcConnectionCachingDataSource (realDataSource);
+
+        final Connection connection = HcUtilJdbc.getConnection (m_connectionCachingDataSource);
+        //System.out.printf ("Create connection [%s]%n", connection);
+
+        // Set the isolation level before starting the transaction.
+        //HcUtilJdbc.setTransactionIsolationLevel (connection, Connection.TRANSACTION_SERIALIZABLE);
+
+        // Turn off auto-commit. This connection will be held for the remainder of the transaction
+        // by JdbcConnectionCachingDataSource. This starts a transaction.
+        HcUtilJdbc.setAutoCommit (connection, false);
     }
 
     @Override
     public void close ()
     {
-        // Control transaction outcome.
-        try
+        final Connection connection = m_connectionCachingDataSource.getConnectionCached ();
+        //System.out.printf ("Closing connection [%s]%n", connection);
+
+        if (connection != null)
         {
-            // Check whether has been set up.
-            if (m_dataSourceName != null)
+            // Control transaction outcome.
+            try
             {
-                Connection connection = null;
-                try
+                if (m_shouldCommit)
                 {
-                    connection = getDataSource ().getConnection ();
+                    Logging.logDebug ("SimpleJdbcTransactionScope committing for data source");
+                    connection.commit ();
                 }
-                catch (final SQLException e)
+                else
                 {
-                    // Don't allow exception since might be closing the connection
-                    // as part of error path handling.
+                    Logging.logWarn ("SimpleJdbcTransactionScope rolling back for data source");
+                    connection.rollback ();
                 }
 
-                // Any SQLExceptions from here on will throw to the catch block below.
-                if (connection != null)
-                {
-                    if (m_shouldCommit)
-                    {
-                        Logging.logDebug ("SimpleJdbcTransactionScope committing for data source [%s]",
-                            m_dataSourceName);
-                        connection.commit ();
-                    }
-                    else
-                    {
-                        Logging.logWarn ("SimpleJdbcTransactionScope rolling back for data source [%s]",
-                            m_dataSourceName);
-                        connection.rollback ();
-                    }
-
-                    // Return connection to original state to allow pooling reuse.
-                    HcUtilJdbc.setAutoCommit (connection, true);
-                }
+                // Return connection to original state to allow pooling reuse.
+                HcUtilJdbc.setAutoCommit (connection, true);
+            }
+            catch (final SQLException e)
+            {
+                // Propagate exception as unchecked fault up to the fault barrier.
+                ThreadContext.throwFault (e);
+            }
+            finally
+            {
+                m_connectionCachingDataSource.closeConnection ();
             }
         }
-        catch (final SQLException e)
-        {
-            // Propagate exception as unchecked fault up to the fault barrier.
-            ThreadContext.throwFault (e);
-        }
-        finally
-        {
-            super.close ();
-        }
+
+        super.close ();
     }
 
-    /** Convenience constructor for one unnamed data source */
-    public void setup (final DataSource realDataSource)
+    @Override
+    public JdbcConnectionCachingDataSource getDataSource ()
     {
-        setup (new NamedDataSource (DEFAULT_DATA_SOURCE_NAME, realDataSource));
-    }
-
-    /** Constructor for one named data source */
-    public void setup (final NamedDataSource dataSource)
-    {
-        //Logging.logDebug ("SimpleJdbcTransactionScope setup [%s]", dataSource.getName ());
-
-        // Only one data source.
-        super.setup (new NamedDataSource[]
-        {
-                dataSource
-        });
-        m_dataSourceName = dataSource.getName ();// remember the name of the one data source
-
-        // Turn off auto-commit. This connection will be held for the remainder of the transaction
-        // by JdbcConnectionCachingDataSource.
-        final Connection connection = HcUtilJdbc.getConnection (getDataSource ());
-        HcUtilJdbc.setAutoCommit (connection, false);
+        return m_connectionCachingDataSource;
     }
 
     @Override
@@ -114,19 +95,7 @@ public class SimpleJdbcTransactionScope extends JdbcConnectionCachingExecutionSc
         m_shouldCommit = true;
     }
 
-    /**
-     * This class specialisation takes only one data source. Get it from the base class
-     * (which supports multiple data sources) by passing down the remembered name of the
-     * data source.
-     */
-    private DataSource getDataSource ()
-    {
-        return getDataSource (m_dataSourceName);
-    }
-
-    private String m_dataSourceName;
+    private final JdbcConnectionCachingDataSource m_connectionCachingDataSource;
 
     private boolean m_shouldCommit;
-
-    private static final String DEFAULT_DATA_SOURCE_NAME = "/local";
 }

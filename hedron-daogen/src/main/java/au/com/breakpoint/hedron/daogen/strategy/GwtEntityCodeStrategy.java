@@ -65,7 +65,7 @@ public class GwtEntityCodeStrategy implements IRelationCodeStrategy
     }
 
     @Override
-    public List<String> generateDao (final StoredProcedure sp, final Schema schema)
+    public List<String> generateStoredProcDao (final StoredProcedure sp, final Schema schema)
     {
         // Only entities are generated.
         return GenericFactory.newArrayList ();

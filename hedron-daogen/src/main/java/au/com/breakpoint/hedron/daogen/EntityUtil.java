@@ -235,6 +235,7 @@ public class EntityUtil
                 final String refcursorType = c.getColumnAttributes ().getRefcursorType ();
                 jti.m_javaObjectType = jti.m_javaType = "List<" + refcursorType + ">";
                 jti.m_importsJavaType.add ("java.util.List");
+                jti.m_importsEntityType.add (refcursorType);
                 jti.m_nonPrimitiveTypeJavaLangType = true;
                 jti.m_jdbcType = "TBD";
                 jti.m_jdbcResultSetAccessor = "getTBD";
@@ -330,6 +331,7 @@ public class EntityUtil
         {
             final List<Column> columns = getColumns (parameters);
             s = getColumnsClass (columns);
+
         }
 
         return s;

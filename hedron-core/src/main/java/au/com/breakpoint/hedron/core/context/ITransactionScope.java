@@ -16,12 +16,15 @@
 //
 package au.com.breakpoint.hedron.core.context;
 
+import javax.sql.DataSource;
+
 /**
  * Aggregation of interfaces for transactional context objects, implementing IScope for
- * scope management, IDataSourceRepository for caching of open database connections
- * between Spring JDBC actions, and ITransactionOutcome for controlling the outcome of
- * transactions (ie commit or rollback the transaction associated with the current scope).
+ * scope management and ITransactionOutcome for controlling the outcome of transactions
+ * (ie commit or rollback the transaction associated with the current scope). Holds cached
+ * open database connection between Spring JDBC actions etc.
  */
-public interface ITransactionScope extends IScope, IDataSourceRepository, ITransactionOutcome
+public interface ITransactionScope extends IScope, ITransactionOutcome
 {
+    DataSource getDataSource ();
 }

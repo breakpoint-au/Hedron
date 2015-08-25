@@ -3424,7 +3424,7 @@ public class HcUtil
         SafeLazyValue.of ( () -> getAvailableDirectoryName (new String[]
     {
             "C:/temp",
-            "/Volumes/Internal-2TB/leigh/temp"
+            System.getProperty ("java.io.tmpdir")
     }));
 
     private static final String ThisOperatingSystem = getOperatingSystem ();
