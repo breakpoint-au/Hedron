@@ -31,6 +31,12 @@ public class BuildDateUtil
             JavaInfoFile
         }
 
+        @Option (name = "-1", aliases =
+        {
+                "--appName"
+        }, usage = "Specifies the name of the application", required = true)
+        public String m_appName;
+
         @Option (name = "-b", aliases =
         {
                 "--buildNumber"
@@ -58,7 +64,7 @@ public class BuildDateUtil
         @Option (name = "-m", aliases =
         {
                 "--mode"
-        }, usage = "Program mode; default is BuildDate")
+        }, usage = "Program mode; default is JavaInfoFile")
         public Mode m_mode = Mode.JavaInfoFile;
 
         @Option (name = "-o", aliases =
@@ -107,28 +113,45 @@ public class BuildDateUtil
                             pw.printf ("%n");
                             pw.printf ("public class %s%n", options.m_className);
                             pw.printf ("{%n");
+                            String infoString = "";
+                            if (options.m_appName != null)
+                            {
+                                infoString += options.m_appName;
+                                pw.printf ("    public static String getAppName ()%n");
+                                pw.printf ("    {%n");
+                                pw.printf ("        return \"%s\";%n", options.m_appName);
+                                pw.printf ("    }%n%n");
+                            }
                             if (options.m_releaseIdentifier != null)
                             {
+                                infoString += " " + options.m_releaseIdentifier;
                                 pw.printf ("    public static String getReleaseIdentifier ()%n");
                                 pw.printf ("    {%n");
                                 pw.printf ("        return \"%s\";%n", options.m_releaseIdentifier);
-                                pw.printf ("    }%n");
+                                pw.printf ("    }%n%n");
                             }
                             if (options.m_buildNumber != null)
                             {
+                                infoString += "#" + options.m_buildNumber;
                                 pw.printf ("    public static int getBuildNumber ()%n");
                                 pw.printf ("    {%n");
                                 pw.printf ("        return %s;%n", options.m_buildNumber);
-                                pw.printf ("    }%n");
+                                pw.printf ("    }%n%n");
                             }
                             if (options.m_generateTimestamp)
                             {
+                                final String timestampString = OleDate.formatDateTime (OleDate.getCurrentDATE ());
+                                infoString += " (" + timestampString + ")";
                                 pw.printf ("    public static String getTimestamp ()%n");
                                 pw.printf ("    {%n");
-                                pw.printf ("        return \"%s\";%n",
-                                    OleDate.formatDateTime (OleDate.getCurrentDATE ()));
-                                pw.printf ("    }%n");
+                                pw.printf ("        return \"%s\";%n", timestampString);
+                                pw.printf ("    }%n%n");
                             }
+
+                            pw.printf ("    public static String getInfoString ()%n");
+                            pw.printf ("    {%n");
+                            pw.printf ("        return \"%s\";%n", infoString);
+                            pw.printf ("    }%n");
                             pw.printf ("}%n");
                         }
 
