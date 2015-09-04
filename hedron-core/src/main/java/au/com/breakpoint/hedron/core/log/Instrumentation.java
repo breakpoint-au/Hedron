@@ -150,10 +150,10 @@ public class Instrumentation
      * Implements the execution scope pattern for a program main (). This implements a top
      * level fault barrier, with a nested ExecutionScope.
      */
-    public static void executeProgram (final String appname, final String buildString, final Runnable service,
+    public static void executeProgram (final String appname, final String infoString, final Runnable service,
         final ILogConfiguration logConfiguration)
     {
-        // TODO _ review JSW alternatives ... eg 64 bit capable ... docker etc
+        // TODO 0 review JSW alternatives ... eg 64 bit capable ... docker etc
         // This scope handles HcUtil.onShutdown () at the end to shutdown background threads.
         ExecutionScopes.executeProgram ( () ->
         {
@@ -167,7 +167,7 @@ public class Instrumentation
                 shutdown ();
             } , ShutdownPriority.ExecutionSummaryWriting, "execution summary writing");// higher priority than threadpool, less than IProcessor shutdowns
 
-            HcUtil.setApplicationName (appname, buildString);
+            HcUtil.setApplicationName (appname, infoString);
 
             if (logConfiguration != null)
             {

@@ -16,8 +16,6 @@
 //
 package au.com.breakpoint.hedron.core;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import org.kohsuke.args4j.Option;
 import au.com.breakpoint.hedron.core.args4j.HcUtilArgs4j;
@@ -30,8 +28,20 @@ public class BuildDateUtil
     {
         public enum Mode
         {
-            BuildDate
+            JavaInfoFile
         }
+
+        @Option (name = "-1", aliases =
+        {
+                "--appName"
+        }, usage = "Specifies the name of the application", required = true)
+        public String m_appName;
+
+        @Option (name = "-b", aliases =
+        {
+                "--buildNumber"
+        }, usage = "Specifies an optional build number attribute")
+        public String m_buildNumber;
 
         @Option (name = "-c", aliases =
         {
@@ -45,16 +55,22 @@ public class BuildDateUtil
         }, usage = "Echo contents of generated file to console")
         public boolean m_echo;
 
+        @Option (name = "-t", aliases =
+        {
+                "--generateTimestamp"
+        }, usage = "Specifies whether to create a timestamp attribute")
+        public boolean m_generateTimestamp = true;
+
         @Option (name = "-m", aliases =
         {
                 "--mode"
-        }, usage = "Program mode; default is BuildDate")
-        public Mode m_mode = Mode.BuildDate;
+        }, usage = "Program mode; default is JavaInfoFile")
+        public Mode m_mode = Mode.JavaInfoFile;
 
         @Option (name = "-o", aliases =
         {
                 "--outfile"
-        }, usage = "Specifies the name of the output file ** MANDATORY for Summary **")
+        }, usage = "Specifies the name of the output file")
         public String m_outputFilename;
 
         @Option (name = "-p", aliases =
@@ -62,6 +78,12 @@ public class BuildDateUtil
                 "--package"
         }, usage = "Package name ()")
         public String m_packageName;
+
+        @Option (name = "-r", aliases =
+        {
+                "--releaseIdentifier"
+        }, usage = "Specifies an optional release identifier attribute")
+        public String m_releaseIdentifier;
     }
 
     public static void main (final String[] args)
@@ -75,31 +97,73 @@ public class BuildDateUtil
 
             switch (options.m_mode)
             {
-                case BuildDate:
+                case JavaInfoFile:
                 {
-                    try (final PrintWriter pw = new PrintWriter (new FileWriter (options.m_outputFilename)))
-                    {
-                        pw.printf ("package %s;%n", options.m_packageName);
-                        pw.printf ("%n");
-                        pw.printf ("public class %s%n", options.m_className);
-                        pw.printf ("{%n");
-                        pw.printf ("    public static String getInfoString ()%n");
-                        pw.printf ("    {%n");
-                        pw.printf ("        return INFO_STRING;%n");
-                        pw.printf ("    }%n%n");
-                        pw.printf ("    private static final String INFO_STRING = \"%s\";%n",
-                            OleDate.formatDateTime (OleDate.getCurrentDATE ()));
-                        pw.printf ("}%n");
-                    }
-                    catch (final IOException e)
-                    {
-                        // Propagate exception as unchecked fault up to the fault barrier.
-                        ThreadContext.throwFault (e);
-                    }
+                    final String filepath = options.m_outputFilename;
 
-                    if (options.m_echo)
+                    try (final UserFeedback feedback = new UserFeedback (false))
                     {
-                        System.out.println (HcUtilFile.readTextFile (options.m_outputFilename));
+                        feedback.showProgress (filepath);
+
+                        final SmartFileWriter sw = new SmartFileWriter (filepath);
+
+                        try (final PrintWriter pw = new PrintWriter (sw))
+                        {
+                            pw.printf ("package %s;%n", options.m_packageName);
+                            pw.printf ("%n");
+                            pw.printf ("public class %s%n", options.m_className);
+                            pw.printf ("{%n");
+                            String infoString = "";
+                            if (options.m_appName != null)
+                            {
+                                infoString += options.m_appName;
+                                pw.printf ("    public static String getAppName ()%n");
+                                pw.printf ("    {%n");
+                                pw.printf ("        return \"%s\";%n", options.m_appName);
+                                pw.printf ("    }%n%n");
+                            }
+                            if (options.m_releaseIdentifier != null)
+                            {
+                                infoString += " " + options.m_releaseIdentifier;
+                                pw.printf ("    public static String getReleaseIdentifier ()%n");
+                                pw.printf ("    {%n");
+                                pw.printf ("        return \"%s\";%n", options.m_releaseIdentifier);
+                                pw.printf ("    }%n%n");
+                            }
+                            if (options.m_buildNumber != null)
+                            {
+                                infoString += "#" + options.m_buildNumber;
+                                pw.printf ("    public static int getBuildNumber ()%n");
+                                pw.printf ("    {%n");
+                                pw.printf ("        return %s;%n", options.m_buildNumber);
+                                pw.printf ("    }%n%n");
+                            }
+                            if (options.m_generateTimestamp)
+                            {
+                                final String timestampString = OleDate.formatDateTime (OleDate.getCurrentDATE ());
+                                infoString += " (" + timestampString + ")";
+                                pw.printf ("    public static String getTimestamp ()%n");
+                                pw.printf ("    {%n");
+                                pw.printf ("        return \"%s\";%n", timestampString);
+                                pw.printf ("    }%n%n");
+                            }
+
+                            pw.printf ("    public static String getInfoString ()%n");
+                            pw.printf ("    {%n");
+                            pw.printf ("        return \"%s\";%n", infoString);
+                            pw.printf ("    }%n");
+                            pw.printf ("}%n");
+                        }
+
+                        if (sw.didUpdate ())
+                        {
+                            feedback.outputMessage (true, 1, filepath);
+                        }
+
+                        if (options.m_echo)
+                        {
+                            System.out.println (HcUtilFile.readTextFile (filepath));
+                        }
                     }
                     break;
                 }
