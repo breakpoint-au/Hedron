@@ -29,23 +29,22 @@ import au.com.breakpoint.hedron.core.HcUtil;
  *
  * List<SomeTable> l = new SomeTableDao (dataSource).fetch (sql);
  */
-public class SetSql implements Serializable
+public class SetSql<TEntity extends IEntity<?>> implements Serializable
 {
-    // TODO _ review fluent syntax
     public SetSql ()
     {
     }
 
-    public SetSql (final int columnId)
+    public SetSql (final IColumnIndex<TEntity> columnId)
     {
         and (columnId);
     }
 
     // Set clause support
-    public SetSql and (final int columnId)
+    public SetSql<TEntity> and (final IColumnIndex<TEntity> columnId)
     {
         final SetElement ob = addSetElement ();
-        ob.setColumnId (columnId);
+        ob.setColumnId (columnId.getColumnIndex ());
 
         return this;
     }
@@ -55,7 +54,7 @@ public class SetSql implements Serializable
         return m_setElements.toArray (new SetElement[m_setElements.size ()]);
     }
 
-    public SetSql set (final Object value)
+    public SetSql<TEntity> set (final Object value)
     {
         final SetElement ob = getLastSetElement ();
         ob.setValue (value);
@@ -84,5 +83,5 @@ public class SetSql implements Serializable
 
     private final List<SetElement> m_setElements = newArrayList ();
 
-    private static final long serialVersionUID = 7990434835781817954L;
+    private static final long serialVersionUID = 1L;
 }

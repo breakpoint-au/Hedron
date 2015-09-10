@@ -21,17 +21,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
-import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.GenericFactory;
-import au.com.breakpoint.hedron.core.dao.BaseEntity;
-import au.com.breakpoint.hedron.core.dao.BaseEntityDao;
-import au.com.breakpoint.hedron.core.dao.DaoUtil;
-import au.com.breakpoint.hedron.core.dao.IEntity;
-import au.com.breakpoint.hedron.core.dao.OrderByElement;
-import au.com.breakpoint.hedron.core.dao.SetElement;
-import au.com.breakpoint.hedron.core.dao.WhereElement;
+import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.dao.DaoUtil.SqlData;
 import au.com.breakpoint.hedron.core.dao.WhereElement.Operator;
+import au.com.breakpoint.hedron.core.dao.sample.dao.BlackList;
 
 public class DaoUtilTest
 {
@@ -45,10 +39,9 @@ public class DaoUtilTest
     @Test
     public void testDumpCreateEntityCode ()
     {
-        final SampleEntity e = new SampleEntity ();
-        e.setRcs ("columnRcs");
-        e.setResponseTime (null);
-        e.setIsResponding (true);
+        final BlackList e = new BlackList ();
+        e.setAvcId ("columnAvcId");
+        e.setActionId (1);
 
         @SuppressWarnings ("unused")
         final String s = DaoUtil.dumpCreateEntityCode (e, "e");

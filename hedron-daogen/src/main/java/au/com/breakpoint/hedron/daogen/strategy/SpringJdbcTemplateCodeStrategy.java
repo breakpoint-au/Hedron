@@ -65,6 +65,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             cv.getParameters (), "Custom");
     }
 
+    // TODO _ dao with just U capability doesn't compile
+
     @Override
     public List<String> generateDao (final DbEnum en, final Schema schema)
     {
@@ -107,6 +109,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
             pw.addClassImport ("au.com.breakpoint.hedron.core.dao.IEntity");
             pw.addClassImport ("au.com.breakpoint.hedron.core.dao.BaseEntity");
+            pw.addClassImport ("au.com.breakpoint.hedron.core.dao.IColumnIndex");
             if (pk != null && pk.getColumns ().size () > 1)
             {
                 pw.addClassImport ("au.com.breakpoint.hedron.core.Tuple");
@@ -340,7 +343,19 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
             pw.printf ("%n");
             pw.printf ("    /** Logical identifiers for the columns, used in WhereElement, SetElement, etc */%n");
-            pw.printf ("    public static class Columns%n");
+            if (true)
+            {
+                int i = 0;
+                for (final Column c : columns)
+                {
+                    final String columnName = c.getName ();
+                    pw.printf ("    public static final int Column%s = %s;%n", columnName, i);
+                    ++i;
+                }
+            }
+            pw.printf ("%n");
+
+            pw.printf ("    public static enum Column implements IColumnIndex<%s>%n", entityName);
             pw.printf ("    {%n");
             if (true)
             {
@@ -348,11 +363,26 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 for (final Column c : columns)
                 {
                     final String columnName = c.getName ();
-                    pw.printf ("        public static final int %s = %d;%n", columnName, i);
+                    pw.printf ("        %s (Column%s)%s%n", columnName, columnName,
+                        i < columns.size () - 1 ? "," : ";");
                     ++i;
                 }
             }
+            pw.printf ("%n");
+            pw.printf ("        private Column (final int index)%n");
+            pw.printf ("        {%n");
+            pw.printf ("            m_index = index;%n");
+            pw.printf ("        }%n");
+            pw.printf ("%n");
+            pw.printf ("        @Override%n");
+            pw.printf ("        public int getColumnIndex ()%n");
+            pw.printf ("        {%n");
+            pw.printf ("            return m_index;%n");
+            pw.printf ("        }%n");
+            pw.printf ("%n");
+            pw.printf ("        private final int m_index;%n");
             pw.printf ("    }%n");
+
             for (final Column c : columns)
             {
                 final String columnName = c.getName ();
@@ -1062,7 +1092,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     pw.printf ("     * %n");
                     pw.printf ("     * @return Collection of %s entities%n", entityName);
                     pw.printf ("     */%n");
-                    pw.printf ("    public List<%s> fetch (final FetchSql sql)%n", entityName);
+                    pw.printf ("    public List<%s> fetch (final FetchSql<%s> sql)%n", entityName, entityName);
                     pw.printf ("    {%n");
                     pw.printf ("        return fetch (sql.getWhereElements (), sql.getOrderByElements ());%n");
                     pw.printf ("    }%n");
@@ -1212,7 +1242,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     for (final Column c : nonIdentityColumns)
                     {
                         final String columnName = c.getName ();
-                        pw.printf ("        columnValues.put (COLUMN_NAMES[%s.Columns.%s], e.get%s ());%n", entityName,
+                        pw.printf ("        columnValues.put (COLUMN_NAMES[%s.Column%s], e.get%s ());%n", entityName,
                             columnName, columnName);
                     }
                     pw.printf ("    %n");
@@ -1268,6 +1298,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("     */%n");
                 pw.printf ("    @Override%n");
                 pw.addClassImport ("au.com.breakpoint.hedron.core.dao.SetElement");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.WhereElement");
                 pw.printf (
                     "    public int update (final SetElement[] newValues, final WhereElement[] whereElements)%n");
                 pw.printf ("    {%n");
@@ -1287,7 +1318,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("     * @return the numbers of rows affected by the update%n");
                 pw.printf ("     */%n");
                 pw.addClassImport ("au.com.breakpoint.hedron.core.dao.UpdateSql");
-                pw.printf ("    public int update (final UpdateSql sql)%n");
+                pw.printf ("    public int update (final UpdateSql<%s> sql)%n", entityName);
                 pw.printf ("    {%n");
                 pw.printf ("        return update (sql.getSetElements (), sql.getWhereElements ());%n");
                 pw.printf ("    }%n");
@@ -1828,7 +1859,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
     }
 
     final Function<E3<String, String, String>, String> m_accessorDefaultFormatter =
-        e3 -> String.format ("rs.%s (COLUMN_NAMES[%s.Columns.%s])", e3.getE0 (), e3.getE1 (), e3.getE2 ());
+        e3 -> String.format ("rs.%s (COLUMN_NAMES[%s.Column%s])", e3.getE0 (), e3.getE1 (), e3.getE2 ());
 
     private final List<Attribute> m_attributes = Collections.synchronizedList (new ArrayList<Attribute> ());// accumulated during output of entities
 
