@@ -49,6 +49,12 @@ public class BuildDateUtil
         }, usage = "Class name", required = true)
         public String m_className;
 
+        @Option (name = "-i", aliases =
+        {
+                "--commitIdentifier"
+        }, usage = "Specifies an optional commit identifier attribute")
+        public String m_commitIdentifier;
+
         @Option (name = "-e", aliases =
         {
                 "--echo"
@@ -83,6 +89,7 @@ public class BuildDateUtil
         {
                 "--releaseIdentifier"
         }, usage = "Specifies an optional release identifier attribute")
+
         public String m_releaseIdentifier;
     }
 
@@ -136,6 +143,14 @@ public class BuildDateUtil
                                 pw.printf ("    public static int getBuildNumber ()%n");
                                 pw.printf ("    {%n");
                                 pw.printf ("        return %s;%n", options.m_buildNumber);
+                                pw.printf ("    }%n%n");
+                            }
+                            if (options.m_commitIdentifier != null)
+                            {
+                                infoString += " (" + options.m_commitIdentifier + ")";
+                                pw.printf ("    public static String getCommitIdentifier ()%n");
+                                pw.printf ("    {%n");
+                                pw.printf ("        return \"%s\";%n", options.m_commitIdentifier);
                                 pw.printf ("    }%n%n");
                             }
                             if (options.m_generateTimestamp)
