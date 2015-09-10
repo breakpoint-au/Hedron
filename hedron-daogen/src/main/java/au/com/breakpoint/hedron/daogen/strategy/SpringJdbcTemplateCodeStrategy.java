@@ -1092,7 +1092,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     pw.printf ("     * %n");
                     pw.printf ("     * @return Collection of %s entities%n", entityName);
                     pw.printf ("     */%n");
-                    pw.printf ("    public List<%s> fetch (final FetchSql sql)%n", entityName);
+                    pw.printf ("    public List<%s> fetch (final FetchSql<%s> sql)%n", entityName, entityName);
                     pw.printf ("    {%n");
                     pw.printf ("        return fetch (sql.getWhereElements (), sql.getOrderByElements ());%n");
                     pw.printf ("    }%n");
@@ -1242,7 +1242,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     for (final Column c : nonIdentityColumns)
                     {
                         final String columnName = c.getName ();
-                        pw.printf ("        columnValues.put (COLUMN_NAMES[%s.Columns.%s], e.get%s ());%n", entityName,
+                        pw.printf ("        columnValues.put (COLUMN_NAMES[%s.Column%s], e.get%s ());%n", entityName,
                             columnName, columnName);
                     }
                     pw.printf ("    %n");
@@ -1318,7 +1318,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("     * @return the numbers of rows affected by the update%n");
                 pw.printf ("     */%n");
                 pw.addClassImport ("au.com.breakpoint.hedron.core.dao.UpdateSql");
-                pw.printf ("    public int update (final UpdateSql sql)%n");
+                pw.printf ("    public int update (final UpdateSql<%s> sql)%n", entityName);
                 pw.printf ("    {%n");
                 pw.printf ("        return update (sql.getSetElements (), sql.getWhereElements ());%n");
                 pw.printf ("    }%n");
@@ -1859,7 +1859,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
     }
 
     final Function<E3<String, String, String>, String> m_accessorDefaultFormatter =
-        e3 -> String.format ("rs.%s (COLUMN_NAMES[%s.Columns.%s])", e3.getE0 (), e3.getE1 (), e3.getE2 ());
+        e3 -> String.format ("rs.%s (COLUMN_NAMES[%s.Column%s])", e3.getE0 (), e3.getE1 (), e3.getE2 ());
 
     private final List<Attribute> m_attributes = Collections.synchronizedList (new ArrayList<Attribute> ());// accumulated during output of entities
 
