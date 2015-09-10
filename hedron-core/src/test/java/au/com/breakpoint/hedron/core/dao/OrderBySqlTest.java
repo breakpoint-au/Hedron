@@ -18,15 +18,17 @@ package au.com.breakpoint.hedron.core.dao;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import au.com.breakpoint.hedron.core.dao.OrderByElement;
-import au.com.breakpoint.hedron.core.dao.OrderBySql_delete;
+import au.com.breakpoint.hedron.core.dao.sample.dao.BlackList;
 
 public class OrderBySqlTest
 {
     @Test
     public void testOrderBySql ()
     {
-        final OrderBySql_delete sql = new OrderBySql_delete (0).ascending ().then (1).descending ().then (2).ascending ();
+        final OrderBySql<BlackList> sql = //
+            new OrderBySql<> (BlackList.Column.AvcId).ascending () //
+                .then (BlackList.Column.DateRequested).descending () //
+                .then (BlackList.Column.Reason).ascending ();
 
         final OrderByElement[] es = sql.getOrderByElements ();
         assertTrue (es.length == 3);

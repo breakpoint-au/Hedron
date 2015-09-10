@@ -18,15 +18,16 @@ package au.com.breakpoint.hedron.core.dao;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import au.com.breakpoint.hedron.core.dao.SetElement;
-import au.com.breakpoint.hedron.core.dao.SetSql_delete;
+import au.com.breakpoint.hedron.core.dao.sample.dao.BlackList;
 
 public class SetSqlTest
 {
     @Test
     public void testSetSql ()
     {
-        final SetSql_delete sql = new SetSql_delete (0).set ("asdf").and (1).set (15);
+        final SetSql<BlackList> sql = //
+            new SetSql<> (BlackList.Column.AvcId).set ("asdf") //
+                .and (BlackList.Column.DateRequested).set (15);
 
         final SetElement[] es = sql.getSetElements ();
         assertTrue (es.length == 2);

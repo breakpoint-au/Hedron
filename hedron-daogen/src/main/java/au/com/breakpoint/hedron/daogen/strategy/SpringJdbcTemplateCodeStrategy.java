@@ -355,7 +355,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             }
             pw.printf ("%n");
 
-            pw.printf ("    public static enum Columns implements IColumnIndex<%s>%n", entityName);
+            pw.printf ("    public static enum Column implements IColumnIndex<%s>%n", entityName);
             pw.printf ("    {%n");
             if (true)
             {
@@ -369,7 +369,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 }
             }
             pw.printf ("%n");
-            pw.printf ("        private Columns (final int index)%n");
+            pw.printf ("        private Column (final int index)%n");
             pw.printf ("        {%n");
             pw.printf ("            m_index = index;%n");
             pw.printf ("        }%n");

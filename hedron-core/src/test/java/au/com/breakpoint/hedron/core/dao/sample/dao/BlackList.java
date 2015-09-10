@@ -216,7 +216,7 @@ public class BlackList extends BaseEntity<String>
     }
 
     /** Logical identifiers for the columns, used in WhereElement, SetElement, etc */
-    public static enum Columns implements IColumnIndex<BlackList>
+    public static enum Column implements IColumnIndex<BlackList>
     {
         AvcId (ColumnAvcId),
         DateRequested (ColumnDateRequested),
@@ -225,7 +225,7 @@ public class BlackList extends BaseEntity<String>
         ReferenceId (ColumnReferenceId),
         ActionId (ColumnActionId);
 
-        private Columns (final int index)
+        private Column (final int index)
         {
             m_index = index;
         }

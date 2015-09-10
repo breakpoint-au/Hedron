@@ -251,18 +251,18 @@ public class BlackListDao extends BaseEntityDao<BlackList, String>
         final BlackListDao dao = new BlackListDao (null);
 
         final FetchSql<BlackList> fetchSql = //
-            new FetchSql<BlackList> (BlackList.Columns.ReferenceId).greaterThanOrEqual (1) //
-                .and (BlackList.Columns.ActionId).lessThan (2) //
-                .orderBy (BlackList.Columns.OperatorId);
+            new FetchSql<BlackList> (BlackList.Column.ReferenceId).greaterThanOrEqual (1) //
+                .and (BlackList.Column.ActionId).lessThan (2) //
+                .orderBy (BlackList.Column.OperatorId);
 
         @SuppressWarnings ("unused")
         final List<BlackList> es = dao.fetch (fetchSql);
 
         final UpdateSql<BlackList> updateSql = //
-            new UpdateSql<BlackList> (BlackList.Columns.OperatorId).set ("qwerqwer") //
-                .and (BlackList.Columns.ReferenceId).set ("asdfasdf") //
-                .where (BlackList.Columns.ActionId).equal (1) //
-                .and (BlackList.Columns.OperatorId).notEqual (1);
+            new UpdateSql<BlackList> (BlackList.Column.OperatorId).set ("qwerqwer") //
+                .and (BlackList.Column.ReferenceId).set ("asdfasdf") //
+                .where (BlackList.Column.ActionId).equal (1) //
+                .and (BlackList.Column.OperatorId).notEqual (1);
 
         dao.update (updateSql);
     }

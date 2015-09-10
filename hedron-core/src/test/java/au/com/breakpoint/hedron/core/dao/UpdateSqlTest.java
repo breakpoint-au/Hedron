@@ -18,50 +18,46 @@ package au.com.breakpoint.hedron.core.dao;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import au.com.breakpoint.hedron.core.dao.SetElement;
-import au.com.breakpoint.hedron.core.dao.UpdateSql_delete;
-import au.com.breakpoint.hedron.core.dao.WhereElement;
 import au.com.breakpoint.hedron.core.dao.WhereElement.Operator;
+import au.com.breakpoint.hedron.core.dao.sample.dao.BlackList;
 
 public class UpdateSqlTest
 {
-
     @Test
     public void testUpdateSql ()
     {
-        final UpdateSql_delete sql = new UpdateSql_delete (0).set ("qwerqwer").and (1).set (2).where (2).equal ("asdf").and (3)
-            .notEqual (1).and (4).like ("Leigh%").and (5).greaterThan (1).and (6).greaterThanOrEqual (1).and (7)
-            .lessThan (1).and (8).lessThanOrEqual (1);
+        final UpdateSql<BlackList> sql = //
+            new UpdateSql<> (BlackList.Column.AvcId).set ("asdf") //
+                .and (BlackList.Column.DateRequested).set (15) //
+                .where (BlackList.Column.AvcId).equal ("asdf") //
+                .and (BlackList.Column.DateRequested).notEqual (1) //
+                .and (BlackList.Column.OperatorId).like ("Leigh%") //
+                .and (BlackList.Column.ReferenceId).greaterThan (1) //
+                .and (BlackList.Column.ActionId).greaterThanOrEqual (1);
 
-        final SetElement[] ses = sql.getSetElements ();
-        assertTrue (ses.length == 2);
-        assertTrue (ses[0].getColumnId () == 0);
-        assertTrue (ses[0].getValue ().equals ("qwerqwer"));
-        assertTrue (ses[1].getColumnId () == 1);
-        assertTrue (((Integer) ses[1].getValue ()) == 2);
+        final SetElement[] es = sql.getSetElements ();
+        assertTrue (es.length == 2);
+        assertTrue (es[0].getColumnId () == 0);
+        assertTrue (es[0].getValue ().equals ("asdf"));
+        assertTrue (es[1].getColumnId () == 1);
+        assertTrue (((Integer) es[1].getValue ()) == 15);
 
         final WhereElement[] wes = sql.getWhereElements ();
-        assertTrue (wes.length == 7);
-        assertTrue (wes[0].getColumnId () == 2);
+        assertTrue (wes.length == 5);
+        assertTrue (wes[0].getColumnId () == 0);
         assertTrue (wes[0].getOperator () == Operator.Equal);
         assertTrue (wes[0].getValue ().equals ("asdf"));
-        assertTrue (wes[1].getColumnId () == 3);
+        assertTrue (wes[1].getColumnId () == 1);
         assertTrue (wes[1].getOperator () == Operator.NotEqual);
         assertTrue (((Integer) wes[1].getValue ()) == 1);
-        assertTrue (wes[2].getColumnId () == 4);
+        assertTrue (wes[2].getColumnId () == 3);
         assertTrue (wes[2].getOperator () == Operator.Like);
         assertTrue (wes[2].getValue ().equals ("Leigh%"));
-        assertTrue (wes[3].getColumnId () == 5);
+        assertTrue (wes[3].getColumnId () == 4);
         assertTrue (wes[3].getOperator () == Operator.GreaterThan);
         assertTrue (((Integer) wes[3].getValue ()) == 1);
-        assertTrue (wes[4].getColumnId () == 6);
+        assertTrue (wes[4].getColumnId () == 5);
         assertTrue (wes[4].getOperator () == Operator.GreaterThanOrEqual);
         assertTrue (((Integer) wes[4].getValue ()) == 1);
-        assertTrue (wes[5].getColumnId () == 7);
-        assertTrue (wes[5].getOperator () == Operator.LessThan);
-        assertTrue (((Integer) wes[5].getValue ()) == 1);
-        assertTrue (wes[6].getColumnId () == 8);
-        assertTrue (wes[6].getOperator () == Operator.LessThanOrEqual);
-        assertTrue (((Integer) wes[6].getValue ()) == 1);
     }
 }
