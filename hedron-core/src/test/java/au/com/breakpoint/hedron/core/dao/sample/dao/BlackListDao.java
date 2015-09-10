@@ -6,10 +6,10 @@ import org.springframework.jdbc.core.RowMapper;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.core.dao.BaseEntityDao;
 import au.com.breakpoint.hedron.core.dao.DaoUtil;
-import au.com.breakpoint.hedron.core.dao.FetchSql2;
+import au.com.breakpoint.hedron.core.dao.FetchSql;
 import au.com.breakpoint.hedron.core.dao.OrderByElement;
 import au.com.breakpoint.hedron.core.dao.SetElement;
-import au.com.breakpoint.hedron.core.dao.UpdateSql2;
+import au.com.breakpoint.hedron.core.dao.UpdateSql;
 import au.com.breakpoint.hedron.core.dao.WhereElement;
 
 /**
@@ -92,7 +92,7 @@ public class BlackListDao extends BaseEntityDao<BlackList, String>
      *
      * @return Collection of BlackList entities
      */
-    public List<BlackList> fetch (final FetchSql2<BlackList> sql)
+    public List<BlackList> fetch (final FetchSql<BlackList> sql)
     {
         return fetch (sql.getWhereElements (), sql.getOrderByElements ());
     }
@@ -241,7 +241,7 @@ public class BlackListDao extends BaseEntityDao<BlackList, String>
      *
      * @return the numbers of rows affected by the update
      */
-    public int update (final UpdateSql2<BlackList> sql)
+    public int update (final UpdateSql<BlackList> sql)
     {
         return update (sql.getSetElements (), sql.getWhereElements ());
     }
@@ -250,16 +250,16 @@ public class BlackListDao extends BaseEntityDao<BlackList, String>
     {
         final BlackListDao dao = new BlackListDao (null);
 
-        final FetchSql2<BlackList> fetchSql = //
-            new FetchSql2<BlackList> (BlackList.Columns.ReferenceId).greaterThanOrEqual (1) //
+        final FetchSql<BlackList> fetchSql = //
+            new FetchSql<BlackList> (BlackList.Columns.ReferenceId).greaterThanOrEqual (1) //
                 .and (BlackList.Columns.ActionId).lessThan (2) //
                 .orderBy (BlackList.Columns.OperatorId);
 
         @SuppressWarnings ("unused")
         final List<BlackList> es = dao.fetch (fetchSql);
 
-        final UpdateSql2<BlackList> updateSql = //
-            new UpdateSql2<BlackList> (BlackList.Columns.OperatorId).set ("qwerqwer") //
+        final UpdateSql<BlackList> updateSql = //
+            new UpdateSql<BlackList> (BlackList.Columns.OperatorId).set ("qwerqwer") //
                 .and (BlackList.Columns.ReferenceId).set ("asdfasdf") //
                 .where (BlackList.Columns.ActionId).equal (1) //
                 .and (BlackList.Columns.OperatorId).notEqual (1);

@@ -19,7 +19,7 @@ package au.com.breakpoint.hedron.core.dao;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import au.com.breakpoint.hedron.core.dao.SetElement;
-import au.com.breakpoint.hedron.core.dao.UpdateSql;
+import au.com.breakpoint.hedron.core.dao.UpdateSql_delete;
 import au.com.breakpoint.hedron.core.dao.WhereElement;
 import au.com.breakpoint.hedron.core.dao.WhereElement.Operator;
 
@@ -29,7 +29,7 @@ public class UpdateSqlTest
     @Test
     public void testUpdateSql ()
     {
-        final UpdateSql sql = new UpdateSql (0).set ("qwerqwer").and (1).set (2).where (2).equal ("asdf").and (3)
+        final UpdateSql_delete sql = new UpdateSql_delete (0).set ("qwerqwer").and (1).set (2).where (2).equal ("asdf").and (3)
             .notEqual (1).and (4).like ("Leigh%").and (5).greaterThan (1).and (6).greaterThanOrEqual (1).and (7)
             .lessThan (1).and (8).lessThanOrEqual (1);
 

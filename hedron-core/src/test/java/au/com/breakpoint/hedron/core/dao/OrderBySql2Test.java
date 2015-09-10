@@ -25,8 +25,8 @@ public class OrderBySql2Test
     @Test
     public void testOrderBySql ()
     {
-        final OrderBySql2<BlackList> sql = //
-            new OrderBySql2<BlackList> (BlackList.Columns.AvcId).ascending () //
+        final OrderBySql<BlackList> sql = //
+            new OrderBySql<BlackList> (BlackList.Columns.AvcId).ascending () //
                 .then (BlackList.Columns.DateRequested).descending () //
                 .then (BlackList.Columns.Reason).ascending ();
 

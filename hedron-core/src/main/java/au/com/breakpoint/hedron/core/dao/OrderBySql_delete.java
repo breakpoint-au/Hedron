@@ -24,40 +24,48 @@ import au.com.breakpoint.hedron.core.HcUtil;
 /**
  * Example:
  *
- * final SetSql sql = new SetSql (SomeTable.Columns.SomeType).set ("asdf") .and
- * (SomeTable.Columns.Id).set (15);
+ * final OrderBySql sql = new OrderBySql (SomeTable.Columns.SomeType).ascending () .then
+ * (SomeTable.Columns.Id).descending ();
  *
  * List<SomeTable> l = new SomeTableDao (dataSource).fetch (sql);
  */
-public class SetSql2<TEntity extends IEntity<?>> implements Serializable
+public class OrderBySql_delete implements Serializable
 {
-    public SetSql2 ()
+    public OrderBySql_delete ()
     {
     }
 
-    public SetSql2 (final IColumnIndex<TEntity> columnId)
+    public OrderBySql_delete (final int columnId)
     {
-        and (columnId);
+        then (columnId);
     }
 
-    // Set clause support
-    public SetSql2<TEntity> and (final IColumnIndex<TEntity> columnId)
+    public OrderBySql_delete ascending ()
     {
-        final SetElement ob = addSetElement ();
-        ob.setColumnId (columnId.getColumnIndex ());
+        final OrderByElement ob = getLastOrderByElement ();
+        ob.setAscending (true);
 
         return this;
     }
 
-    public SetElement[] getSetElements ()
+    public OrderBySql_delete descending ()
     {
-        return m_setElements.toArray (new SetElement[m_setElements.size ()]);
+        final OrderByElement ob = getLastOrderByElement ();
+        ob.setAscending (false);
+
+        return this;
     }
 
-    public SetSql2<TEntity> set (final Object value)
+    public OrderByElement[] getOrderByElements ()
     {
-        final SetElement ob = getLastSetElement ();
-        ob.setValue (value);
+        return m_orderByElements.toArray (new OrderByElement[m_orderByElements.size ()]);
+    }
+
+    // Order by clause support
+    public OrderBySql_delete then (final int columnId)
+    {
+        final OrderByElement ob = addOrderByElement ();
+        ob.setColumnId (columnId);
 
         return this;
     }
@@ -65,23 +73,23 @@ public class SetSql2<TEntity extends IEntity<?>> implements Serializable
     @Override
     public String toString ()
     {
-        return HcUtil.toString (m_setElements);
+        return HcUtil.toString (m_orderByElements);
     }
 
-    private SetElement addSetElement ()
+    private OrderByElement addOrderByElement ()
     {
-        final SetElement sc = new SetElement ();
-        m_setElements.add (sc);
+        final OrderByElement sc = new OrderByElement ();
+        m_orderByElements.add (sc);
 
         return sc;
     }
 
-    private SetElement getLastSetElement ()
+    private OrderByElement getLastOrderByElement ()
     {
-        return m_setElements.get (m_setElements.size () - 1);
+        return m_orderByElements.get (m_orderByElements.size () - 1);
     }
 
-    private final List<SetElement> m_setElements = newArrayList ();
+    private final List<OrderByElement> m_orderByElements = newArrayList ();
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7990434835781817954L;
 }

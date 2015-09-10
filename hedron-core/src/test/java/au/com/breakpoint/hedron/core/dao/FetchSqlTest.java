@@ -25,8 +25,8 @@ public class FetchSqlTest
     @Test
     public void testFetchSql ()
     {
-        final FetchSql sql = //
-            new FetchSql (2).equal ("asdf") //
+        final FetchSql_delete sql = //
+            new FetchSql_delete (2).equal ("asdf") //
                 .and (3).notEqual (1) //
                 .and (4).like ("Leigh%") //
                 .and (5).greaterThan (1) //

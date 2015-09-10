@@ -19,7 +19,7 @@ package au.com.breakpoint.hedron.core.dao;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import au.com.breakpoint.hedron.core.dao.WhereElement;
-import au.com.breakpoint.hedron.core.dao.WhereSql;
+import au.com.breakpoint.hedron.core.dao.WhereSql_delete;
 import au.com.breakpoint.hedron.core.dao.WhereElement.Operator;
 
 public class WhereSqlTest
@@ -27,7 +27,7 @@ public class WhereSqlTest
     @Test
     public void testWhereSql ()
     {
-        final WhereSql sql = new WhereSql (2).equal ("asdf").and (3).notEqual (1).and (4).like ("Leigh%").and (5)
+        final WhereSql_delete sql = new WhereSql_delete (2).equal ("asdf").and (3).notEqual (1).and (4).like ("Leigh%").and (5)
             .greaterThan (1).and (6).greaterThanOrEqual (1).and (7).lessThan (1).and (8).lessThanOrEqual (1);
 
         final WhereElement[] wes = sql.getWhereElements ();

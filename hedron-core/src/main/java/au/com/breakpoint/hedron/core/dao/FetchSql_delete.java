@@ -28,36 +28,36 @@ import au.com.breakpoint.hedron.core.HcUtil;
  *
  * List<SomeTable> l = new SomeTableDao (dataSource).fetch (sql);
  */
-public class FetchSql2<TEntity extends IEntity<?>> implements Serializable
+public class FetchSql_delete implements Serializable
 {
-    public FetchSql2 ()
+    public FetchSql_delete ()
     {
     }
 
-    public FetchSql2 (final IColumnIndex<TEntity> columnId)
+    public FetchSql_delete (final int columnId)
     {
         and (columnId);
     }
 
-    public FetchSql2<TEntity> and (final IColumnIndex<TEntity> columnId)
+    public FetchSql_delete and (final int columnId)
     {
         m_whereSql.and (columnId);
         return this;
     }
 
-    public FetchSql2<TEntity> ascending ()
+    public FetchSql_delete ascending ()
     {
         m_orderBySql.ascending ();
         return this;
     }
 
-    public FetchSql2<TEntity> descending ()
+    public FetchSql_delete descending ()
     {
         m_orderBySql.descending ();
         return this;
     }
 
-    public FetchSql2<TEntity> equal (final Object value)
+    public FetchSql_delete equal (final Object value)
     {
         m_whereSql.equal (value);
         return this;
@@ -74,50 +74,50 @@ public class FetchSql2<TEntity extends IEntity<?>> implements Serializable
         return m_whereSql.getWhereElements ();
     }
 
-    public FetchSql2<TEntity> greaterThan (final Object value)
+    public FetchSql_delete greaterThan (final Object value)
     {
         m_whereSql.greaterThan (value);
         return this;
     }
 
-    public FetchSql2<TEntity> greaterThanOrEqual (final Object value)
+    public FetchSql_delete greaterThanOrEqual (final Object value)
     {
         m_whereSql.greaterThanOrEqual (value);
         return this;
     }
 
-    public FetchSql2<TEntity> lessThan (final Object value)
+    public FetchSql_delete lessThan (final Object value)
     {
         m_whereSql.lessThan (value);
         return this;
     }
 
-    public FetchSql2<TEntity> lessThanOrEqual (final Object value)
+    public FetchSql_delete lessThanOrEqual (final Object value)
     {
         m_whereSql.lessThanOrEqual (value);
         return this;
     }
 
-    public FetchSql2<TEntity> like (final Object value)
+    public FetchSql_delete like (final Object value)
     {
         m_whereSql.like (value);
         return this;
     }
 
-    public FetchSql2<TEntity> notEqual (final Object value)
+    public FetchSql_delete notEqual (final Object value)
     {
         m_whereSql.notEqual (value);
         return this;
     }
 
     // Order by clause support
-    public FetchSql2<TEntity> orderBy (final IColumnIndex<TEntity> columnId)
+    public FetchSql_delete orderBy (final int columnId)
     {
         m_orderBySql.then (columnId);
         return this;
     }
 
-    public FetchSql2<TEntity> then (final IColumnIndex<TEntity> columnId)
+    public FetchSql_delete then (final int columnId)
     {
         m_orderBySql.then (columnId);
         return this;
@@ -129,9 +129,9 @@ public class FetchSql2<TEntity extends IEntity<?>> implements Serializable
         return HcUtil.toString (m_whereSql, m_orderBySql);
     }
 
-    private final OrderBySql2<TEntity> m_orderBySql = new OrderBySql2<> ();
+    private final OrderBySql_delete m_orderBySql = new OrderBySql_delete ();
 
-    private final WhereSql2<TEntity> m_whereSql = new WhereSql2<> ();
+    private final WhereSql_delete m_whereSql = new WhereSql_delete ();
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7990434835781817954L;
 }

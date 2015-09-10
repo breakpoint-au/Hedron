@@ -29,27 +29,27 @@ import au.com.breakpoint.hedron.core.HcUtil;
  *
  * List<SomeTable> l = new SomeTableDao (dataSource).fetch (sql);
  */
-public class WhereSql implements Serializable
+public class WhereSql<TEntity extends IEntity<?>> implements Serializable
 {
     public WhereSql ()
     {
     }
 
-    public WhereSql (final int columnId)
+    public WhereSql (final IColumnIndex<TEntity> columnId)
     {
         and (columnId);
     }
 
     // Where clause support
-    public WhereSql and (final int columnId)
+    public WhereSql<TEntity> and (final IColumnIndex<TEntity> columnId)
     {
         final WhereElement sc = addSqlClause ();
-        sc.setColumnId (columnId);
+        sc.setColumnId (columnId.getColumnIndex ());
 
         return this;
     }
 
-    public WhereSql equal (final Object value)
+    public WhereSql<TEntity> equal (final Object value)
     {
         final WhereElement sc = getLastSqlClause ();
         sc.setOperator (WhereElement.Operator.Equal);
@@ -63,7 +63,7 @@ public class WhereSql implements Serializable
         return m_whereElements.toArray (new WhereElement[m_whereElements.size ()]);
     }
 
-    public WhereSql greaterThan (final Object value)
+    public WhereSql<TEntity> greaterThan (final Object value)
     {
         final WhereElement sc = getLastSqlClause ();
         sc.setOperator (WhereElement.Operator.GreaterThan);
@@ -72,7 +72,7 @@ public class WhereSql implements Serializable
         return this;
     }
 
-    public WhereSql greaterThanOrEqual (final Object value)
+    public WhereSql<TEntity> greaterThanOrEqual (final Object value)
     {
         final WhereElement sc = getLastSqlClause ();
         sc.setOperator (WhereElement.Operator.GreaterThanOrEqual);
@@ -81,7 +81,7 @@ public class WhereSql implements Serializable
         return this;
     }
 
-    public WhereSql lessThan (final Object value)
+    public WhereSql<TEntity> lessThan (final Object value)
     {
         final WhereElement sc = getLastSqlClause ();
         sc.setOperator (WhereElement.Operator.LessThan);
@@ -90,7 +90,7 @@ public class WhereSql implements Serializable
         return this;
     }
 
-    public WhereSql lessThanOrEqual (final Object value)
+    public WhereSql<TEntity> lessThanOrEqual (final Object value)
     {
         final WhereElement sc = getLastSqlClause ();
         sc.setOperator (WhereElement.Operator.LessThanOrEqual);
@@ -99,7 +99,7 @@ public class WhereSql implements Serializable
         return this;
     }
 
-    public WhereSql like (final Object value)
+    public WhereSql<TEntity> like (final Object value)
     {
         final WhereElement sc = getLastSqlClause ();
         sc.setOperator (WhereElement.Operator.Like);
@@ -108,7 +108,7 @@ public class WhereSql implements Serializable
         return this;
     }
 
-    public WhereSql notEqual (final Object value)
+    public WhereSql<TEntity> notEqual (final Object value)
     {
         final WhereElement sc = getLastSqlClause ();
         sc.setOperator (WhereElement.Operator.NotEqual);

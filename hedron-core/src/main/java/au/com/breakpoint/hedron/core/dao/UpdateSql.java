@@ -28,19 +28,18 @@ import au.com.breakpoint.hedron.core.HcUtil;
  *
  * new SomeTableDao (dataSource).update (sql);
  */
-public class UpdateSql implements Serializable
+public class UpdateSql<TEntity extends IEntity<?>> implements Serializable
 {
-    // TODO _ review fluent syntax
     public UpdateSql ()
     {
     }
 
-    public UpdateSql (final int columnId)
+    public UpdateSql (final IColumnIndex<TEntity> columnId)
     {
         and (columnId);
     }
 
-    public UpdateSql and (final int columnId)
+    public UpdateSql<TEntity> and (final IColumnIndex<TEntity> columnId)
     {
         if (m_gotWhere)
         {
@@ -55,7 +54,7 @@ public class UpdateSql implements Serializable
         return this;
     }
 
-    public UpdateSql equal (final Object value)
+    public UpdateSql<TEntity> equal (final Object value)
     {
         m_whereSql.equal (value);
         return this;
@@ -71,44 +70,44 @@ public class UpdateSql implements Serializable
         return m_whereSql.getWhereElements ();
     }
 
-    public UpdateSql greaterThan (final Object value)
+    public UpdateSql<TEntity> greaterThan (final Object value)
     {
         m_whereSql.greaterThan (value);
         return this;
     }
 
-    public UpdateSql greaterThanOrEqual (final Object value)
+    public UpdateSql<TEntity> greaterThanOrEqual (final Object value)
     {
         m_whereSql.greaterThanOrEqual (value);
         return this;
     }
 
-    public UpdateSql lessThan (final Object value)
+    public UpdateSql<TEntity> lessThan (final Object value)
     {
         m_whereSql.lessThan (value);
         return this;
     }
 
-    public UpdateSql lessThanOrEqual (final Object value)
+    public UpdateSql<TEntity> lessThanOrEqual (final Object value)
     {
         m_whereSql.lessThanOrEqual (value);
         return this;
     }
 
-    public UpdateSql like (final Object value)
+    public UpdateSql<TEntity> like (final Object value)
     {
         m_whereSql.like (value);
         return this;
     }
 
-    public UpdateSql notEqual (final Object value)
+    public UpdateSql<TEntity> notEqual (final Object value)
     {
         m_whereSql.notEqual (value);
         return this;
     }
 
     // Set clause support
-    public UpdateSql set (final Object value)
+    public UpdateSql<TEntity> set (final Object value)
     {
         m_setSql.set (value);
         return this;
@@ -121,7 +120,7 @@ public class UpdateSql implements Serializable
     }
 
     // Where clause support
-    public UpdateSql where (final int columnId)
+    public UpdateSql<TEntity> where (final IColumnIndex<TEntity> columnId)
     {
         m_whereSql.and (columnId);
         m_gotWhere = true;
@@ -130,9 +129,9 @@ public class UpdateSql implements Serializable
 
     private boolean m_gotWhere;
 
-    private final SetSql m_setSql = new SetSql ();
+    private final SetSql<TEntity> m_setSql = new SetSql<> ();
 
-    private final WhereSql m_whereSql = new WhereSql ();
+    private final WhereSql<TEntity> m_whereSql = new WhereSql<> ();
 
-    private static final long serialVersionUID = 7990434835781817954L;
+    private static final long serialVersionUID = 1L;
 }

@@ -26,8 +26,8 @@ public class FetchSql2Test
     @Test
     public void testFetchSql ()
     {
-        final FetchSql2<BlackList> sql = //
-            new FetchSql2<BlackList> (BlackList.Columns.AvcId).equal ("asdf") //
+        final FetchSql<BlackList> sql = //
+            new FetchSql<BlackList> (BlackList.Columns.AvcId).equal ("asdf") //
                 .and (BlackList.Columns.DateRequested).notEqual (1) //
                 .and (BlackList.Columns.OperatorId).like ("Leigh%") //
                 .and (BlackList.Columns.ReferenceId).greaterThan (1) //

@@ -25,8 +25,8 @@ public class SetSql2Test
     @Test
     public void testSetSql ()
     {
-        final SetSql2<BlackList> sql = //
-            new SetSql2<BlackList> (BlackList.Columns.AvcId).set ("asdf") //
+        final SetSql<BlackList> sql = //
+            new SetSql<BlackList> (BlackList.Columns.AvcId).set ("asdf") //
                 .and (BlackList.Columns.DateRequested).set (15);
 
         final SetElement[] es = sql.getSetElements ();

@@ -28,18 +28,19 @@ import au.com.breakpoint.hedron.core.HcUtil;
  *
  * new SomeTableDao (dataSource).update (sql);
  */
-public class UpdateSql2<TEntity extends IEntity<?>> implements Serializable
+public class UpdateSql_delete implements Serializable
 {
-    public UpdateSql2 ()
+    // TODO _ review fluent syntax
+    public UpdateSql_delete ()
     {
     }
 
-    public UpdateSql2 (final IColumnIndex<TEntity> columnId)
+    public UpdateSql_delete (final int columnId)
     {
         and (columnId);
     }
 
-    public UpdateSql2<TEntity> and (final IColumnIndex<TEntity> columnId)
+    public UpdateSql_delete and (final int columnId)
     {
         if (m_gotWhere)
         {
@@ -54,7 +55,7 @@ public class UpdateSql2<TEntity extends IEntity<?>> implements Serializable
         return this;
     }
 
-    public UpdateSql2<TEntity> equal (final Object value)
+    public UpdateSql_delete equal (final Object value)
     {
         m_whereSql.equal (value);
         return this;
@@ -70,44 +71,44 @@ public class UpdateSql2<TEntity extends IEntity<?>> implements Serializable
         return m_whereSql.getWhereElements ();
     }
 
-    public UpdateSql2<TEntity> greaterThan (final Object value)
+    public UpdateSql_delete greaterThan (final Object value)
     {
         m_whereSql.greaterThan (value);
         return this;
     }
 
-    public UpdateSql2<TEntity> greaterThanOrEqual (final Object value)
+    public UpdateSql_delete greaterThanOrEqual (final Object value)
     {
         m_whereSql.greaterThanOrEqual (value);
         return this;
     }
 
-    public UpdateSql2<TEntity> lessThan (final Object value)
+    public UpdateSql_delete lessThan (final Object value)
     {
         m_whereSql.lessThan (value);
         return this;
     }
 
-    public UpdateSql2<TEntity> lessThanOrEqual (final Object value)
+    public UpdateSql_delete lessThanOrEqual (final Object value)
     {
         m_whereSql.lessThanOrEqual (value);
         return this;
     }
 
-    public UpdateSql2<TEntity> like (final Object value)
+    public UpdateSql_delete like (final Object value)
     {
         m_whereSql.like (value);
         return this;
     }
 
-    public UpdateSql2<TEntity> notEqual (final Object value)
+    public UpdateSql_delete notEqual (final Object value)
     {
         m_whereSql.notEqual (value);
         return this;
     }
 
     // Set clause support
-    public UpdateSql2<TEntity> set (final Object value)
+    public UpdateSql_delete set (final Object value)
     {
         m_setSql.set (value);
         return this;
@@ -120,7 +121,7 @@ public class UpdateSql2<TEntity extends IEntity<?>> implements Serializable
     }
 
     // Where clause support
-    public UpdateSql2<TEntity> where (final IColumnIndex<TEntity> columnId)
+    public UpdateSql_delete where (final int columnId)
     {
         m_whereSql.and (columnId);
         m_gotWhere = true;
@@ -129,9 +130,9 @@ public class UpdateSql2<TEntity extends IEntity<?>> implements Serializable
 
     private boolean m_gotWhere;
 
-    private final SetSql2<TEntity> m_setSql = new SetSql2<> ();
+    private final SetSql_delete m_setSql = new SetSql_delete ();
 
-    private final WhereSql2<TEntity> m_whereSql = new WhereSql2<> ();
+    private final WhereSql_delete m_whereSql = new WhereSql_delete ();
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7990434835781817954L;
 }
