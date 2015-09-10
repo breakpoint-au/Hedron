@@ -83,21 +83,6 @@ public class BlackListDao extends BaseEntityDao<BlackList, String>
     }
 
     /**
-     * Fetches the rows of the BLACK_LIST relation that satisfy the criteria in the
-     * <i>whereElements</i> parameter.
-     *
-     * @param sql
-     *            A convenient readable encapsulation of sql where clauses and order by
-     *            statements.
-     *
-     * @return Collection of BlackList entities
-     */
-    public List<BlackList> fetch (final FetchSql<BlackList> sql)
-    {
-        return fetch (sql.getWhereElements (), sql.getOrderByElements ());
-    }
-
-    /**
      * Fetches all rows of the BLACK_LIST relation.
      *
      * @return Collection of BlackList entities
@@ -229,21 +214,6 @@ public class BlackListDao extends BaseEntityDao<BlackList, String>
     public int update (final SetElement[] newValues, final WhereElement[] whereElements)
     {
         return DaoUtil.performUpdate (m_dataSource, ENTITY_NAME, COLUMN_NAMES, newValues, whereElements);
-    }
-
-    /**
-     * Updates the BLACK_LIST table columns specified by newValues according to the
-     * criteria in whereElements.
-     *
-     * @param sql
-     *            A convenient readable encapsulation of update set statements and where
-     *            clauses.
-     *
-     * @return the numbers of rows affected by the update
-     */
-    public int update (final UpdateSql<BlackList> sql)
-    {
-        return update (sql.getSetElements (), sql.getWhereElements ());
     }
 
     public static void main (final String[] args)

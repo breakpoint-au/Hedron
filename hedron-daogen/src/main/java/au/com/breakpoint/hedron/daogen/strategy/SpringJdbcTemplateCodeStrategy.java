@@ -1039,7 +1039,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 {
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.WhereElement");
-                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.FetchSql");
+                    //pw.addClassImport ("au.com.breakpoint.hedron.core.dao.FetchSql");
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.OrderByElement");
                     pw.addClassImport ("java.util.List");
 
@@ -1080,22 +1080,22 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         "        return DaoUtil.performFetch (m_dataSource, %sDao.ROW_MAPPER, SQL_FRAGMENT_SELECT_FROM, COLUMN_NAMES, whereElements, orderByElements);%n",
                         entityName);
                     pw.printf ("    }%n");
-                    pw.printf ("%n");
-                    pw.printf ("    /**%n");
-                    pw.printf (
-                        "     * Fetches the rows of the %s relation that satisfy the criteria in the <i>whereElements</i> parameter.%n",
-                        entityPhysicalName);
-                    pw.printf ("     * %n");
-                    pw.printf ("     * @param sql%n");
-                    pw.printf (
-                        "     *     A convenient readable encapsulation of sql where clauses and order by statements.%n");
-                    pw.printf ("     * %n");
-                    pw.printf ("     * @return Collection of %s entities%n", entityName);
-                    pw.printf ("     */%n");
-                    pw.printf ("    public List<%s> fetch (final FetchSql<%s> sql)%n", entityName, entityName);
-                    pw.printf ("    {%n");
-                    pw.printf ("        return fetch (sql.getWhereElements (), sql.getOrderByElements ());%n");
-                    pw.printf ("    }%n");
+                    //                    pw.printf ("%n");
+                    //                    pw.printf ("    /**%n");
+                    //                    pw.printf (
+                    //                        "     * Fetches the rows of the %s relation that satisfy the criteria in the <i>whereElements</i> parameter.%n",
+                    //                        entityPhysicalName);
+                    //                    pw.printf ("     * %n");
+                    //                    pw.printf ("     * @param sql%n");
+                    //                    pw.printf (
+                    //                        "     *     A convenient readable encapsulation of sql where clauses and order by statements.%n");
+                    //                    pw.printf ("     * %n");
+                    //                    pw.printf ("     * @return Collection of %s entities%n", entityName);
+                    //                    pw.printf ("     */%n");
+                    //                    pw.printf ("    public List<%s> fetch (final FetchSql<%s> sql)%n", entityName, entityName);
+                    //                    pw.printf ("    {%n");
+                    //                    pw.printf ("        return fetch (sql.getWhereElements (), sql.getOrderByElements ());%n");
+                    //                    pw.printf ("    }%n");
                 }
                 else
                 {
@@ -1305,23 +1305,23 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf (
                     "        return DaoUtil.performUpdate (m_dataSource, ENTITY_NAME, COLUMN_NAMES, newValues, whereElements);%n");
                 pw.printf ("    }%n");
-                pw.printf ("%n");
-                pw.printf ("    /**%n");
-                pw.printf (
-                    "     * Updates the %s table columns specified by newValues according to the criteria in whereElements.%n",
-                    entityPhysicalName);
-                pw.printf ("     * %n");
-                pw.printf ("     * @param sql%n");
-                pw.printf (
-                    "     *     A convenient readable encapsulation of update set statements and where clauses.%n");
-                pw.printf ("     * %n");
-                pw.printf ("     * @return the numbers of rows affected by the update%n");
-                pw.printf ("     */%n");
-                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.UpdateSql");
-                pw.printf ("    public int update (final UpdateSql<%s> sql)%n", entityName);
-                pw.printf ("    {%n");
-                pw.printf ("        return update (sql.getSetElements (), sql.getWhereElements ());%n");
-                pw.printf ("    }%n");
+                //                pw.printf ("%n");
+                //                pw.printf ("    /**%n");
+                //                pw.printf (
+                //                    "     * Updates the %s table columns specified by newValues according to the criteria in whereElements.%n",
+                //                    entityPhysicalName);
+                //                pw.printf ("     * %n");
+                //                pw.printf ("     * @param sql%n");
+                //                pw.printf (
+                //                    "     *     A convenient readable encapsulation of update set statements and where clauses.%n");
+                //                pw.printf ("     * %n");
+                //                pw.printf ("     * @return the numbers of rows affected by the update%n");
+                //                pw.printf ("     */%n");
+                //                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.UpdateSql");
+                //                pw.printf ("    public int update (final UpdateSql<%s> sql)%n", entityName);
+                //                pw.printf ("    {%n");
+                //                pw.printf ("        return update (sql.getSetElements (), sql.getWhereElements ());%n");
+                //                pw.printf ("    }%n");
                 if (pk != null)
                 {
                     pw.printf ("%n");
