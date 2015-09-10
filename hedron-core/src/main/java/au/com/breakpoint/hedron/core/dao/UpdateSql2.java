@@ -22,116 +22,116 @@ import au.com.breakpoint.hedron.core.HcUtil;
 /**
  * Example:
  *
- * final FetchSql sql = new FetchSql (SomeTable.Columns.Id).greaterThanOrEqual (6) .and
- * (SomeTable.Columns.Id).lessThan (2345) .orderBy (SomeTable.Columns.SomeType).ascending
- * () .then (SomeTable.Columns.Id).descending ();
+ * UpdateSql = new UpdateSql (SomeTable.Columns.ShortName).set (e.getShortName ()) .and
+ * (SomeTable.Columns.Name).set (e.getName ()) .where (SomeTable.Columns.Id).equal
+ * (e.getId ());
  *
- * List<SomeTable> l = new SomeTableDao (dataSource).fetch (sql);
+ * new SomeTableDao (dataSource).update (sql);
  */
-public class FetchSql implements Serializable
+public class UpdateSql2<TEntity extends IEntity<?>> implements Serializable
 {
-    public FetchSql ()
+    public UpdateSql2 ()
     {
     }
 
-    public FetchSql (final int columnId)
+    public UpdateSql2 (final IColumnIndex<TEntity> columnId)
     {
         and (columnId);
     }
 
-    public FetchSql and (final int columnId)
+    public UpdateSql2<TEntity> and (final IColumnIndex<TEntity> columnId)
     {
-        m_whereSql.and (columnId);
+        if (m_gotWhere)
+        {
+            m_whereSql.and (columnId);
+        }
+        else
+        {
+            // Still in the 'set' part of the update statement.
+            m_setSql.and (columnId);
+        }
+
         return this;
     }
 
-    public FetchSql ascending ()
-    {
-        m_orderBySql.ascending ();
-        return this;
-    }
-
-    public FetchSql descending ()
-    {
-        m_orderBySql.descending ();
-        return this;
-    }
-
-    public FetchSql equal (final Object value)
+    public UpdateSql2<TEntity> equal (final Object value)
     {
         m_whereSql.equal (value);
         return this;
     }
 
-    public OrderByElement[] getOrderByElements ()
+    public SetElement[] getSetElements ()
     {
-        return m_orderBySql.getOrderByElements ();
+        return m_setSql.getSetElements ();
     }
 
-    // Where clause support
     public WhereElement[] getWhereElements ()
     {
         return m_whereSql.getWhereElements ();
     }
 
-    public FetchSql greaterThan (final Object value)
+    public UpdateSql2<TEntity> greaterThan (final Object value)
     {
         m_whereSql.greaterThan (value);
         return this;
     }
 
-    public FetchSql greaterThanOrEqual (final Object value)
+    public UpdateSql2<TEntity> greaterThanOrEqual (final Object value)
     {
         m_whereSql.greaterThanOrEqual (value);
         return this;
     }
 
-    public FetchSql lessThan (final Object value)
+    public UpdateSql2<TEntity> lessThan (final Object value)
     {
         m_whereSql.lessThan (value);
         return this;
     }
 
-    public FetchSql lessThanOrEqual (final Object value)
+    public UpdateSql2<TEntity> lessThanOrEqual (final Object value)
     {
         m_whereSql.lessThanOrEqual (value);
         return this;
     }
 
-    public FetchSql like (final Object value)
+    public UpdateSql2<TEntity> like (final Object value)
     {
         m_whereSql.like (value);
         return this;
     }
 
-    public FetchSql notEqual (final Object value)
+    public UpdateSql2<TEntity> notEqual (final Object value)
     {
         m_whereSql.notEqual (value);
         return this;
     }
 
-    // Order by clause support
-    public FetchSql orderBy (final int columnId)
+    // Set clause support
+    public UpdateSql2<TEntity> set (final Object value)
     {
-        m_orderBySql.then (columnId);
-        return this;
-    }
-
-    public FetchSql then (final int columnId)
-    {
-        m_orderBySql.then (columnId);
+        m_setSql.set (value);
         return this;
     }
 
     @Override
     public String toString ()
     {
-        return HcUtil.toString (m_whereSql, m_orderBySql);
+        return HcUtil.toString (m_setSql, m_whereSql);
     }
 
-    private final OrderBySql m_orderBySql = new OrderBySql ();
+    // Where clause support
+    public UpdateSql2<TEntity> where (final IColumnIndex<TEntity> columnId)
+    {
+        m_whereSql.and (columnId);
+        m_gotWhere = true;
+        return this;
+    }
 
-    private final WhereSql m_whereSql = new WhereSql ();
+    private boolean m_gotWhere;
 
-    private static final long serialVersionUID = 7990434835781817954L;
+    private final SetSql2<TEntity> m_setSql = new SetSql2<> ();
+
+    private final WhereSql2<TEntity> m_whereSql = new WhereSql2<> ();
+
+    private static final long serialVersionUID = 1L;
 }

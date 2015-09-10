@@ -29,18 +29,18 @@ import au.com.breakpoint.hedron.core.HcUtil;
  *
  * List<SomeTable> l = new SomeTableDao (dataSource).fetch (sql);
  */
-public class OrderBySql implements Serializable
+public class OrderBySql2<TEntity extends IEntity<?>> implements Serializable
 {
-    public OrderBySql ()
+    public OrderBySql2 ()
     {
     }
 
-    public OrderBySql (final int columnId)
+    public OrderBySql2 (final IColumnIndex<TEntity> columnId)
     {
         then (columnId);
     }
 
-    public OrderBySql ascending ()
+    public OrderBySql2<TEntity> ascending ()
     {
         final OrderByElement ob = getLastOrderByElement ();
         ob.setAscending (true);
@@ -48,7 +48,7 @@ public class OrderBySql implements Serializable
         return this;
     }
 
-    public OrderBySql descending ()
+    public OrderBySql2<TEntity> descending ()
     {
         final OrderByElement ob = getLastOrderByElement ();
         ob.setAscending (false);
@@ -62,10 +62,10 @@ public class OrderBySql implements Serializable
     }
 
     // Order by clause support
-    public OrderBySql then (final int columnId)
+    public OrderBySql2<TEntity> then (final IColumnIndex<TEntity> columnId)
     {
         final OrderByElement ob = addOrderByElement ();
-        ob.setColumnId (columnId);
+        ob.setColumnId (columnId.getColumnIndex ());
 
         return this;
     }

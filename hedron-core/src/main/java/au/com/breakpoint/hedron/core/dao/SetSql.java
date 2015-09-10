@@ -31,7 +31,6 @@ import au.com.breakpoint.hedron.core.HcUtil;
  */
 public class SetSql implements Serializable
 {
-    // TODO _ review fluent syntax
     public SetSql ()
     {
     }

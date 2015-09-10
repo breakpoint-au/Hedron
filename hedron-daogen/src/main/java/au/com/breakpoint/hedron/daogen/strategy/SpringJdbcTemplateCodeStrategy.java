@@ -65,6 +65,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             cv.getParameters (), "Custom");
     }
 
+    // TODO _ dao with just U capability doesn't compile  
+
     @Override
     public List<String> generateDao (final DbEnum en, final Schema schema)
     {

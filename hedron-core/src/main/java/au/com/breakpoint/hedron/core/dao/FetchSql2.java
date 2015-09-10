@@ -28,36 +28,36 @@ import au.com.breakpoint.hedron.core.HcUtil;
  *
  * List<SomeTable> l = new SomeTableDao (dataSource).fetch (sql);
  */
-public class FetchSql implements Serializable
+public class FetchSql2<TEntity extends IEntity<?>> implements Serializable
 {
-    public FetchSql ()
+    public FetchSql2 ()
     {
     }
 
-    public FetchSql (final int columnId)
+    public FetchSql2 (final IColumnIndex<TEntity> columnId)
     {
         and (columnId);
     }
 
-    public FetchSql and (final int columnId)
+    public FetchSql2<TEntity> and (final IColumnIndex<TEntity> columnId)
     {
         m_whereSql.and (columnId);
         return this;
     }
 
-    public FetchSql ascending ()
+    public FetchSql2<TEntity> ascending ()
     {
         m_orderBySql.ascending ();
         return this;
     }
 
-    public FetchSql descending ()
+    public FetchSql2<TEntity> descending ()
     {
         m_orderBySql.descending ();
         return this;
     }
 
-    public FetchSql equal (final Object value)
+    public FetchSql2<TEntity> equal (final Object value)
     {
         m_whereSql.equal (value);
         return this;
@@ -74,50 +74,50 @@ public class FetchSql implements Serializable
         return m_whereSql.getWhereElements ();
     }
 
-    public FetchSql greaterThan (final Object value)
+    public FetchSql2<TEntity> greaterThan (final Object value)
     {
         m_whereSql.greaterThan (value);
         return this;
     }
 
-    public FetchSql greaterThanOrEqual (final Object value)
+    public FetchSql2<TEntity> greaterThanOrEqual (final Object value)
     {
         m_whereSql.greaterThanOrEqual (value);
         return this;
     }
 
-    public FetchSql lessThan (final Object value)
+    public FetchSql2<TEntity> lessThan (final Object value)
     {
         m_whereSql.lessThan (value);
         return this;
     }
 
-    public FetchSql lessThanOrEqual (final Object value)
+    public FetchSql2<TEntity> lessThanOrEqual (final Object value)
     {
         m_whereSql.lessThanOrEqual (value);
         return this;
     }
 
-    public FetchSql like (final Object value)
+    public FetchSql2<TEntity> like (final Object value)
     {
         m_whereSql.like (value);
         return this;
     }
 
-    public FetchSql notEqual (final Object value)
+    public FetchSql2<TEntity> notEqual (final Object value)
     {
         m_whereSql.notEqual (value);
         return this;
     }
 
     // Order by clause support
-    public FetchSql orderBy (final int columnId)
+    public FetchSql2<TEntity> orderBy (final IColumnIndex<TEntity> columnId)
     {
         m_orderBySql.then (columnId);
         return this;
     }
 
-    public FetchSql then (final int columnId)
+    public FetchSql2<TEntity> then (final IColumnIndex<TEntity> columnId)
     {
         m_orderBySql.then (columnId);
         return this;
@@ -129,9 +129,9 @@ public class FetchSql implements Serializable
         return HcUtil.toString (m_whereSql, m_orderBySql);
     }
 
-    private final OrderBySql m_orderBySql = new OrderBySql ();
+    private final OrderBySql2<TEntity> m_orderBySql = new OrderBySql2<> ();
 
-    private final WhereSql m_whereSql = new WhereSql ();
+    private final WhereSql2<TEntity> m_whereSql = new WhereSql2<> ();
 
-    private static final long serialVersionUID = 7990434835781817954L;
+    private static final long serialVersionUID = 1L;
 }
