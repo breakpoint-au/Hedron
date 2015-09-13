@@ -966,7 +966,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("            return m_description;%n");
                 pw.printf ("        }%n");
                 pw.printf ("%n");
-                pw.printf ("        public %s of (final int value)%n", enumName);
+                pw.printf ("        public static %s of (final int value)%n", enumName);
                 pw.printf ("        {%n");
                 pw.printf ("            %s e = null;%n", enumName);
                 pw.printf ("%n");
