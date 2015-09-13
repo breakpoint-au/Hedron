@@ -881,6 +881,17 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     pw.printf ("    };%n");
                 }
+                //
+                //    pw.printf ("%n");
+                //    pw.printf ("    // Enumeration description string lookup methods.%n");
+                //    for (final DbEnum en : m_enums)
+                //    {
+                //        final String symbol = en.getName ();
+                //        pw.printf ("    public static String getString_%s (final int enumValue)%n", symbol);
+                //        pw.printf ("    {%n");
+                //        pw.printf ("        return ENUM_DESCRIPTIONS_%s[enumValue];%n", symbol);
+                //        pw.printf ("    }%n%n");
+                //    }
             }
 
             pw.printf ("}%n");
@@ -922,23 +933,27 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("    public static enum %s%n", enumName);
                 pw.printf ("    {%n");
                 pw.printf ("        ");
-
-                int j = 0;
-                for (final EnumValue e : en.getEnumValues ())
+                if (true)
                 {
-                    if (j++ > 0)
+                    int j = 0;
+                    for (final EnumValue e : en.getEnumValues ())
                     {
-                        pw.printf (",%n");
-                        pw.printf ("        ");
+                        if (j > 0)
+                        {
+                            pw.printf (",%n");
+                            pw.printf ("        ");
+                        }
+                        final String symbol = stringToSymbol (e.getTitle ());
+                        pw.printf ("%s (%s, Definitions.ENUM_DESCRIPTIONS_%s[%s])", symbol, e.getValue (), enumName, j);
+                        j++;
                     }
-                    final String symbol = stringToSymbol (e.getTitle ());
-                    pw.printf ("%s (%s)", symbol, e.getValue ());
                 }
                 pw.printf (";%n");
                 pw.printf ("%n");
-                pw.printf ("        private %s (int value)%n", enumName);
+                pw.printf ("        private %s (final int value, final String description)%n", enumName);
                 pw.printf ("        {%n");
                 pw.printf ("            m_value = value;%n");
+                pw.printf ("            m_description = description;%n");
                 pw.printf ("        }%n");
                 pw.printf ("%n");
                 pw.printf ("        public int getValue ()%n");
@@ -946,7 +961,47 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("            return m_value;%n");
                 pw.printf ("        }%n");
                 pw.printf ("%n");
+                pw.printf ("        public String getDescription ()%n");
+                pw.printf ("        {%n");
+                pw.printf ("            return m_description;%n");
+                pw.printf ("        }%n");
+                pw.printf ("%n");
+                pw.printf ("        public %s of (final int value)%n", enumName);
+                pw.printf ("        {%n");
+                pw.printf ("            %s e = null;%n", enumName);
+                pw.printf ("%n");
+                pw.printf ("            switch (value)%n");
+                pw.printf ("            {%n");
+                if (true)
+                {
+                    int j = 0;
+                    for (final EnumValue e : en.getEnumValues ())
+                    {
+                        if (j > 0)
+                        {
+                            pw.printf ("%n");
+                        }
+                        final String symbol = stringToSymbol (e.getTitle ());
+                        pw.printf ("                case %s:%n", e.getValue ());
+                        pw.printf ("                {%n");
+                        pw.printf ("                    e = %s;%n", symbol);
+                        pw.printf ("                    break;%n");
+                        pw.printf ("                }%n");
+                        j++;
+                    }
+                }
+                pw.printf ("%n");
+                pw.printf ("                default:%n");
+                pw.printf ("                {%n");
+                pw.printf ("                    break;%n");
+                pw.printf ("                }%n");
+                pw.printf ("            }%n");
+                pw.printf ("%n");
+                pw.printf ("            return e;%n");
+                pw.printf ("        }%n");
+                pw.printf ("%n");
                 pw.printf ("        private final int m_value;%n");
+                pw.printf ("        private final String m_description;%n");
                 pw.printf ("    }%n");
             }
 
