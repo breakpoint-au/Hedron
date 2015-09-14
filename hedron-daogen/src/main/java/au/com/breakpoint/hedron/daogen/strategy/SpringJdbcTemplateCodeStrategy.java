@@ -165,9 +165,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     case Duplicate:
                     {
-                        pw.printf (
-                            "        m_column%s = au.com.breakpoint.hedron.core.HcUtil.duplicate (rhs.m_column%s);%n",
-                            columnName, columnName);
+                        pw.addClassImport ("au.com.breakpoint.hedron.core.HcUtil");
+                        pw.printf ("        m_column%s = HcUtil.duplicate (rhs.m_column%s);%n", columnName, columnName);
                         break;
                     }
 
@@ -241,7 +240,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         pw.printf ("        {%n");
                         if (jti.m_minValue < Long.MAX_VALUE)
                         {
-                            pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+                            addClassImportThreadContext (pw);
                             pw.printf (
                                 "            ThreadContext.assertError (column%s >= MinValue%s, \"Column %s.%s value %%s cannot be less than %%s\", column%s, MinValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
@@ -249,7 +248,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         }
                         if (jti.m_maxValue > Long.MIN_VALUE)
                         {
-                            pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+                            addClassImportThreadContext (pw);
                             pw.printf (
                                 "            ThreadContext.assertError (column%s <= MaxValue%s, \"Column %s.%s value %%s cannot be greater than %%s\", column%s, MaxValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
@@ -257,7 +256,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         }
                         if (jti.m_size > -1)
                         {
-                            pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+                            addClassImportThreadContext (pw);
                             pw.printf (
                                 "            ThreadContext.assertError (column%s.length () <= Size%s, \"Column %s.%s value [%%s] cannot be longer than %%s characters\", column%s, Size%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
@@ -269,14 +268,14 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     {
                         if (jti.m_nonPrimitiveTypeJavaLangType)
                         {
-                            pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+                            addClassImportThreadContext (pw);
                             pw.printf (
                                 "        ThreadContext.assertError (column%s != null, \"Column %s.%s value is classified as 'mandatory'; it cannot be null\");%n",
                                 columnName, c.getParent ().getEntityName (), columnName);
                         }
                         if (jti.m_minValue < Long.MAX_VALUE)
                         {
-                            pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+                            addClassImportThreadContext (pw);
                             pw.printf (
                                 "        ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s >= MinValue%s, \"Column %s.%s value %%s cannot be less than %%s\", column%s, MinValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
@@ -284,7 +283,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         }
                         if (jti.m_maxValue > Long.MIN_VALUE)
                         {
-                            pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+                            addClassImportThreadContext (pw);
                             pw.printf (
                                 "        ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s <= MaxValue%s, \"Column %s.%s value %%s cannot be greater than %%s\", column%s, MaxValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
@@ -292,7 +291,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         }
                         if (jti.m_size > -1)
                         {
-                            pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+                            addClassImportThreadContext (pw);
                             pw.printf (
                                 "        ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s.length () <= Size%s, \"Column %s.%s value [%%s] cannot be longer than %%s characters\", column%s, Size%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
@@ -836,6 +835,11 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         return GenericFactory.newArrayList ();
     }
 
+    private void addClassImportThreadContext (final SmartFileJavaClass pw)
+    {
+        pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+    }
+
     private void generateColumnValueCode (final SmartFile pw, final List<Column> columns)
     {
         int i = 0;
@@ -1344,7 +1348,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                     pw.printf (
                         "        final int updateCount = DaoUtil.performInsert (m_dataSource, e, SQL_INSERT);%n");
-                    pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+                    addClassImportThreadContext (pw);
                     pw.printf ("        ThreadContext.assertError (updateCount == 1, \"%sDao insert failed\");%n",
                         entityName);
                 }
