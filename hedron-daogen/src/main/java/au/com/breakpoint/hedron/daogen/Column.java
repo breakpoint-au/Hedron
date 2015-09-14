@@ -41,6 +41,11 @@ public class Column
         return m_columnAttributes;
     }
 
+    public String getEnumName ()
+    {
+        return m_enumName;
+    }
+
     public String getName ()
     {
         return m_name;
@@ -108,6 +113,7 @@ public class Column
         m_physicalName = attributeSet.getAttributeString ("physicalname", null);
         m_requirement = attributeSet.getAttributeEnum ("requirement", m_requirementEnumStrings, Requirement.MANDATORY);
         m_identity = attributeSet.getAttributeBoolean ("identity", false);
+        m_enumName = attributeSet.getAttributeString ("enumname", null);
 
         ThreadContext.assertError (m_name != null, "<column> must have a 'name' attribute");
         if (m_physicalName == null)
@@ -136,6 +142,18 @@ public class Column
         return e -> e.getName ().equals (columnName);
     }
 
+    public static String[] getRequirementdescription ()
+    {
+        return m_requirementDescription;
+    }
+
+    public static EnumString[] getRequirementenumstrings ()
+    {
+        return m_requirementEnumStrings;
+    }
+
+    private String m_enumName;
+
     private ColumnAttributes m_columnAttributes = new ColumnAttributes ();
 
     private boolean m_identity;
@@ -149,8 +167,10 @@ public class Column
     private int m_requirement;
 
     private static final String[] m_requirementDescription =
-    {
-            "primary key", "non-nullable", "nullable"
+        {
+                "primary key",
+                "non-nullable",
+                "nullable"
     };
 
     private static final EnumString[] m_requirementEnumStrings = new EnumString[]

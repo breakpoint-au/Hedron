@@ -197,6 +197,18 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     pw.printf ("    {%n");
                     pw.printf ("        return Optional.ofNullable (m_column%s);%n", columnName);
                     pw.printf ("    }%n");
+
+                    final String enumName = c.getEnumName ();
+                    if (enumName != null)
+                    {
+                        pw.addClassImport ("%s.Enums", outputPackage);
+                        pw.printf ("%n");
+                        pw.printf ("    public static final Optional<Enums.%s> get%sEnum (final %s e)%n", enumName,
+                            columnName, entityName);
+                        pw.printf ("    {%n");
+                        pw.printf ("        return e.get%s ().map (Enums.%s::of);%n", columnName, enumName);
+                        pw.printf ("    }%n");
+                    }
                 }
                 else
                 {
@@ -204,6 +216,18 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     pw.printf ("    {%n");
                     pw.printf ("        return m_column%s;%n", columnName);
                     pw.printf ("    }%n");
+
+                    final String enumName = c.getEnumName ();
+                    if (enumName != null)
+                    {
+                        pw.addClassImport ("%s.Enums", outputPackage);
+                        pw.printf ("%n");
+                        pw.printf ("    public static final Enums.%s get%sEnum (final %s e)%n", enumName, columnName,
+                            entityName);
+                        pw.printf ("    {%n");
+                        pw.printf ("        return Enums.%s.of (e.get%s ());%n", enumName, columnName);
+                        pw.printf ("    }%n");
+                    }
                 }
                 pw.printf ("%n");
                 pw.printf ("    public void set%s (final %s column%s)%n", columnName, jti.m_javaType, columnName);
