@@ -1,6 +1,7 @@
 package au.com.breakpoint.hedron.core.dao.sample.dao;
 
 import java.sql.Timestamp;
+import java.util.Optional;
 import au.com.breakpoint.hedron.core.dao.BaseEntity;
 import au.com.breakpoint.hedron.core.dao.IColumnIndex;
 import au.com.breakpoint.hedron.core.dao.IEntity;
@@ -83,12 +84,12 @@ public class BlackList extends BaseEntity<String>
             {
                 values = new Object[]
                 {
-                        getAvcId (),
-                        getDateRequested (),
-                        getReason (),
-                        getOperatorId (),
-                        getReferenceId (),
-                        getActionId ()
+                        m_columnAvcId,
+                        m_columnDateRequested,
+                        m_columnReason,
+                        m_columnOperatorId,
+                        m_columnReferenceId,
+                        m_columnActionId
                 };
                 break;
             }
@@ -97,7 +98,7 @@ public class BlackList extends BaseEntity<String>
             {
                 values = new Object[]
                 {
-                        getAvcId ()
+                        m_columnAvcId
                 };
                 break;
             }
@@ -106,11 +107,11 @@ public class BlackList extends BaseEntity<String>
             {
                 values = new Object[]
                 {
-                        getDateRequested (),
-                        getReason (),
-                        getOperatorId (),
-                        getReferenceId (),
-                        getActionId ()
+                        m_columnDateRequested,
+                        m_columnReason,
+                        m_columnOperatorId,
+                        m_columnReferenceId,
+                        m_columnActionId
                 };
                 break;
             }
@@ -157,9 +158,9 @@ public class BlackList extends BaseEntity<String>
     /**
      * Column ReferenceId accessors.
      */
-    public String getReferenceId ()
+    public Optional<String> getReferenceId ()
     {
-        return m_columnReferenceId;
+        return Optional.ofNullable (m_columnReferenceId);
     }
 
     public void setActionId (final int columnActionId)
@@ -215,7 +216,6 @@ public class BlackList extends BaseEntity<String>
         m_columnReferenceId = columnReferenceId;
     }
 
-    /** Logical identifiers for the columns, used in WhereElement, SetElement, etc */
     public static enum Column implements IColumnIndex<BlackList>
     {
         AvcId (ColumnAvcId),
@@ -239,6 +239,11 @@ public class BlackList extends BaseEntity<String>
         private final int m_index;
     }
 
+    public static final Enums.AvcAction getActionIdEnum (final BlackList e)
+    {
+        return Enums.AvcAction.of (e.getActionId ());
+    }
+
     private String m_columnAvcId; // primary key
 
     private Timestamp m_columnDateRequested; // non-nullable
@@ -251,6 +256,7 @@ public class BlackList extends BaseEntity<String>
 
     private int m_columnActionId; // non-nullable
 
+    /** Logical identifiers for the columns, used in WhereElement, SetElement, etc */
     public static final int ColumnAvcId = 0;
 
     public static final int ColumnDateRequested = 1;
