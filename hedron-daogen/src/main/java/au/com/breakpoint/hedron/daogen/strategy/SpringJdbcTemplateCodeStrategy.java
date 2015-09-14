@@ -190,10 +190,21 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("    /**%n");
                 pw.printf ("     * Column %s accessors.%n", columnName);
                 pw.printf ("     */%n");
-                pw.printf ("    public %s get%s ()%n", jti.m_javaType, columnName);
-                pw.printf ("    {%n");
-                pw.printf ("        return m_column%s;%n", columnName);
-                pw.printf ("    }%n");
+                if (c.isNullable ())
+                {
+                    pw.addClassImport ("java.util.Optional");
+                    pw.printf ("    public Optional<%s> get%s ()%n", jti.m_javaType, columnName);
+                    pw.printf ("    {%n");
+                    pw.printf ("        return Optional.ofNullable (m_column%s);%n", columnName);
+                    pw.printf ("    }%n");
+                }
+                else
+                {
+                    pw.printf ("    public %s get%s ()%n", jti.m_javaType, columnName);
+                    pw.printf ("    {%n");
+                    pw.printf ("        return m_column%s;%n", columnName);
+                    pw.printf ("    }%n");
+                }
                 pw.printf ("%n");
                 pw.printf ("    public void set%s (final %s column%s)%n", columnName, jti.m_javaType, columnName);
                 pw.printf ("    {%n");
@@ -257,6 +268,11 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                                 columnName);
                         }
                     }
+                    //                    public Enums.AvcAction getActionIdEnum ()
+                    //                    {
+                    //                        return Enums.AvcAction.of (m_columnActionId);
+                    //                    }
+
                 }
                 pw.printf ("        m_column%s = column%s;%n", columnName, columnName);
                 pw.printf ("    }%n");
