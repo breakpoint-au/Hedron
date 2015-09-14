@@ -834,8 +834,18 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         int i = 0;
         for (final Column c : columns)
         {
+            pw.printf ("                    ");
+
             final String columnName = c.getName ();
-            pw.printf ("                    get%s ()%s%n", columnName, i == columns.size () - 1 ? "" : ",");
+            if (c.isNullable ())
+            {
+                pw.printf ("get%s ().orElse (null)", columnName);
+            }
+            else
+            {
+                pw.printf ("get%s ()", columnName);
+            }
+            pw.printf ("%s%n", i == columns.size () - 1 ? "" : ",");
             ++i;
         }
     }
