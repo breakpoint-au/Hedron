@@ -65,6 +65,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             cv.getParameters (), "Custom");
     }
 
+    // TODO _ dao with just U capability doesn't compile
+
     @Override
     public List<String> generateDao (final DbEnum en, final Schema schema)
     {
@@ -107,6 +109,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
             pw.addClassImport ("au.com.breakpoint.hedron.core.dao.IEntity");
             pw.addClassImport ("au.com.breakpoint.hedron.core.dao.BaseEntity");
+            pw.addClassImport ("au.com.breakpoint.hedron.core.dao.IColumnIndex");
             if (pk != null && pk.getColumns ().size () > 1)
             {
                 pw.addClassImport ("au.com.breakpoint.hedron.core.Tuple");
@@ -187,10 +190,45 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("    /**%n");
                 pw.printf ("     * Column %s accessors.%n", columnName);
                 pw.printf ("     */%n");
-                pw.printf ("    public %s get%s ()%n", jti.m_javaType, columnName);
-                pw.printf ("    {%n");
-                pw.printf ("        return m_column%s;%n", columnName);
-                pw.printf ("    }%n");
+                if (c.isNullable ())
+                {
+                    pw.addClassImport ("java.util.Optional");
+                    pw.printf ("    public Optional<%s> get%s ()%n", jti.m_javaType, columnName);
+                    pw.printf ("    {%n");
+                    pw.printf ("        return Optional.ofNullable (m_column%s);%n", columnName);
+                    pw.printf ("    }%n");
+
+                    final String enumName = c.getEnumName ();
+                    if (enumName != null)
+                    {
+                        pw.addClassImport ("%s.Enums", outputPackage);
+                        pw.printf ("%n");
+                        pw.printf ("    public static final Optional<Enums.%s> get%sEnum (final %s e)%n", enumName,
+                            columnName, entityName);
+                        pw.printf ("    {%n");
+                        pw.printf ("        return e.get%s ().map (Enums.%s::of);%n", columnName, enumName);
+                        pw.printf ("    }%n");
+                    }
+                }
+                else
+                {
+                    pw.printf ("    public %s get%s ()%n", jti.m_javaType, columnName);
+                    pw.printf ("    {%n");
+                    pw.printf ("        return m_column%s;%n", columnName);
+                    pw.printf ("    }%n");
+
+                    final String enumName = c.getEnumName ();
+                    if (enumName != null)
+                    {
+                        pw.addClassImport ("%s.Enums", outputPackage);
+                        pw.printf ("%n");
+                        pw.printf ("    public static final Enums.%s get%sEnum (final %s e)%n", enumName, columnName,
+                            entityName);
+                        pw.printf ("    {%n");
+                        pw.printf ("        return Enums.%s.of (e.get%s ());%n", enumName, columnName);
+                        pw.printf ("    }%n");
+                    }
+                }
                 pw.printf ("%n");
                 pw.printf ("    public void set%s (final %s column%s)%n", columnName, jti.m_javaType, columnName);
                 pw.printf ("    {%n");
@@ -254,6 +292,11 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                                 columnName);
                         }
                     }
+                    //                    public Enums.AvcAction getActionIdEnum ()
+                    //                    {
+                    //                        return Enums.AvcAction.of (m_columnActionId);
+                    //                    }
+
                 }
                 pw.printf ("        m_column%s = column%s;%n", columnName, columnName);
                 pw.printf ("    }%n");
@@ -340,7 +383,19 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
             pw.printf ("%n");
             pw.printf ("    /** Logical identifiers for the columns, used in WhereElement, SetElement, etc */%n");
-            pw.printf ("    public static class Columns%n");
+            if (true)
+            {
+                int i = 0;
+                for (final Column c : columns)
+                {
+                    final String columnName = c.getName ();
+                    pw.printf ("    public static final int Column%s = %s;%n", columnName, i);
+                    ++i;
+                }
+            }
+            pw.printf ("%n");
+
+            pw.printf ("    public static enum Column implements IColumnIndex<%s>%n", entityName);
             pw.printf ("    {%n");
             if (true)
             {
@@ -348,11 +403,26 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 for (final Column c : columns)
                 {
                     final String columnName = c.getName ();
-                    pw.printf ("        public static final int %s = %d;%n", columnName, i);
+                    pw.printf ("        %s (Column%s)%s%n", columnName, columnName,
+                        i < columns.size () - 1 ? "," : ";");
                     ++i;
                 }
             }
+            pw.printf ("%n");
+            pw.printf ("        private Column (final int index)%n");
+            pw.printf ("        {%n");
+            pw.printf ("            m_index = index;%n");
+            pw.printf ("        }%n");
+            pw.printf ("%n");
+            pw.printf ("        @Override%n");
+            pw.printf ("        public int getColumnIndex ()%n");
+            pw.printf ("        {%n");
+            pw.printf ("            return m_index;%n");
+            pw.printf ("        }%n");
+            pw.printf ("%n");
+            pw.printf ("        private final int m_index;%n");
             pw.printf ("    }%n");
+
             for (final Column c : columns)
             {
                 final String columnName = c.getName ();
@@ -764,8 +834,18 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         int i = 0;
         for (final Column c : columns)
         {
+            pw.printf ("                    ");
+
             final String columnName = c.getName ();
-            pw.printf ("                    get%s ()%s%n", columnName, i == columns.size () - 1 ? "" : ",");
+            if (c.isNullable ())
+            {
+                pw.printf ("get%s ().orElse (null)", columnName);
+            }
+            else
+            {
+                pw.printf ("get%s ()", columnName);
+            }
+            pw.printf ("%s%n", i == columns.size () - 1 ? "" : ",");
             ++i;
         }
     }
@@ -851,6 +931,17 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     pw.printf ("    };%n");
                 }
+                //
+                //    pw.printf ("%n");
+                //    pw.printf ("    // Enumeration description string lookup methods.%n");
+                //    for (final DbEnum en : m_enums)
+                //    {
+                //        final String symbol = en.getName ();
+                //        pw.printf ("    public static String getString_%s (final int enumValue)%n", symbol);
+                //        pw.printf ("    {%n");
+                //        pw.printf ("        return ENUM_DESCRIPTIONS_%s[enumValue];%n", symbol);
+                //        pw.printf ("    }%n%n");
+                //    }
             }
 
             pw.printf ("}%n");
@@ -892,23 +983,27 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("    public static enum %s%n", enumName);
                 pw.printf ("    {%n");
                 pw.printf ("        ");
-
-                int j = 0;
-                for (final EnumValue e : en.getEnumValues ())
+                if (true)
                 {
-                    if (j++ > 0)
+                    int j = 0;
+                    for (final EnumValue e : en.getEnumValues ())
                     {
-                        pw.printf (",%n");
-                        pw.printf ("        ");
+                        if (j > 0)
+                        {
+                            pw.printf (",%n");
+                            pw.printf ("        ");
+                        }
+                        final String symbol = stringToSymbol (e.getTitle ());
+                        pw.printf ("%s (%s, Definitions.ENUM_DESCRIPTIONS_%s[%s])", symbol, e.getValue (), enumName, j);
+                        j++;
                     }
-                    final String symbol = stringToSymbol (e.getTitle ());
-                    pw.printf ("%s (%s)", symbol, e.getValue ());
                 }
                 pw.printf (";%n");
                 pw.printf ("%n");
-                pw.printf ("        private %s (int value)%n", enumName);
+                pw.printf ("        private %s (final int value, final String description)%n", enumName);
                 pw.printf ("        {%n");
                 pw.printf ("            m_value = value;%n");
+                pw.printf ("            m_description = description;%n");
                 pw.printf ("        }%n");
                 pw.printf ("%n");
                 pw.printf ("        public int getValue ()%n");
@@ -916,7 +1011,47 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("            return m_value;%n");
                 pw.printf ("        }%n");
                 pw.printf ("%n");
+                pw.printf ("        public String getDescription ()%n");
+                pw.printf ("        {%n");
+                pw.printf ("            return m_description;%n");
+                pw.printf ("        }%n");
+                pw.printf ("%n");
+                pw.printf ("        public static %s of (final int value)%n", enumName);
+                pw.printf ("        {%n");
+                pw.printf ("            %s e = null;%n", enumName);
+                pw.printf ("%n");
+                pw.printf ("            switch (value)%n");
+                pw.printf ("            {%n");
+                if (true)
+                {
+                    int j = 0;
+                    for (final EnumValue e : en.getEnumValues ())
+                    {
+                        if (j > 0)
+                        {
+                            pw.printf ("%n");
+                        }
+                        final String symbol = stringToSymbol (e.getTitle ());
+                        pw.printf ("                case %s:%n", e.getValue ());
+                        pw.printf ("                {%n");
+                        pw.printf ("                    e = %s;%n", symbol);
+                        pw.printf ("                    break;%n");
+                        pw.printf ("                }%n");
+                        j++;
+                    }
+                }
+                pw.printf ("%n");
+                pw.printf ("                default:%n");
+                pw.printf ("                {%n");
+                pw.printf ("                    break;%n");
+                pw.printf ("                }%n");
+                pw.printf ("            }%n");
+                pw.printf ("%n");
+                pw.printf ("            return e;%n");
+                pw.printf ("        }%n");
+                pw.printf ("%n");
                 pw.printf ("        private final int m_value;%n");
+                pw.printf ("        private final String m_description;%n");
                 pw.printf ("    }%n");
             }
 
@@ -1009,7 +1144,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 {
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.WhereElement");
-                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.FetchSql");
+                    //pw.addClassImport ("au.com.breakpoint.hedron.core.dao.FetchSql");
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.OrderByElement");
                     pw.addClassImport ("java.util.List");
 
@@ -1050,22 +1185,22 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         "        return DaoUtil.performFetch (m_dataSource, %sDao.ROW_MAPPER, SQL_FRAGMENT_SELECT_FROM, COLUMN_NAMES, whereElements, orderByElements);%n",
                         entityName);
                     pw.printf ("    }%n");
-                    pw.printf ("%n");
-                    pw.printf ("    /**%n");
-                    pw.printf (
-                        "     * Fetches the rows of the %s relation that satisfy the criteria in the <i>whereElements</i> parameter.%n",
-                        entityPhysicalName);
-                    pw.printf ("     * %n");
-                    pw.printf ("     * @param sql%n");
-                    pw.printf (
-                        "     *     A convenient readable encapsulation of sql where clauses and order by statements.%n");
-                    pw.printf ("     * %n");
-                    pw.printf ("     * @return Collection of %s entities%n", entityName);
-                    pw.printf ("     */%n");
-                    pw.printf ("    public List<%s> fetch (final FetchSql sql)%n", entityName);
-                    pw.printf ("    {%n");
-                    pw.printf ("        return fetch (sql.getWhereElements (), sql.getOrderByElements ());%n");
-                    pw.printf ("    }%n");
+                    //                    pw.printf ("%n");
+                    //                    pw.printf ("    /**%n");
+                    //                    pw.printf (
+                    //                        "     * Fetches the rows of the %s relation that satisfy the criteria in the <i>whereElements</i> parameter.%n",
+                    //                        entityPhysicalName);
+                    //                    pw.printf ("     * %n");
+                    //                    pw.printf ("     * @param sql%n");
+                    //                    pw.printf (
+                    //                        "     *     A convenient readable encapsulation of sql where clauses and order by statements.%n");
+                    //                    pw.printf ("     * %n");
+                    //                    pw.printf ("     * @return Collection of %s entities%n", entityName);
+                    //                    pw.printf ("     */%n");
+                    //                    pw.printf ("    public List<%s> fetch (final FetchSql<%s> sql)%n", entityName, entityName);
+                    //                    pw.printf ("    {%n");
+                    //                    pw.printf ("        return fetch (sql.getWhereElements (), sql.getOrderByElements ());%n");
+                    //                    pw.printf ("    }%n");
                 }
                 else
                 {
@@ -1212,7 +1347,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     for (final Column c : nonIdentityColumns)
                     {
                         final String columnName = c.getName ();
-                        pw.printf ("        columnValues.put (COLUMN_NAMES[%s.Columns.%s], e.get%s ());%n", entityName,
+                        pw.printf ("        columnValues.put (COLUMN_NAMES[%s.Column%s], e.get%s ());%n", entityName,
                             columnName, columnName);
                     }
                     pw.printf ("    %n");
@@ -1268,29 +1403,30 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("     */%n");
                 pw.printf ("    @Override%n");
                 pw.addClassImport ("au.com.breakpoint.hedron.core.dao.SetElement");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.WhereElement");
                 pw.printf (
                     "    public int update (final SetElement[] newValues, final WhereElement[] whereElements)%n");
                 pw.printf ("    {%n");
                 pw.printf (
                     "        return DaoUtil.performUpdate (m_dataSource, ENTITY_NAME, COLUMN_NAMES, newValues, whereElements);%n");
                 pw.printf ("    }%n");
-                pw.printf ("%n");
-                pw.printf ("    /**%n");
-                pw.printf (
-                    "     * Updates the %s table columns specified by newValues according to the criteria in whereElements.%n",
-                    entityPhysicalName);
-                pw.printf ("     * %n");
-                pw.printf ("     * @param sql%n");
-                pw.printf (
-                    "     *     A convenient readable encapsulation of update set statements and where clauses.%n");
-                pw.printf ("     * %n");
-                pw.printf ("     * @return the numbers of rows affected by the update%n");
-                pw.printf ("     */%n");
-                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.UpdateSql");
-                pw.printf ("    public int update (final UpdateSql sql)%n");
-                pw.printf ("    {%n");
-                pw.printf ("        return update (sql.getSetElements (), sql.getWhereElements ());%n");
-                pw.printf ("    }%n");
+                //                pw.printf ("%n");
+                //                pw.printf ("    /**%n");
+                //                pw.printf (
+                //                    "     * Updates the %s table columns specified by newValues according to the criteria in whereElements.%n",
+                //                    entityPhysicalName);
+                //                pw.printf ("     * %n");
+                //                pw.printf ("     * @param sql%n");
+                //                pw.printf (
+                //                    "     *     A convenient readable encapsulation of update set statements and where clauses.%n");
+                //                pw.printf ("     * %n");
+                //                pw.printf ("     * @return the numbers of rows affected by the update%n");
+                //                pw.printf ("     */%n");
+                //                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.UpdateSql");
+                //                pw.printf ("    public int update (final UpdateSql<%s> sql)%n", entityName);
+                //                pw.printf ("    {%n");
+                //                pw.printf ("        return update (sql.getSetElements (), sql.getWhereElements ());%n");
+                //                pw.printf ("    }%n");
                 if (pk != null)
                 {
                     pw.printf ("%n");
@@ -1828,7 +1964,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
     }
 
     final Function<E3<String, String, String>, String> m_accessorDefaultFormatter =
-        e3 -> String.format ("rs.%s (COLUMN_NAMES[%s.Columns.%s])", e3.getE0 (), e3.getE1 (), e3.getE2 ());
+        e3 -> String.format ("rs.%s (COLUMN_NAMES[%s.Column%s])", e3.getE0 (), e3.getE1 (), e3.getE2 ());
 
     private final List<Attribute> m_attributes = Collections.synchronizedList (new ArrayList<Attribute> ());// accumulated during output of entities
 

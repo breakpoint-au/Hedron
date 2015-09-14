@@ -19,7 +19,7 @@ package au.com.breakpoint.hedron.core.dao;
 import javax.sql.DataSource;
 
 /**
- * Base class containing 'not implemented' versions of the IEntityDao methods.
+ * Base class containing the data source for the IEntityDao methods.
  *
  * @param <TEntity>
  *            Type of the entity.

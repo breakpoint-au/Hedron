@@ -217,7 +217,7 @@ public class EntityUtil
                 jti.m_nonPrimitiveTypeJavaLangType = true;
                 jti.m_jdbcType = "String";
                 jti.m_jdbcResultSetAccessorFormatter = e3 -> String
-                    .format ("DaoUtil.getClobAsString (rs, COLUMN_NAMES[%s.Columns.%s])", e3.getE1 (), e3.getE2 ());
+                    .format ("DaoUtil.getClobAsString (rs, COLUMN_NAMES[%s.Column%s])", e3.getE1 (), e3.getE2 ());
                 jti.m_importsResultSetAccessorFormatter.add ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                 setJavaSqlType (jti, "CLOB");
                 jti.m_javaCastExpression = "(String)";
@@ -429,7 +429,7 @@ public class EntityUtil
         final StringBuilder sb = new StringBuilder ();
 
         final String formatString =
-            accessAsEntity ? "new %s (%s.Columns.%s, e.get%s ())" : "new %s (%s.Columns.%s, column%s)";
+            accessAsEntity ? "new %s (%s.Column%s, e.get%s ())" : "new %s (%s.Column%s, column%s)";
 
         int i = 0;
         for (final Column c : columns)
@@ -617,8 +617,8 @@ public class EntityUtil
             final String columnName = c.getName ();
 
             final String s = String.format (getValueFormatString, columnName);
-            sb.append (String.format ("%n            %s (%s.Columns.%s).set (%s)",
-                i == 0 ? "new UpdateSql" : "    .and", entityName, columnName, s));
+            sb.append (String.format ("%n            %s (%s.Column%s).set (%s)", i == 0 ? "new UpdateSql" : "    .and",
+                entityName, columnName, s));
             ++i;
         }
 
@@ -629,7 +629,7 @@ public class EntityUtil
             final String columnName = c.getName ();
 
             final String s = String.format (getValueFormatString, columnName);
-            sb.append (String.format ("%n            %s (%s.Columns.%s).equal (%s)", i == 0 ? ".where" : "    .and",
+            sb.append (String.format ("%n            %s (%s.Column%s).equal (%s)", i == 0 ? ".where" : "    .and",
                 entityName, columnName, s));
             ++i;
         }
@@ -638,7 +638,7 @@ public class EntityUtil
         {
             final String name = optimisticLockColumn.getName ();
             final String s = String.format ("column%s", name);
-            sb.append (String.format ("%n            %s (%s.Columns.%s).equal (%s)", i == 0 ? ".where" : "    .and",
+            sb.append (String.format ("%n            %s (%s.Column%s).equal (%s)", i == 0 ? ".where" : "    .and",
                 entityName, name, s));
             ++i;
         }

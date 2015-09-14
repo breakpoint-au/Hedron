@@ -77,6 +77,22 @@ public interface IEntityDao<TEntity extends IEntity<TPrimaryKey>, TPrimaryKey>
     }
 
     /**
+     * Deletes rows from the entity table according to the criteria in whereElements.
+     *
+     * @param whereElements
+     *            Specified criteria to be added into the where clause. These result in
+     *            SQL 'and' clauses. There is currently no way to directly express 'or'
+     *            clauses, or more complex expressions. Use a custom query or stored
+     *            procedure instead.
+     *
+     * @return whether or not a row was affected by the delete
+     */
+    default int delete (final WhereSql<TEntity> sql)
+    {
+        return delete (sql.getWhereElements ());
+    }
+
+    /**
      * Deletes the entity table row corresponding to the specified primary key.
      *
      * @return whether or not a row was affected by the delete
@@ -86,6 +102,21 @@ public interface IEntityDao<TEntity extends IEntity<TPrimaryKey>, TPrimaryKey>
         ThreadContext.assertError (false, "deleteByPrimaryKey () is not implemented for class [%s]",
             getClass ().getCanonicalName ());
         return false;
+    }
+
+    /**
+     * Fetches the rows of the BLACK_LIST relation that satisfy the criteria in the
+     * <i>whereElements</i> parameter.
+     *
+     * @param sql
+     *            A convenient readable encapsulation of sql where clauses and order by
+     *            statements.
+     *
+     * @return Collection of TEntity entities
+     */
+    default List<TEntity> fetch (final FetchSql<TEntity> sql)
+    {
+        return fetch (sql.getWhereElements (), sql.getOrderByElements ());
     }
 
     /**
@@ -223,5 +254,20 @@ public interface IEntityDao<TEntity extends IEntity<TPrimaryKey>, TPrimaryKey>
         ThreadContext.assertError (false, "update () is not implemented for class [%s]",
             getClass ().getCanonicalName ());
         return false;
+    }
+
+    /**
+     * Updates the BLACK_LIST table columns specified by newValues according to the
+     * criteria in whereElements.
+     *
+     * @param sql
+     *            A convenient readable encapsulation of update set statements and where
+     *            clauses.
+     *
+     * @return the numbers of rows affected by the update
+     */
+    default int update (final UpdateSql<TEntity> sql)
+    {
+        return update (sql.getSetElements (), sql.getWhereElements ());
     }
 }
