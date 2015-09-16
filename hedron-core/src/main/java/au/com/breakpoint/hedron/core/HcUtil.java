@@ -1283,7 +1283,7 @@ public class HcUtil
      *            class of the exception being checked for
      * @return the instance of the specified exception, or null
      */
-    public static Throwable getCause (Throwable e, final Class<? extends Throwable> targetClass)
+    public static <T extends Throwable> T getCause (Throwable e, final Class<? extends T> targetClass)
     {
         Throwable target = null;
 
@@ -1297,7 +1297,7 @@ public class HcUtil
             }
         }
 
-        return target;
+        return uncheckedCast (target);
     }
 
     /**
@@ -1310,7 +1310,7 @@ public class HcUtil
      *            class of the exception being checked for
      * @return the instance of the specified exception, or null
      */
-    public static Throwable getCauseAllowSubclass (Throwable e, final Class<? extends Throwable> targetClass)
+    public static <T extends Throwable> T getCauseAllowSubclass (Throwable e, final Class<? extends T> targetClass)
     {
         Throwable target = null;
 
@@ -1324,7 +1324,7 @@ public class HcUtil
             }
         }
 
-        return target;
+        return uncheckedCast (target);
     }
 
     public static <T> Class<T> getClassObject (final String className)

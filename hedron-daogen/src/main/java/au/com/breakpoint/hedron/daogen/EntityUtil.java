@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.HcUtil;
+import au.com.breakpoint.hedron.core.Tuple.E2;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.daogen.strategy.ColumnTypeInfo;
 
@@ -42,233 +43,22 @@ public class EntityUtil
 
     public static ColumnTypeInfo getColumnTypeInfo (final Column c)
     {
-        final IRelation ir = c.getParent ();
-        ColumnTypeInfo jti = null;
-        String key = null;
-        if (ir != null)
+        ColumnTypeInfo ci = null;
+
+        final IRelation entity = c.getParent ();
+        if (entity == null)
         {
-            final String entityName = ir.getEntityName ();
+            ci = createColumnTypeInfo (c);
+        }
+        else
+        {
+            final String entityName = entity.getName ();
             final String columnName = c.getName ();
-            key = String.format ("%s.%s", entityName, columnName);
-            jti = m_jtiCache.get (key);
+            final E2<String, String> key = E2.of (entityName, columnName);
+
+            ci = m_columnInfoCache.computeIfAbsent (key, k -> createColumnTypeInfo (c));
         }
-
-        if (jti == null)
-        {
-            jti = new ColumnTypeInfo ();
-
-            final String columnType = c.getColumnAttributes ().getType ();
-            if (columnType == null)
-            {
-                ThreadContext.assertInformation (false, "Unknown column type for column[%s]", c.getName ());
-            }
-            else if (columnType.equals ("char"))
-            {
-                final boolean isVarchar = c.getColumnAttributes ().getMode ().equals ("varying");
-                setStringJavaType (isVarchar, c.getColumnAttributes ().getSize (), jti);
-
-            }
-            else if (columnType.equals ("integer"))
-            {
-                setInt (c, jti, Integer.MIN_VALUE);// Integer.MIN_VALUE = no value checking
-            }
-            else if (columnType.equalsIgnoreCase ("number") || columnType.equalsIgnoreCase ("decimal"))
-            {
-                // If no fractional digits, map to byte / int / long if will fit.
-                if (c.getColumnAttributes ().getScale () == 0)
-                {
-                    final int wholeDigits = c.getColumnAttributes ().getPrecision ();// all whole digits
-                    final BigDecimal upperLimitValue =
-                        new BigDecimal (10).pow (wholeDigits).subtract (new BigDecimal (1));
-
-                    // compareTo returns -1, 0 or 1 as this number is less than, equal to, or greater than the arg.
-                    if (upperLimitValue.compareTo (MAX_BYTE) < 0)
-                    {
-                        // Can fit in byte.
-                        jti.m_javaObjectType = "Byte";
-                        jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "byte";
-                        jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                        setHcUtilConversionMethod (jti, "getByteValue");
-                        jti.m_javaTypeOfLimitValue = "byte";
-                        jti.m_jdbcType = "Byte";
-                        jti.m_jdbcResultSetAccessor = "getByte";
-                        setJavaSqlType (jti, "TINYINT");
-                        jti.m_javaCastExpression = "(Byte)";
-                        jti.m_maxValue = upperLimitValue.longValue ();
-                        jti.m_minValue = -jti.m_maxValue;
-                        jti.m_javaTypeConstantSuffix = "";
-                        jti.m_equalityExpression = getEqualsExpression (c);
-                        jti.m_hashCodeExpression = c.isNullable () ? HASHCODE_OBJECT : HASHCODE_ALREADY_INT_COMPATIBLE;
-                        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
-                    }
-                    else if (upperLimitValue.compareTo (MAX_SHORT) < 0)
-                    {
-                        // Can fit in short.
-                        jti.m_javaObjectType = "Short";
-                        jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "short";
-                        jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                        setHcUtilConversionMethod (jti, "getShortValue");
-                        jti.m_javaTypeOfLimitValue = "short";
-                        jti.m_jdbcType = "Short";
-                        jti.m_jdbcResultSetAccessor = "getShort";
-                        setJavaSqlType (jti, "SMALLINT");
-                        jti.m_javaCastExpression = "(Short)";
-                        jti.m_maxValue = upperLimitValue.longValue ();
-                        jti.m_minValue = -jti.m_maxValue;
-                        jti.m_javaTypeConstantSuffix = "";
-                        jti.m_equalityExpression = getEqualsExpression (c);
-                        jti.m_hashCodeExpression = c.isNullable () ? HASHCODE_OBJECT : HASHCODE_ALREADY_INT_COMPATIBLE;
-                        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
-                    }
-                    else if (upperLimitValue.compareTo (MAX_INT) < 0)
-                    {
-                        setInt (c, jti, upperLimitValue.intValue ());
-                    }
-                    else if (upperLimitValue.compareTo (MAX_LONG) < 0)
-                    {
-                        // Can fit in long.
-                        jti.m_javaObjectType = "Long";
-                        jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "long";
-                        jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                        setHcUtilConversionMethod (jti, "getLongValue");
-                        jti.m_javaTypeOfLimitValue = "long";
-                        jti.m_jdbcType = "Long";
-                        jti.m_jdbcResultSetAccessor = "getLong";
-                        setJavaSqlType (jti, "BIGINT");
-                        jti.m_javaCastExpression = "(Long)";
-                        jti.m_maxValue = upperLimitValue.longValue ();
-                        jti.m_minValue = -jti.m_maxValue;
-                        jti.m_javaTypeConstantSuffix = "L";
-                        jti.m_equalityExpression = getEqualsExpression (c);
-                        jti.m_hashCodeExpression =
-                            c.isNullable () ? HASHCODE_OBJECT : "(m_column%s ^ (m_column%s >>> 32))";
-                        //                            c.isNullable () ? HASHCODE_OBJECT : "(int) (m_column%s ^ (m_column%s >>> 32))";
-                        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
-                    }
-                    else
-                    {
-                        setBigDecimal (jti, c);
-                    }
-                }
-                else
-                {
-                    setBigDecimal (jti, c);
-                }
-            }
-            else if (columnType.equalsIgnoreCase ("floatingpoint"))
-            {
-                jti.m_javaObjectType = "Double";
-                jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "double";
-                jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                jti.m_jdbcType = "Double";
-                jti.m_jdbcResultSetAccessor = "getDouble";
-                setJavaSqlType (jti, "DOUBLE");
-                jti.m_javaCastExpression = "(Double)";
-                jti.m_equalityExpression = getEqualsExpression (c);
-                jti.m_hashCodeExpression =
-                    c.isNullable () ? HASHCODE_OBJECT : "(int) Double.doubleToLongBits (m_column%s)";
-                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
-            }
-            else if (columnType.equalsIgnoreCase ("boolean"))
-            {
-                jti.m_javaObjectType = "Boolean";
-                jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "boolean";
-                jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                jti.m_jdbcType = "Boolean";
-                jti.m_jdbcResultSetAccessor = "getBoolean";
-                setJavaSqlType (jti, "BIT");
-                jti.m_javaCastExpression = "(Boolean)";
-                jti.m_equalityExpression = getEqualsExpression (c);
-                jti.m_hashCodeExpression =
-                    c.isNullable () ? HASHCODE_OBJECT : "((m_column%s ? 1 : 0) ^ ((m_column%s ? 1 : 0) >>> 32))";
-                //                c.isNullable () ? HASHCODE_OBJECT : "(int) ((m_column%s ? 1 : 0) ^ ((m_column%s ? 1 : 0) >>> 32))";
-                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
-            }
-            else if (columnType.equalsIgnoreCase ("datetime") || columnType.equalsIgnoreCase ("date"))
-            {
-                // java.sql.Date truncates time component
-                jti.m_javaObjectType = jti.m_javaType = "Timestamp";
-                jti.m_importsJavaType.add ("java.sql.Timestamp");
-                jti.m_nonPrimitiveTypeJavaLangType = true;
-                jti.m_jdbcType = "Timestamp";
-                jti.m_jdbcResultSetAccessor = "getTimestamp";
-                setJavaSqlType (jti, "TIMESTAMP");
-                jti.m_javaCastExpression = "(java.sql.Timestamp)";
-                jti.m_equalityExpression = EQUALS_OBJECT;
-                jti.m_hashCodeExpression = HASHCODE_OBJECT;
-                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.Duplicate;
-            }
-            else if (columnType.equalsIgnoreCase ("blob") || columnType.equalsIgnoreCase ("guid"))
-            {
-                // TODO 4 prove that guid support works
-                jti.m_javaObjectType = jti.m_javaType = "byte[]";
-                jti.m_nonPrimitiveTypeJavaLangType = true;
-                jti.m_jdbcType = "Bytes";
-                jti.m_jdbcResultSetAccessor = "getBytes";
-                setJavaSqlType (jti, "BLOB");
-                jti.m_javaCastExpression = "(byte[])";
-                jti.m_equalityExpression = EQUALS_OBJECT;
-                jti.m_hashCodeExpression = HASHCODE_OBJECT;
-                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.Duplicate;
-            }
-            else if (columnType.equalsIgnoreCase ("clob"))
-            {
-                jti.m_javaObjectType = jti.m_javaType = "String";
-                jti.m_nonPrimitiveTypeJavaLangType = true;
-                jti.m_jdbcType = "String";
-                jti.m_jdbcResultSetAccessorFormatter = e3 -> String
-                    .format ("DaoUtil.getClobAsString (rs, COLUMN_NAMES[%s.Column%s])", e3.getE1 (), e3.getE2 ());
-                jti.m_importsResultSetAccessorFormatter.add ("au.com.breakpoint.hedron.core.dao.DaoUtil");
-                setJavaSqlType (jti, "CLOB");
-                jti.m_javaCastExpression = "(String)";
-                jti.m_size = -1;
-                jti.m_equalityExpression = EQUALS_OBJECT;
-                jti.m_hashCodeExpression = HASHCODE_OBJECT;
-                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;// no size information
-            }
-            else if (columnType.equalsIgnoreCase ("text"))
-            {
-                setStringJavaType (true, -1, jti);// no size information
-            }
-            else if (columnType.equalsIgnoreCase ("oracle-refcursor"))
-            {
-                final String refcursorType = c.getColumnAttributes ().getRefcursorType ();
-                jti.m_javaObjectType = jti.m_javaType = "List<" + refcursorType + ">";
-                jti.m_importsJavaType.add ("java.util.List");
-                jti.m_importsEntityType.add (refcursorType);
-                jti.m_nonPrimitiveTypeJavaLangType = true;
-                jti.m_jdbcType = "TBD";
-                jti.m_jdbcResultSetAccessor = "getTBD";
-                jti.m_jdbcJavaSqlType = "OracleTypes.CURSOR";
-                jti.m_importsJavaSqlType.add ("oracle.jdbc.OracleTypes");
-                jti.m_javaCastExpression = null;// "(" + jti.m_javaType + ")"
-                jti.m_equalityExpression = EQUALS_OBJECT;
-                jti.m_hashCodeExpression = HASHCODE_OBJECT;
-                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.Duplicate;
-                jti.m_rowMapperType = refcursorType;
-            }
-            else
-            {
-                //                ThreadContext.assertError (false, "Unsupported column type [%s] for column[%s].[%s]", columnType, c.getParent ().getName (), c.getName ());
-                if (ir == null)
-                {
-                    ThreadContext.assertWarning (false, "Mapping String for unsupported column type [%s]", columnType);
-                }
-                else
-                {
-                    ThreadContext.assertWarning (false, "Mapping String for unsupported column type [%s] for %s.%s",
-                        columnType, ir.getEntityName (), c.getName ());
-                }
-                setStringJavaType (true, 16, jti);
-            }
-
-            if (ir != null)
-            {
-                m_jtiCache.put (key, jti);
-            }
-        }
-
-        return jti;
+        return ci;
     }
 
     public static String getEqualsExpression (final Column c)
@@ -744,6 +534,238 @@ public class EntityUtil
         jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
     }
 
+    private static ColumnTypeInfo createColumnTypeInfo (final Column c)
+    {
+        final IRelation ir = c.getParent ();
+        //System.out.printf ("%s:%s%n", ir == null ? "/" : ir.getEntityName (), c.getName ());
+        ColumnTypeInfo jti = null;
+        String key = null;
+        if (ir != null)
+        {
+            final String entityName = ir.getEntityName ();
+            final String columnName = c.getName ();
+            key = String.format ("%s.%s", entityName, columnName);
+            jti = m_jtiCache.get (key);
+        }
+
+        if (jti == null)
+        {
+            jti = new ColumnTypeInfo ();
+
+            final String columnType = c.getColumnAttributes ().getType ();
+            if (columnType == null)
+            {
+                ThreadContext.assertInformation (false, "Unknown column type for column[%s]", c.getName ());
+            }
+            else if (columnType.equals ("char"))
+            {
+                final boolean isVarchar = c.getColumnAttributes ().getMode ().equals ("varying");
+                setStringJavaType (isVarchar, c.getColumnAttributes ().getSize (), jti);
+
+            }
+            else if (columnType.equals ("integer"))
+            {
+                setInt (c, jti, Integer.MIN_VALUE);// Integer.MIN_VALUE = no value checking
+            }
+            else if (columnType.equalsIgnoreCase ("number") || columnType.equalsIgnoreCase ("decimal"))
+            {
+                // If no fractional digits, map to byte / int / long if will fit.
+                if (c.getColumnAttributes ().getScale () == 0)
+                {
+                    final int wholeDigits = c.getColumnAttributes ().getPrecision ();// all whole digits
+                    final BigDecimal upperLimitValue =
+                        new BigDecimal (10).pow (wholeDigits).subtract (new BigDecimal (1));
+
+                    // compareTo returns -1, 0 or 1 as this number is less than, equal to, or greater than the arg.
+                    if (upperLimitValue.compareTo (MAX_BYTE) < 0)
+                    {
+                        // Can fit in byte.
+                        jti.m_javaObjectType = "Byte";
+                        jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "byte";
+                        jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
+                        setHcUtilConversionMethod (jti, "getByteValue");
+                        jti.m_javaTypeOfLimitValue = "byte";
+                        jti.m_jdbcType = "Byte";
+                        jti.m_jdbcResultSetAccessor = "getByte";
+                        setJavaSqlType (jti, "TINYINT");
+                        jti.m_javaCastExpression = "(Byte)";
+                        jti.m_maxValue = upperLimitValue.longValue ();
+                        jti.m_minValue = -jti.m_maxValue;
+                        jti.m_javaTypeConstantSuffix = "";
+                        jti.m_equalityExpression = getEqualsExpression (c);
+                        jti.m_hashCodeExpression = c.isNullable () ? HASHCODE_OBJECT : HASHCODE_ALREADY_INT_COMPATIBLE;
+                        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
+                    }
+                    else if (upperLimitValue.compareTo (MAX_SHORT) < 0)
+                    {
+                        // Can fit in short.
+                        jti.m_javaObjectType = "Short";
+                        jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "short";
+                        jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
+                        setHcUtilConversionMethod (jti, "getShortValue");
+                        jti.m_javaTypeOfLimitValue = "short";
+                        jti.m_jdbcType = "Short";
+                        jti.m_jdbcResultSetAccessor = "getShort";
+                        setJavaSqlType (jti, "SMALLINT");
+                        jti.m_javaCastExpression = "(Short)";
+                        jti.m_maxValue = upperLimitValue.longValue ();
+                        jti.m_minValue = -jti.m_maxValue;
+                        jti.m_javaTypeConstantSuffix = "";
+                        jti.m_equalityExpression = getEqualsExpression (c);
+                        jti.m_hashCodeExpression = c.isNullable () ? HASHCODE_OBJECT : HASHCODE_ALREADY_INT_COMPATIBLE;
+                        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
+                    }
+                    else if (upperLimitValue.compareTo (MAX_INT) < 0)
+                    {
+                        setInt (c, jti, upperLimitValue.intValue ());
+                    }
+                    else if (upperLimitValue.compareTo (MAX_LONG) < 0)
+                    {
+                        // Can fit in long.
+                        jti.m_javaObjectType = "Long";
+                        jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "long";
+                        jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
+                        setHcUtilConversionMethod (jti, "getLongValue");
+                        jti.m_javaTypeOfLimitValue = "long";
+                        jti.m_jdbcType = "Long";
+                        jti.m_jdbcResultSetAccessor = "getLong";
+                        setJavaSqlType (jti, "BIGINT");
+                        jti.m_javaCastExpression = "(Long)";
+                        jti.m_maxValue = upperLimitValue.longValue ();
+                        jti.m_minValue = -jti.m_maxValue;
+                        jti.m_javaTypeConstantSuffix = "L";
+                        jti.m_equalityExpression = getEqualsExpression (c);
+                        jti.m_hashCodeExpression =
+                            c.isNullable () ? HASHCODE_OBJECT : "(m_column%s ^ (m_column%s >>> 32))";
+                        //                            c.isNullable () ? HASHCODE_OBJECT : "(int) (m_column%s ^ (m_column%s >>> 32))";
+                        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
+                    }
+                    else
+                    {
+                        setBigDecimal (jti, c);
+                    }
+                }
+                else
+                {
+                    setBigDecimal (jti, c);
+                }
+            }
+            else if (columnType.equalsIgnoreCase ("floatingpoint"))
+            {
+                jti.m_javaObjectType = "Double";
+                jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "double";
+                jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
+                jti.m_jdbcType = "Double";
+                jti.m_jdbcResultSetAccessor = "getDouble";
+                setJavaSqlType (jti, "DOUBLE");
+                jti.m_javaCastExpression = "(Double)";
+                jti.m_equalityExpression = getEqualsExpression (c);
+                jti.m_hashCodeExpression =
+                    c.isNullable () ? HASHCODE_OBJECT : "(int) Double.doubleToLongBits (m_column%s)";
+                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
+            }
+            else if (columnType.equalsIgnoreCase ("boolean"))
+            {
+                jti.m_javaObjectType = "Boolean";
+                jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "boolean";
+                jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
+                jti.m_jdbcType = "Boolean";
+                jti.m_jdbcResultSetAccessor = "getBoolean";
+                setJavaSqlType (jti, "BIT");
+                jti.m_javaCastExpression = "(Boolean)";
+                jti.m_equalityExpression = getEqualsExpression (c);
+                jti.m_hashCodeExpression =
+                    c.isNullable () ? HASHCODE_OBJECT : "((m_column%s ? 1 : 0) ^ ((m_column%s ? 1 : 0) >>> 32))";
+                //                c.isNullable () ? HASHCODE_OBJECT : "(int) ((m_column%s ? 1 : 0) ^ ((m_column%s ? 1 : 0) >>> 32))";
+                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
+            }
+            else if (columnType.equalsIgnoreCase ("datetime") || columnType.equalsIgnoreCase ("date"))
+            {
+                // java.sql.Date truncates time component
+                jti.m_javaObjectType = jti.m_javaType = "Timestamp";
+                jti.m_importsJavaType.add ("java.sql.Timestamp");
+                jti.m_nonPrimitiveTypeJavaLangType = true;
+                jti.m_jdbcType = "Timestamp";
+                jti.m_jdbcResultSetAccessor = "getTimestamp";
+                setJavaSqlType (jti, "TIMESTAMP");
+                jti.m_javaCastExpression = "(java.sql.Timestamp)";
+                jti.m_equalityExpression = EQUALS_OBJECT;
+                jti.m_hashCodeExpression = HASHCODE_OBJECT;
+                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.Duplicate;
+            }
+            else if (columnType.equalsIgnoreCase ("blob") || columnType.equalsIgnoreCase ("guid"))
+            {
+                // TODO 4 prove that guid support works
+                jti.m_javaObjectType = jti.m_javaType = "byte[]";
+                jti.m_nonPrimitiveTypeJavaLangType = true;
+                jti.m_jdbcType = "Bytes";
+                jti.m_jdbcResultSetAccessor = "getBytes";
+                setJavaSqlType (jti, "BLOB");
+                jti.m_javaCastExpression = "(byte[])";
+                jti.m_equalityExpression = EQUALS_OBJECT;
+                jti.m_hashCodeExpression = HASHCODE_OBJECT;
+                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.Duplicate;
+            }
+            else if (columnType.equalsIgnoreCase ("clob"))
+            {
+                jti.m_javaObjectType = jti.m_javaType = "String";
+                jti.m_nonPrimitiveTypeJavaLangType = true;
+                jti.m_jdbcType = "String";
+                jti.m_jdbcResultSetAccessorFormatter = e3 -> String
+                    .format ("DaoUtil.getClobAsString (rs, COLUMN_NAMES[%s.Column%s])", e3.getE1 (), e3.getE2 ());
+                jti.m_importsResultSetAccessorFormatter.add ("au.com.breakpoint.hedron.core.dao.DaoUtil");
+                setJavaSqlType (jti, "CLOB");
+                jti.m_javaCastExpression = "(String)";
+                jti.m_size = -1;
+                jti.m_equalityExpression = EQUALS_OBJECT;
+                jti.m_hashCodeExpression = HASHCODE_OBJECT;
+                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;// no size information
+            }
+            else if (columnType.equalsIgnoreCase ("text"))
+            {
+                setStringJavaType (true, -1, jti);// no size information
+            }
+            else if (columnType.equalsIgnoreCase ("oracle-refcursor"))
+            {
+                final String refcursorType = c.getColumnAttributes ().getRefcursorType ();
+                jti.m_javaObjectType = jti.m_javaType = "List<" + refcursorType + ">";
+                jti.m_importsJavaType.add ("java.util.List");
+                jti.m_importsEntityType.add (refcursorType);
+                jti.m_nonPrimitiveTypeJavaLangType = true;
+                jti.m_jdbcType = "TBD";
+                jti.m_jdbcResultSetAccessor = "getTBD";
+                jti.m_jdbcJavaSqlType = "OracleTypes.CURSOR";
+                jti.m_importsJavaSqlType.add ("oracle.jdbc.OracleTypes");
+                jti.m_javaCastExpression = null;// "(" + jti.m_javaType + ")"
+                jti.m_equalityExpression = EQUALS_OBJECT;
+                jti.m_hashCodeExpression = HASHCODE_OBJECT;
+                jti.m_copyStyle = ColumnTypeInfo.CopyStyle.Duplicate;
+                jti.m_rowMapperType = refcursorType;
+            }
+            else
+            {
+                //                ThreadContext.assertError (false, "Unsupported column type [%s] for column[%s].[%s]", columnType, c.getParent ().getName (), c.getName ());
+                if (ir == null)
+                {
+                    ThreadContext.assertWarning (false, "Mapping String for unsupported column type [%s]", columnType);
+                }
+                else
+                {
+                    ThreadContext.assertWarning (false, "Mapping String for unsupported column type [%s] for %s.%s",
+                        columnType, ir.getEntityName (), c.getName ());
+                }
+                setStringJavaType (true, 16, jti);
+            }
+
+            if (ir != null)
+            {
+                m_jtiCache.put (key, jti);
+            }
+        }
+
+        return jti;
+    }
+
     private static List<Column> getColumns (final List<Parameter> parameters)
     {
         final List<Column> columns = GenericFactory.newArrayList ();
@@ -812,6 +834,8 @@ public class EntityUtil
         jti.m_jdbcJavaSqlType = "Types." + typesType;
         jti.m_importsJavaSqlType.add ("java.sql.Types");
     }
+
+    private static Map<E2<String, String>, ColumnTypeInfo> m_columnInfoCache = GenericFactory.newHashMap ();
 
     // i. If the field is a boolean, compute (f ? 1 : 0).
     // ii. If the field is a byte, char, short, or int, compute (int) f.

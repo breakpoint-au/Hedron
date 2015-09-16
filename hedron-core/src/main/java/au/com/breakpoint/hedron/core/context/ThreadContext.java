@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.log.Logging;
@@ -237,6 +238,44 @@ public class ThreadContext
         return name;
     }
 
+    //    public static <T> T getThreadObject (final Object key)
+    //    {
+    //        T o = null;
+    //
+    //        if (m_contextData.isInitalised ())
+    //        {
+    //            final ContextData contextData = m_contextData.get ();
+    //            o = HcUtil.uncheckedCast (contextData.m_mapThreadObjects.get (key));
+    //        }
+    //
+    //        return o;
+    //    }
+    //
+    //    public static <T> T getThreadObject (final Object key, final Function<Object, T> mappingFunction)
+    //    {
+    //        T o = null;
+    //
+    //        if (m_contextData.isInitalised ())
+    //        {
+    //            final ContextData contextData = m_contextData.get ();
+    //            o = HcUtil.uncheckedCast (contextData.m_mapThreadObjects.computeIfAbsent (key, mappingFunction));
+    //        }
+    //
+    //        return o;
+    //    }
+
+    public static <T> T getThreadObject (final Object key)
+    {
+        final ContextData contextData = m_contextData.get ();
+        return HcUtil.uncheckedCast (contextData.m_mapThreadObjects.get (key));
+    }
+
+    public static <T> T getThreadObject (final Object key, final Function<Object, T> mappingFunction)
+    {
+        final ContextData contextData = m_contextData.get ();
+        return HcUtil.uncheckedCast (contextData.m_mapThreadObjects.computeIfAbsent (key, mappingFunction));
+    }
+
     public static boolean hasBeenLogged (final Throwable e)
     {
         return e instanceof ThreadContextException && ((ThreadContextException) e).isLogged ();
@@ -284,6 +323,18 @@ public class ThreadContext
                 outputErrorExceptionDetails (exceptionDetails);
             }
         }
+    }
+
+    public static void putThreadObject (final Object key, final Object value)
+    {
+        final ContextData contextData = getExistingContextData ();
+        contextData.m_mapThreadObjects.put (key, value);
+    }
+
+    public static void removeContextObject (final Object key)
+    {
+        final ContextData contextData = getExistingContextData ();
+        contextData.m_mapThreadObjects.remove (key);
     }
 
     public static void removeIScope (final IScope iScope)
@@ -454,6 +505,24 @@ public class ThreadContext
         return id;
     }
 
+    //    private static ContextData getExistingContextData ()
+    //    {
+    //        // Don't use assertFault for this; bootstrap situation: there is no scope to use.
+    //        if (!m_contextData.isInitalised ())
+    //        {
+    //            throw new FaultException (
+    //                "There is no existing context. This code should be wrapped in an ExecutionScope, eg ExecutionScopes.executeXxxx ()",
+    //                false);
+    //        }
+    //
+    //        return m_contextData.get ();
+    //    }
+
+    private static ContextData getExistingContextData ()
+    {
+        return m_contextData.get ();
+    }
+
     private static boolean isAnActiveScope ()
     {
         final ContextData contextData = m_contextData.get ();
@@ -492,6 +561,7 @@ public class ThreadContext
 
     /** Make the ContextData thread-local */
     private static ThreadLocal<ContextData> m_contextData = ThreadLocal.withInitial (ContextData::new);
+    //    private static OptionalThreadLocal<ContextData> m_contextData = OptionalThreadLocal.withInitial (ContextData::new);
 
     /** Sequence counter used to allocate outmost context id */
     private static AtomicLong m_idSequenceOuter = new AtomicLong (-1L);

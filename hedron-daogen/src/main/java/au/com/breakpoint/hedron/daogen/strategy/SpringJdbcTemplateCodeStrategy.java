@@ -65,8 +65,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             cv.getParameters (), "Custom");
     }
 
-    // TODO _ dao with just U capability doesn't compile
-
     @Override
     public List<String> generateDao (final DbEnum en, final Schema schema)
     {
@@ -165,9 +163,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     case Duplicate:
                     {
-                        pw.printf (
-                            "        m_column%s = au.com.breakpoint.hedron.core.HcUtil.duplicate (rhs.m_column%s);%n",
-                            columnName, columnName);
+                        pw.addClassImport ("au.com.breakpoint.hedron.core.HcUtil");
+                        pw.printf ("        m_column%s = HcUtil.duplicate (rhs.m_column%s);%n", columnName, columnName);
                         break;
                     }
 
@@ -193,39 +190,51 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 if (c.isNullable ())
                 {
                     pw.addClassImport ("java.util.Optional");
-                    pw.printf ("    public Optional<%s> get%s ()%n", jti.m_javaType, columnName);
-                    pw.printf ("    {%n");
-                    pw.printf ("        return Optional.ofNullable (m_column%s);%n", columnName);
-                    pw.printf ("    }%n");
 
                     final String enumName = c.getEnumName ();
                     if (enumName != null)
                     {
                         pw.addClassImport ("%s.Enums", outputPackage);
                         pw.printf ("%n");
-                        pw.printf ("    public static final Optional<Enums.%s> get%sEnum (final %s e)%n", enumName,
-                            columnName, entityName);
+                        pw.printf ("    public Optional<Enums.%s> get%s ()%n", enumName, columnName, entityName);
                         pw.printf ("    {%n");
-                        pw.printf ("        return e.get%s ().map (Enums.%s::of);%n", columnName, enumName);
+                        pw.printf ("        return get%sInt ().map (Enums.%s::of);%n", columnName, enumName);
+                        pw.printf ("    }%n");
+                        pw.printf ("%n");
+                        pw.printf ("    public Optional<%s> get%sInt ()%n", jti.m_javaType, columnName);
+                        pw.printf ("    {%n");
+                        pw.printf ("        return Optional.ofNullable (m_column%s);%n", columnName);
+                        pw.printf ("    }%n");
+                    }
+                    else
+                    {
+                        pw.printf ("    public Optional<%s> get%s ()%n", jti.m_javaType, columnName);
+                        pw.printf ("    {%n");
+                        pw.printf ("        return Optional.ofNullable (m_column%s);%n", columnName);
                         pw.printf ("    }%n");
                     }
                 }
                 else
                 {
-                    pw.printf ("    public %s get%s ()%n", jti.m_javaType, columnName);
-                    pw.printf ("    {%n");
-                    pw.printf ("        return m_column%s;%n", columnName);
-                    pw.printf ("    }%n");
-
                     final String enumName = c.getEnumName ();
                     if (enumName != null)
                     {
                         pw.addClassImport ("%s.Enums", outputPackage);
-                        pw.printf ("%n");
-                        pw.printf ("    public static final Enums.%s get%sEnum (final %s e)%n", enumName, columnName,
-                            entityName);
+                        pw.printf ("    public Enums.%s get%s ()%n", enumName, columnName, entityName);
                         pw.printf ("    {%n");
-                        pw.printf ("        return Enums.%s.of (e.get%s ());%n", enumName, columnName);
+                        pw.printf ("        return Enums.%s.of (m_column%s);%n", enumName, columnName);
+                        pw.printf ("    }%n");
+                        pw.printf ("%n");
+                        pw.printf ("    public %s get%sInt ()%n", jti.m_javaType, columnName);
+                        pw.printf ("    {%n");
+                        pw.printf ("        return m_column%s;%n", columnName);
+                        pw.printf ("    }%n");
+                    }
+                    else
+                    {
+                        pw.printf ("    public %s get%s ()%n", jti.m_javaType, columnName);
+                        pw.printf ("    {%n");
+                        pw.printf ("        return m_column%s;%n", columnName);
                         pw.printf ("    }%n");
                     }
                 }
@@ -241,22 +250,25 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                         pw.printf ("        {%n");
                         if (jti.m_minValue < Long.MAX_VALUE)
                         {
+                            addClassImportThreadContext (pw);
                             pw.printf (
-                                "            au.com.breakpoint.hedron.core.context.ThreadContext.assertError (column%s >= MinValue%s, \"Column %s.%s value %%s cannot be less than %%s\", column%s, MinValue%s);%n",
+                                "            ThreadContext.assertError (column%s >= MinValue%s, \"Column %s.%s value %%s cannot be less than %%s\", column%s, MinValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName, columnName);
                         }
                         if (jti.m_maxValue > Long.MIN_VALUE)
                         {
+                            addClassImportThreadContext (pw);
                             pw.printf (
-                                "            au.com.breakpoint.hedron.core.context.ThreadContext.assertError (column%s <= MaxValue%s, \"Column %s.%s value %%s cannot be greater than %%s\", column%s, MaxValue%s);%n",
+                                "            ThreadContext.assertError (column%s <= MaxValue%s, \"Column %s.%s value %%s cannot be greater than %%s\", column%s, MaxValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName, columnName);
                         }
                         if (jti.m_size > -1)
                         {
+                            addClassImportThreadContext (pw);
                             pw.printf (
-                                "            au.com.breakpoint.hedron.core.context.ThreadContext.assertError (column%s.length () <= Size%s, \"Column %s.%s value [%%s] cannot be longer than %%s characters\", column%s, Size%s);%n",
+                                "            ThreadContext.assertError (column%s.length () <= Size%s, \"Column %s.%s value [%%s] cannot be longer than %%s characters\", column%s, Size%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName);
                         }
@@ -266,28 +278,32 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     {
                         if (jti.m_nonPrimitiveTypeJavaLangType)
                         {
+                            addClassImportThreadContext (pw);
                             pw.printf (
-                                "        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (column%s != null, \"Column %s.%s value is classified as 'mandatory'; it cannot be null\");%n",
+                                "        ThreadContext.assertError (column%s != null, \"Column %s.%s value is classified as 'mandatory'; it cannot be null\");%n",
                                 columnName, c.getParent ().getEntityName (), columnName);
                         }
                         if (jti.m_minValue < Long.MAX_VALUE)
                         {
+                            addClassImportThreadContext (pw);
                             pw.printf (
-                                "        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s >= MinValue%s, \"Column %s.%s value %%s cannot be less than %%s\", column%s, MinValue%s);%n",
+                                "        ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s >= MinValue%s, \"Column %s.%s value %%s cannot be less than %%s\", column%s, MinValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName);
                         }
                         if (jti.m_maxValue > Long.MIN_VALUE)
                         {
+                            addClassImportThreadContext (pw);
                             pw.printf (
-                                "        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s <= MaxValue%s, \"Column %s.%s value %%s cannot be greater than %%s\", column%s, MaxValue%s);%n",
+                                "        ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s <= MaxValue%s, \"Column %s.%s value %%s cannot be greater than %%s\", column%s, MaxValue%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName);
                         }
                         if (jti.m_size > -1)
                         {
+                            addClassImportThreadContext (pw);
                             pw.printf (
-                                "        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s.length () <= Size%s, \"Column %s.%s value [%%s] cannot be longer than %%s characters\", column%s, Size%s);%n",
+                                "        ThreadContext.assertError (!shouldEnforceColumnLimits () || column%s.length () <= Size%s, \"Column %s.%s value [%%s] cannot be longer than %%s characters\", column%s, Size%s);%n",
                                 columnName, columnName, c.getParent ().getEntityName (), columnName, columnName,
                                 columnName);
                         }
@@ -829,23 +845,18 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         return GenericFactory.newArrayList ();
     }
 
+    private void addClassImportThreadContext (final SmartFileJavaClass pw)
+    {
+        pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+    }
+
     private void generateColumnValueCode (final SmartFile pw, final List<Column> columns)
     {
         int i = 0;
         for (final Column c : columns)
         {
-            pw.printf ("                    ");
-
             final String columnName = c.getName ();
-            if (c.isNullable ())
-            {
-                pw.printf ("get%s ().orElse (null)", columnName);
-            }
-            else
-            {
-                pw.printf ("get%s ()", columnName);
-            }
-            pw.printf ("%s%n", i == columns.size () - 1 ? "" : ",");
+            pw.printf ("                    m_column%s%s%n", columnName, i == columns.size () - 1 ? "" : ",");
             ++i;
         }
     }
@@ -931,17 +942,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
                     pw.printf ("    };%n");
                 }
-                //
-                //    pw.printf ("%n");
-                //    pw.printf ("    // Enumeration description string lookup methods.%n");
-                //    for (final DbEnum en : m_enums)
-                //    {
-                //        final String symbol = en.getName ();
-                //        pw.printf ("    public static String getString_%s (final int enumValue)%n", symbol);
-                //        pw.printf ("    {%n");
-                //        pw.printf ("        return ENUM_DESCRIPTIONS_%s[enumValue];%n", symbol);
-                //        pw.printf ("    }%n%n");
-                //    }
             }
 
             pw.printf ("}%n");
@@ -1144,7 +1144,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 {
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.WhereElement");
-                    //pw.addClassImport ("au.com.breakpoint.hedron.core.dao.FetchSql");
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.OrderByElement");
                     pw.addClassImport ("java.util.List");
 
@@ -1248,6 +1247,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 if (pk != null)
                 {
                     pw.addClassImport ("java.util.List");
+                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.WhereElement");
+
                     final boolean canOverload = EntityUtil.allowsOverloadDisambiguation (pkColumns);
                     final boolean generateSeparateOverload = canOverload || pkColumns.size () > 1;
 
@@ -1358,7 +1359,7 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                     pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                     pw.printf (
                         "        final int updateCount = DaoUtil.performInsert (m_dataSource, e, SQL_INSERT);%n");
-                    pw.addClassImport ("au.com.breakpoint.hedron.core.context.ThreadContext");
+                    addClassImportThreadContext (pw);
                     pw.printf ("        ThreadContext.assertError (updateCount == 1, \"%sDao insert failed\");%n",
                         entityName);
                 }
@@ -1368,6 +1369,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             {
                 pw.addClassImport ("java.util.List");
                 pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.WhereElement");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.SetElement");
 
                 pw.printf ("%n");
                 pw.printf ("    /**%n");
@@ -1402,8 +1405,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("     * @return the numbers of rows affected by the update%n");
                 pw.printf ("     */%n");
                 pw.printf ("    @Override%n");
-                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.SetElement");
-                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.WhereElement");
                 pw.printf (
                     "    public int update (final SetElement[] newValues, final WhereElement[] whereElements)%n");
                 pw.printf ("    {%n");
@@ -1487,6 +1488,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             {
                 pw.addClassImport ("java.util.List");
                 pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.WhereElement");
+
                 pw.printf ("%n");
                 pw.printf ("    /**%n");
                 pw.printf ("     * Deletes multiple rows from the %s table.%n", entityPhysicalName);
