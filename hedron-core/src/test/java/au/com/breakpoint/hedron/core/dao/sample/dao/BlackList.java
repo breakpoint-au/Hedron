@@ -2,6 +2,8 @@ package au.com.breakpoint.hedron.core.dao.sample.dao;
 
 import java.sql.Timestamp;
 import java.util.Optional;
+import au.com.breakpoint.hedron.core.HcUtil;
+import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.core.dao.BaseEntity;
 import au.com.breakpoint.hedron.core.dao.IColumnIndex;
 import au.com.breakpoint.hedron.core.dao.IEntity;
@@ -36,7 +38,7 @@ public class BlackList extends BaseEntity<String>
     public void copyFrom (final BlackList rhs)
     {
         m_columnAvcId = rhs.m_columnAvcId;
-        m_columnDateRequested = au.com.breakpoint.hedron.core.HcUtil.duplicate (rhs.m_columnDateRequested);
+        m_columnDateRequested = HcUtil.duplicate (rhs.m_columnDateRequested);
         m_columnReason = rhs.m_columnReason;
         m_columnOperatorId = rhs.m_columnOperatorId;
         m_columnReferenceId = rhs.m_columnReferenceId;
@@ -58,7 +60,12 @@ public class BlackList extends BaseEntity<String>
     /**
      * Column ActionId accessors.
      */
-    public int getActionId ()
+    public Enums.AvcAction getActionId ()
+    {
+        return Enums.AvcAction.of (m_columnActionId);
+    }
+
+    public int getActionIdInt ()
     {
         return m_columnActionId;
     }
@@ -170,10 +177,9 @@ public class BlackList extends BaseEntity<String>
 
     public void setAvcId (final String columnAvcId)
     {
-        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (columnAvcId != null,
+        ThreadContext.assertError (columnAvcId != null,
             "Column BlackList.AvcId value is classified as 'mandatory'; it cannot be null");
-        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (
-            !shouldEnforceColumnLimits () || columnAvcId.length () <= SizeAvcId,
+        ThreadContext.assertError (!shouldEnforceColumnLimits () || columnAvcId.length () <= SizeAvcId,
             "Column BlackList.AvcId value [%s] cannot be longer than %s characters", columnAvcId, SizeAvcId);
         m_columnAvcId = columnAvcId;
     }
@@ -185,10 +191,9 @@ public class BlackList extends BaseEntity<String>
 
     public void setOperatorId (final String columnOperatorId)
     {
-        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (columnOperatorId != null,
+        ThreadContext.assertError (columnOperatorId != null,
             "Column BlackList.OperatorId value is classified as 'mandatory'; it cannot be null");
-        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (
-            !shouldEnforceColumnLimits () || columnOperatorId.length () <= SizeOperatorId,
+        ThreadContext.assertError (!shouldEnforceColumnLimits () || columnOperatorId.length () <= SizeOperatorId,
             "Column BlackList.OperatorId value [%s] cannot be longer than %s characters", columnOperatorId,
             SizeOperatorId);
         m_columnOperatorId = columnOperatorId;
@@ -196,10 +201,9 @@ public class BlackList extends BaseEntity<String>
 
     public void setReason (final String columnReason)
     {
-        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (columnReason != null,
+        ThreadContext.assertError (columnReason != null,
             "Column BlackList.Reason value is classified as 'mandatory'; it cannot be null");
-        au.com.breakpoint.hedron.core.context.ThreadContext.assertError (
-            !shouldEnforceColumnLimits () || columnReason.length () <= SizeReason,
+        ThreadContext.assertError (!shouldEnforceColumnLimits () || columnReason.length () <= SizeReason,
             "Column BlackList.Reason value [%s] cannot be longer than %s characters", columnReason, SizeReason);
         m_columnReason = columnReason;
     }
@@ -208,8 +212,7 @@ public class BlackList extends BaseEntity<String>
     {
         if (columnReferenceId != null && shouldEnforceColumnLimits ())
         {
-            au.com.breakpoint.hedron.core.context.ThreadContext.assertError (
-                columnReferenceId.length () <= SizeReferenceId,
+            ThreadContext.assertError (columnReferenceId.length () <= SizeReferenceId,
                 "Column BlackList.ReferenceId value [%s] cannot be longer than %s characters", columnReferenceId,
                 SizeReferenceId);
         }
@@ -237,11 +240,6 @@ public class BlackList extends BaseEntity<String>
         }
 
         private final int m_index;
-    }
-
-    public static final Enums.AvcAction getActionIdEnum (final BlackList e)
-    {
-        return Enums.AvcAction.of (e.getActionId ());
     }
 
     private String m_columnAvcId; // primary key

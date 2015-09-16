@@ -21,22 +21,17 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
-import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.Counter;
 import au.com.breakpoint.hedron.core.CounterRange;
 import au.com.breakpoint.hedron.core.CounterThroughput;
 import au.com.breakpoint.hedron.core.GenericFactory;
+import au.com.breakpoint.hedron.core.HcUtil;
 import au.com.breakpoint.hedron.core.MaxCounter;
 import au.com.breakpoint.hedron.core.TimedScope;
+import au.com.breakpoint.hedron.core.Tuple.E2;
 import au.com.breakpoint.hedron.core.context.ExecutionScope;
 import au.com.breakpoint.hedron.core.context.IScope;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
-import au.com.breakpoint.hedron.core.log.ConsoleStringLogger;
-import au.com.breakpoint.hedron.core.log.IInstrumentionListenerLogger;
-import au.com.breakpoint.hedron.core.log.Instrumentation;
-import au.com.breakpoint.hedron.core.log.InstrumentionStringLogger;
-import au.com.breakpoint.hedron.core.log.Level;
-import au.com.breakpoint.hedron.core.log.Logging;
 
 public class InstrumentationTest
 {
@@ -47,14 +42,16 @@ public class InstrumentationTest
         {
             Instrumentation.setPolicyAsyncInstrumentation (false);// execute actions synchronously
 
-            setupLoggers ("fewi");
+            final E2<DummyLogger, DummyRemoteInstrumentationLogger> loggers = setupLoggers ("fewi");
+            final DummyLogger localLogger = loggers.getE0 ();
+            final DummyRemoteInstrumentationLogger remoteLogger = loggers.getE1 ();
 
             if (true)
             {
                 Instrumentation.publishExecutionSummary ();
-                checkInstrumentationListener (1, 0, 0, 0);
-                checkLogger (m_local, 0, 0, 0, 1, 0, 0);
-                checkLogger (m_remote, 0, 0, 0, 0, 0, 0);
+                checkInstrumentationListener (remoteLogger, 1, 0, 0, 0);
+                checkLogger (localLogger, 0, 0, 0, 1, 0, 0);
+                checkLogger (remoteLogger, 0, 0, 0, 0, 0, 0);
             }
 
             if (true)
@@ -66,9 +63,9 @@ public class InstrumentationTest
                 } , name);
 
                 Instrumentation.publishExecutionSummary ();
-                checkInstrumentationListener (2, 0, 0, 0);
-                checkLogger (m_local, 0, 0, 0, 2, 0, 0);
-                checkLogger (m_remote, 0, 0, 0, 0, 0, 0);
+                checkInstrumentationListener (remoteLogger, 2, 0, 0, 0);
+                checkLogger (localLogger, 0, 0, 0, 2, 0, 0);
+                checkLogger (remoteLogger, 0, 0, 0, 0, 0, 0);
             }
 
             if (true)
@@ -80,9 +77,9 @@ public class InstrumentationTest
                 } , name);
 
                 Instrumentation.publishExecutionSummary ();
-                checkInstrumentationListener (3, 1, 1, 0);
-                checkLogger (m_local, 0, 0, 2, 3, 0, 0);
-                checkLogger (m_remote, 0, 0, 0, 0, 0, 0);
+                checkInstrumentationListener (remoteLogger, 3, 1, 1, 0);
+                checkLogger (localLogger, 0, 0, 2, 3, 0, 0);
+                checkLogger (remoteLogger, 0, 0, 0, 0, 0, 0);
             }
 
             if (true)
@@ -101,9 +98,9 @@ public class InstrumentationTest
                 }
 
                 Instrumentation.publishExecutionSummary ();
-                checkInstrumentationListener (4, 1, 1, 1);
-                checkLogger (m_local, 2, 0, 2, 4, 0, 0);
-                checkLogger (m_remote, 1, 0, 0, 0, 0, 0);
+                checkInstrumentationListener (remoteLogger, 4, 1, 1, 1);
+                checkLogger (localLogger, 2, 0, 2, 4, 0, 0);
+                checkLogger (remoteLogger, 1, 0, 0, 0, 0, 0);
             }
 
             if (true)
@@ -122,9 +119,9 @@ public class InstrumentationTest
                 }
 
                 Instrumentation.publishExecutionSummary ();
-                checkInstrumentationListener (5, 1, 1, 2);
-                checkLogger (m_local, 4, 0, 2, 5, 0, 0);
-                checkLogger (m_remote, 2, 0, 0, 0, 0, 0);
+                checkInstrumentationListener (remoteLogger, 5, 1, 1, 2);
+                checkLogger (localLogger, 4, 0, 2, 5, 0, 0);
+                checkLogger (remoteLogger, 2, 0, 0, 0, 0, 0);
             }
         }
     }
@@ -134,7 +131,9 @@ public class InstrumentationTest
     {
         try (IScope scope = new ExecutionScope ())
         {
-            setupLoggers ("fewidt");
+            final E2<DummyLogger, DummyRemoteInstrumentationLogger> loggers = setupLoggers ("fewidt");
+            final DummyLogger localLogger = loggers.getE0 ();
+            final DummyRemoteInstrumentationLogger remoteLogger = loggers.getE1 ();
 
             final String fatal = "fatal test string";
             final String error = "error test string";
@@ -144,54 +143,58 @@ public class InstrumentationTest
             final String trace = "trace test string";
 
             Logging.logInfoString (info);
-            checkLogger (m_local, null, null, null, info, null, null);
-            checkLogger (m_remote, null, null, null, info, null, null);
+            checkLogger (localLogger, null, null, null, info, null, null);
+            checkLogger (remoteLogger, null, null, null, info, null, null);
 
             Logging.logFatalString (fatal);
-            checkLogger (m_local, fatal, null, null, info, null, null);
-            checkLogger (m_remote, fatal, null, null, info, null, null);
+            checkLogger (localLogger, fatal, null, null, info, null, null);
+            checkLogger (remoteLogger, fatal, null, null, info, null, null);
 
             Logging.logErrorString (error);
-            checkLogger (m_local, fatal, error, null, info, null, null);
-            checkLogger (m_remote, fatal, error, null, info, null, null);
+            checkLogger (localLogger, fatal, error, null, info, null, null);
+            checkLogger (remoteLogger, fatal, error, null, info, null, null);
 
             Logging.logWarnString (warn);
-            checkLogger (m_local, fatal, error, warn, info, null, null);
-            checkLogger (m_remote, fatal, error, warn, info, null, null);
+            checkLogger (localLogger, fatal, error, warn, info, null, null);
+            checkLogger (remoteLogger, fatal, error, warn, info, null, null);
 
             Logging.logDebugString (debug);
-            checkLogger (m_local, fatal, error, warn, info, debug, null);
-            checkLogger (m_remote, fatal, error, warn, info, null, null);
+            checkLogger (localLogger, fatal, error, warn, info, debug, null);
+            checkLogger (remoteLogger, fatal, error, warn, info, null, null);
 
             Logging.logTraceString (trace);
-            checkLogger (m_local, fatal, error, warn, info, debug, trace);
-            checkLogger (m_remote, fatal, error, warn, info, null, null);
+            checkLogger (localLogger, fatal, error, warn, info, debug, trace);
+            checkLogger (remoteLogger, fatal, error, warn, info, null, null);
         }
     }
 
-    private void checkInstrumentationListener (final int summary, final int timedOut, final int slow, final int failed)
+    private void checkInstrumentationListener (final DummyRemoteInstrumentationLogger remoteLogger, final int summary,
+        final int timedOut, final int slow, final int failed)
     {
-        assertEquals (summary, m_remote.m_valueOnExecutionSummary.size ());
-        assertEquals (timedOut, m_remote.m_valueOnOperationTimedOut.size ());
-        assertEquals (slow, m_remote.m_valueOnOperationSlow.size ());
-        assertEquals (failed, m_remote.m_valueOnOperationFailed.size ());
+        assertEquals (summary, remoteLogger.m_valueOnExecutionSummary.size ());
+        assertEquals (timedOut, remoteLogger.m_valueOnOperationTimedOut.size ());
+        assertEquals (slow, remoteLogger.m_valueOnOperationSlow.size ());
+        assertEquals (failed, remoteLogger.m_valueOnOperationFailed.size ());
     }
 
-    private void setupLoggers (final String levelsConfig)
+    private E2<DummyLogger, DummyRemoteInstrumentationLogger> setupLoggers (final String levelsConfig)
     {
         // Red of Instrumentation.configure ()
         Logging.clearLoggers ();
 
-        m_remote = new DummyRemoteInstrumentationLogger ("fewi", getTempPath ("log-remote.txt"));
+        final DummyRemoteInstrumentationLogger remoteLogger =
+            new DummyRemoteInstrumentationLogger ("fewi", getTempPath ("log-remote.txt"));
 
         final List<ConsoleStringLogger> slaves = OUTPUT_TO_CONSOLE ? Arrays.asList (new ConsoleStringLogger ()) : null;
-        m_local = new DummyLogger (levelsConfig, slaves, getTempPath ("log-local.txt"));
-        Logging.addLogger (m_local);
+        final DummyLogger localLogger = new DummyLogger (levelsConfig, slaves, getTempPath ("log-local.txt"));
+        Logging.addLogger (localLogger);
 
-        Instrumentation.addInstrumentationListener (new InstrumentionStringLogger (m_local));
+        Instrumentation.addInstrumentationListener (new InstrumentionStringLogger (localLogger));
 
-        Instrumentation.addInstrumentationListener (m_remote);
-        Logging.addLogger (m_remote);
+        Instrumentation.addInstrumentationListener (remoteLogger);
+        Logging.addLogger (remoteLogger);
+
+        return E2.of (localLogger, remoteLogger);
     }
 
     public static class DummyRemoteInstrumentationLogger extends DummyLogger implements IInstrumentionListenerLogger
@@ -254,8 +257,8 @@ public class InstrumentationTest
     //    private void checkLoggers (final int fatal, final int error, final int warn, final int info, final int debug,
     //        final int trace)
     //    {
-    //        checkLogger (m_local, fatal, error, warn, info, debug, trace);
-    //        checkLogger (m_remote, fatal, error, warn, info, debug, trace);
+    //        checkLogger (localLogger, fatal, error, warn, info, debug, trace);
+    //        checkLogger (remoteLogger, fatal, error, warn, info, debug, trace);
     //    }
 
     private static void checkArrayEquals (final String expectedString, final List<String> l)
@@ -308,10 +311,6 @@ public class InstrumentationTest
     {
         return HcUtil.formFilepath (HcUtil.getTempDirectoryName (), filename);
     }
-
-    private DummyLogger m_local;
-
-    private DummyRemoteInstrumentationLogger m_remote;
 
     private static final boolean OUTPUT_TO_CONSOLE = false;
 }

@@ -16,9 +16,7 @@
 //
 package au.com.breakpoint.hedron.core.context;
 
-import au.com.breakpoint.hedron.core.ICloseable;
-
-public class LoggingSilenceScope implements ICloseable
+public class LoggingSilenceScope extends ExecutionScope
 {
     public LoggingSilenceScope ()
     {
@@ -29,5 +27,6 @@ public class LoggingSilenceScope implements ICloseable
     public void close ()
     {
         ThreadContext.leaveLoggingSilence ();
+        super.close ();
     }
 }

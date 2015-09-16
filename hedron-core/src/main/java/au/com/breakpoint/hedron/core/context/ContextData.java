@@ -18,6 +18,8 @@ package au.com.breakpoint.hedron.core.context;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Map;
+import au.com.breakpoint.hedron.core.GenericFactory;
 
 /** A set of data associated with the thread's context */
 class ContextData
@@ -41,4 +43,7 @@ class ContextData
 
     /** A stack representing the current set of nested scopes */
     final Deque<NestedScopeData> m_scopeNesting = new ArrayDeque<> ();
+
+    /** Map of additional objects */
+    final Map<Object, Object> m_mapThreadObjects = GenericFactory.newHashMap ();
 }
