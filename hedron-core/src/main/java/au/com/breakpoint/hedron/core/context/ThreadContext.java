@@ -301,13 +301,13 @@ public class ThreadContext
 
     public static void putThreadObject (final Object key, final Object value)
     {
-        final ContextData contextData = getExistingContextData ();
+        final ContextData contextData = m_contextData.get ();
         contextData.m_mapThreadObjects.put (key, value);
     }
 
     public static void removeContextObject (final Object key)
     {
-        final ContextData contextData = getExistingContextData ();
+        final ContextData contextData = m_contextData.get ();
         contextData.m_mapThreadObjects.remove (key);
     }
 
@@ -477,11 +477,6 @@ public class ThreadContext
         }
 
         return id;
-    }
-
-    private static ContextData getExistingContextData ()
-    {
-        return m_contextData.get ();
     }
 
     private static boolean isAnActiveScope ()
