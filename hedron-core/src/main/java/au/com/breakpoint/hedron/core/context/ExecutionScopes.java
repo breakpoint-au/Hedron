@@ -16,10 +16,12 @@
 //
 package au.com.breakpoint.hedron.core.context;
 
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import au.com.breakpoint.hedron.core.HcUtil;
 
@@ -38,6 +40,11 @@ public class ExecutionScopes
      */
     public static void executeFaultBarrier (final Runnable service)
     {
+        executeFaultBarrier (service, null);
+    }
+
+    public static void executeFaultBarrier (final Runnable service, final Consumer<Throwable> onException)
+    {
         // NOTE: Java try-with-resources closes the AutoCloseable scope before
         // executing the catch () block, thus losing ThreadContext's context id.
         // Thus any exception logging needs to be done in an inner scope.
@@ -53,6 +60,11 @@ public class ExecutionScopes
                 // ThreadContext.assertXxxx methods already log details at time of assertion,
                 // but ThreadContext.logException does not re-log them.
                 ThreadContext.logException (e);
+
+                if (onException != null)
+                {
+                    onException.accept (e);
+                }
             }
         }
     }
@@ -67,9 +79,15 @@ public class ExecutionScopes
      *            Instance of the service to call
      * @return Returned item of data
      */
-    public static <TOutput> TOutput executeFaultBarrier (final Supplier<? extends TOutput> service)
+    public static <TOutput> Optional<TOutput> executeFaultBarrier (final Supplier<? extends TOutput> service)
     {
-        TOutput output = null;
+        return executeFaultBarrier (service, null);
+    }
+
+    public static <TOutput> Optional<TOutput> executeFaultBarrier (final Supplier<? extends TOutput> service,
+        final Consumer<Throwable> onException)
+    {
+        Optional<TOutput> result = Optional.empty ();
 
         // NOTE: Java try-with-resources closes the AutoCloseable scope before
         // executing the catch () block, thus losing ThreadContext's context id.
@@ -79,17 +97,23 @@ public class ExecutionScopes
             try
             {
                 // Execute the business service method.
-                output = service.get ();
+                final TOutput output = service.get ();
+                result = Optional.of (output);
             }
             catch (final Throwable e)
             {
                 // ThreadContext.assertXxxx methods already log details at time of assertion,
                 // but ThreadContext.logException does not re-log them.
                 ThreadContext.logException (e);
+
+                if (onException != null)
+                {
+                    onException.accept (e);
+                }
             }
         }
 
-        return output;
+        return result;
     }
 
     /**
