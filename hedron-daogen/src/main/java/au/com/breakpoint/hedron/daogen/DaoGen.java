@@ -404,16 +404,15 @@ public class DaoGen
         {
             case Oracle:
             {
-                // TODO 3 review -- temporarily turned off
-                SpringJdbcTemplateCodeStrategy.setShouldUseSimpleJdbcInsert (false);
-                SpringJdbcTemplateCodeStrategy.setShouldUseSimpleJdbcCall (false);
+                //                SpringJdbcTemplateCodeStrategy.setShouldUseSimpleJdbcInsert (false);
+                //                SpringJdbcTemplateCodeStrategy.setShouldUseSimpleJdbcCall (false);
                 break;
             }
 
             case Sybase:
             {
-                SpringJdbcTemplateCodeStrategy.setShouldUseSimpleJdbcInsert (false);
-                SpringJdbcTemplateCodeStrategy.setShouldUseSimpleJdbcCall (false);
+                //                SpringJdbcTemplateCodeStrategy.setShouldUseSimpleJdbcInsert (false);
+                //                SpringJdbcTemplateCodeStrategy.setShouldUseSimpleJdbcCall (false);
                 break;
             }
         }

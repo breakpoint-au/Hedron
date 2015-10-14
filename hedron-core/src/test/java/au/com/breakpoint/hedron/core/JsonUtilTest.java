@@ -20,60 +20,52 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.junit.Test;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import au.com.breakpoint.hedron.core.HcUtil;
-import au.com.breakpoint.hedron.core.DirectoryTree;
-import au.com.breakpoint.hedron.core.GenericFactory;
-import au.com.breakpoint.hedron.core.JsonUtil;
 import au.com.breakpoint.hedron.core.Tuple.E2;
 
 public class JsonUtilTest
 {
-    //@Test
-    // TODO 1 move to roottools
-    public void testGsonReciprocality ()
-    {
-        final Gson gson = new GsonBuilder ().setPrettyPrinting ().create ();
-
-        final String directoryPath = HcUtil.getProjectsDirectoryName () + "/Archiver/test";
-
-        final DirectoryTree dt1 = new DirectoryTree (directoryPath);
-        final DirectoryTree dt2 = new DirectoryTree (directoryPath);
-        assertEquals (dt1.getFiles (), dt2.getFiles ());
-        assertEquals (dt1.getAbsolutePaths (), dt2.getAbsolutePaths ());
-        assertEquals (dt1.getRelativeFilepaths (), dt2.getRelativeFilepaths ());
-
-        final List<String> fpsl = dt1.getAbsolutePaths ();
-
-        if (true)
-        {
-            final String jsonArray = gson.toJson (fpsl);
-            //System.out.println (jsonArray);
-
-            final Type listType = new TypeToken<List<String>> ()
-            {
-            }.getType ();
-
-            final List<String> fpsl2 = gson.fromJson (jsonArray, listType);
-            assertEquals (fpsl, fpsl2);
-        }
-
-        if (true)
-        {
-            final String[] fps = fpsl.toArray (new String[fpsl.size ()]);
-            final String jsonArray = gson.toJson (fps);
-            //System.out.println (jsonArray);
-
-            final String[] fps2 = gson.fromJson (jsonArray, String[].class);
-            assertArrayEquals (fps, fps2);
-        }
-    }
+    //    //@Test
+    //    public void testGsonReciprocality ()
+    //    {
+    //        final Gson gson = new GsonBuilder ().setPrettyPrinting ().create ();
+    //
+    //        final String directoryPath = HcUtil.getProjectsDirectoryName () + "/Archiver/test";
+    //
+    //        final DirectoryTree dt1 = new DirectoryTree (directoryPath);
+    //        final DirectoryTree dt2 = new DirectoryTree (directoryPath);
+    //        assertEquals (dt1.getFiles (), dt2.getFiles ());
+    //        assertEquals (dt1.getAbsolutePaths (), dt2.getAbsolutePaths ());
+    //        assertEquals (dt1.getRelativeFilepaths (), dt2.getRelativeFilepaths ());
+    //
+    //        final List<String> fpsl = dt1.getAbsolutePaths ();
+    //
+    //        if (true)
+    //        {
+    //            final String jsonArray = gson.toJson (fpsl);
+    //            //System.out.println (jsonArray);
+    //
+    //            final Type listType = new TypeToken<List<String>> ()
+    //            {
+    //            }.getType ();
+    //
+    //            final List<String> fpsl2 = gson.fromJson (jsonArray, listType);
+    //            assertEquals (fpsl, fpsl2);
+    //        }
+    //
+    //        if (true)
+    //        {
+    //            final String[] fps = fpsl.toArray (new String[fpsl.size ()]);
+    //            final String jsonArray = gson.toJson (fps);
+    //            //System.out.println (jsonArray);
+    //
+    //            final String[] fps2 = gson.fromJson (jsonArray, String[].class);
+    //            assertArrayEquals (fps, fps2);
+    //        }
+    //    }
 
     @Test
     public void testGsonReciprocalityMap ()

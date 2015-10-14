@@ -17,8 +17,8 @@
 package au.com.breakpoint.hedron.core.concurrent;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import au.com.breakpoint.hedron.core.HcUtil;
-import au.com.breakpoint.hedron.core.IFactory;
 import au.com.breakpoint.hedron.core.context.ExecutionScope;
 import au.com.breakpoint.hedron.core.context.IScope;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
@@ -32,19 +32,19 @@ import au.com.breakpoint.hedron.core.log.Logging;
  */
 public class RetryProcessor implements IProcessor
 {
-    public RetryProcessor (final IFactory<IProcessor> factory, final int retryPauseMsec)
+    public RetryProcessor (final Supplier<IProcessor> factory, final int retryPauseMsec)
     {
         this (factory, retryPauseMsec, null);
     }
 
-    public RetryProcessor (final IFactory<IProcessor> factory, final int retryPauseMsec,
+    public RetryProcessor (final Supplier<IProcessor> factory, final int retryPauseMsec,
         final Consumer<? super RetryProcessor> restartCallback)
     {
         m_processorFactory = factory;
         m_retryPauseMsec = retryPauseMsec;
         m_restartCallback = restartCallback;
 
-        m_processor = m_processorFactory.newInstance ();
+        m_processor = m_processorFactory.get ();
     }
 
     @Override
@@ -80,7 +80,7 @@ public class RetryProcessor implements IProcessor
                 m_processor.signalShutdown ();
 
                 // Reinitialise with a new processor instance.
-                m_processor = m_processorFactory.newInstance ();
+                m_processor = m_processorFactory.get ();
 
                 // A FailureException must have happened in this main thread. This is
                 // assumed to be some temporary condition such as infrastructure being offline.
@@ -117,7 +117,7 @@ public class RetryProcessor implements IProcessor
 
     private volatile IProcessor m_processor;
 
-    private final IFactory<IProcessor> m_processorFactory;
+    private final Supplier<IProcessor> m_processorFactory;
 
     private final Consumer<? super RetryProcessor> m_restartCallback;
 
