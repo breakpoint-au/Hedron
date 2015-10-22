@@ -484,7 +484,7 @@ public class EntityUtil
         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
         jti.m_javaConvenienceType = c.isNullable () ? "Long" : "long";
 
-        jti.m_jdbcType = "BigDecimal";
+        //jti.m_jdbcType = "BigDecimal";
         jti.m_jdbcResultSetAccessor = "getBigDecimal";
         setJavaSqlType (jti, "DECIMAL");
         jti.m_javaCastExpression = "(" + "BigDecimal" + ")";
@@ -495,7 +495,7 @@ public class EntityUtil
         jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;// BigDecimal is immutable so is safe to copy
     }
 
-    public static void setInt (final Column c, final ColumnTypeInfo jti, final int upperLimitValue)
+    public static void setInteger (final Column c, final ColumnTypeInfo jti, final int upperLimitValue)
     {
         // Can fit in int.
         jti.m_javaObjectType = "Integer";
@@ -503,11 +503,10 @@ public class EntityUtil
         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
         setHcUtilConversionMethod (jti, "getIntValue");
         jti.m_javaTypeOfLimitValue = "int";
-        jti.m_jdbcType = "Int";
+        //jti.m_jdbcType = "Int";
         jti.m_jdbcResultSetAccessor = "getInt";
         setJavaSqlType (jti, "INTEGER");
-        //        jti.m_javaCastExpression = "(int) (Integer)";
-        jti.m_javaCastExpression = "(Integer)";// remove redundant cast
+        jti.m_javaCastExpression = "(Integer)";
         if (upperLimitValue > Integer.MIN_VALUE)
         {
             jti.m_maxValue = upperLimitValue;
@@ -519,12 +518,35 @@ public class EntityUtil
         jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
     }
 
+    public static void setLong (final Column c, final ColumnTypeInfo jti, final long upperLimitValue)
+    {
+        // Can fit in long.
+        jti.m_javaObjectType = "Long";
+        jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "long";
+        jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
+        setHcUtilConversionMethod (jti, "getLongValue");
+        jti.m_javaTypeOfLimitValue = "long";
+        //jti.m_jdbcType = "Long";
+        jti.m_jdbcResultSetAccessor = "getLong";
+        setJavaSqlType (jti, "BIGINT");
+        jti.m_javaCastExpression = "(Long)";
+        if (upperLimitValue > Long.MIN_VALUE)
+        {
+            jti.m_maxValue = upperLimitValue;
+            jti.m_minValue = -jti.m_maxValue;
+        }
+        jti.m_javaTypeConstantSuffix = "L";
+        jti.m_equalityExpression = getEqualsExpression (c);
+        jti.m_hashCodeExpression = c.isNullable () ? HASHCODE_OBJECT : "(m_column%s ^ (m_column%s >>> 32))";
+        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
+    }
+
     public static void setStringJavaType (final boolean isVarchar, final int size, final ColumnTypeInfo jti)
     {
         //            jti.m_javaType = size == 1 ? "char" : "String";
         jti.m_javaObjectType = jti.m_javaType = "String";
         jti.m_nonPrimitiveTypeJavaLangType = true;
-        jti.m_jdbcType = "String";
+        //jti.m_jdbcType = "String";
         jti.m_jdbcResultSetAccessor = "getString";
         setJavaSqlType (jti, isVarchar ? "VARCHAR" : "CHAR");
         jti.m_javaCastExpression = "(String)";
@@ -565,7 +587,11 @@ public class EntityUtil
             }
             else if (columnType.equals ("integer"))
             {
-                setInt (c, jti, Integer.MIN_VALUE);// Integer.MIN_VALUE = no value checking
+                setInteger (c, jti, Integer.MIN_VALUE);// Integer.MIN_VALUE = no value checking
+            }
+            else if (columnType.equals ("long"))
+            {
+                setLong (c, jti, Long.MIN_VALUE);// Long.MIN_VALUE = no value checking
             }
             else if (columnType.equalsIgnoreCase ("number") || columnType.equalsIgnoreCase ("decimal"))
             {
@@ -585,7 +611,7 @@ public class EntityUtil
                         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
                         setHcUtilConversionMethod (jti, "getByteValue");
                         jti.m_javaTypeOfLimitValue = "byte";
-                        jti.m_jdbcType = "Byte";
+                        //jti.m_jdbcType = "Byte";
                         jti.m_jdbcResultSetAccessor = "getByte";
                         setJavaSqlType (jti, "TINYINT");
                         jti.m_javaCastExpression = "(Byte)";
@@ -604,7 +630,7 @@ public class EntityUtil
                         jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
                         setHcUtilConversionMethod (jti, "getShortValue");
                         jti.m_javaTypeOfLimitValue = "short";
-                        jti.m_jdbcType = "Short";
+                        //jti.m_jdbcType = "Short";
                         jti.m_jdbcResultSetAccessor = "getShort";
                         setJavaSqlType (jti, "SMALLINT");
                         jti.m_javaCastExpression = "(Short)";
@@ -617,28 +643,29 @@ public class EntityUtil
                     }
                     else if (upperLimitValue.compareTo (MAX_INT) < 0)
                     {
-                        setInt (c, jti, upperLimitValue.intValue ());
+                        setInteger (c, jti, upperLimitValue.intValue ());
                     }
                     else if (upperLimitValue.compareTo (MAX_LONG) < 0)
                     {
-                        // Can fit in long.
-                        jti.m_javaObjectType = "Long";
-                        jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "long";
-                        jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                        setHcUtilConversionMethod (jti, "getLongValue");
-                        jti.m_javaTypeOfLimitValue = "long";
-                        jti.m_jdbcType = "Long";
-                        jti.m_jdbcResultSetAccessor = "getLong";
-                        setJavaSqlType (jti, "BIGINT");
-                        jti.m_javaCastExpression = "(Long)";
-                        jti.m_maxValue = upperLimitValue.longValue ();
-                        jti.m_minValue = -jti.m_maxValue;
-                        jti.m_javaTypeConstantSuffix = "L";
-                        jti.m_equalityExpression = getEqualsExpression (c);
-                        jti.m_hashCodeExpression =
-                            c.isNullable () ? HASHCODE_OBJECT : "(m_column%s ^ (m_column%s >>> 32))";
-                        //                            c.isNullable () ? HASHCODE_OBJECT : "(int) (m_column%s ^ (m_column%s >>> 32))";
-                        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
+                        //                        // Can fit in long.
+                        //                        jti.m_javaObjectType = "Long";
+                        //                        jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "long";
+                        //                        jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
+                        //                        setHcUtilConversionMethod (jti, "getLongValue");
+                        //                        jti.m_javaTypeOfLimitValue = "long";
+                        //                        //jti.m_jdbcType = "Long";
+                        //                        jti.m_jdbcResultSetAccessor = "getLong";
+                        //                        setJavaSqlType (jti, "BIGINT");
+                        //                        jti.m_javaCastExpression = "(Long)";
+                        //                        jti.m_maxValue = upperLimitValue.longValue ();
+                        //                        jti.m_minValue = -jti.m_maxValue;
+                        //                        jti.m_javaTypeConstantSuffix = "L";
+                        //                        jti.m_equalityExpression = getEqualsExpression (c);
+                        //                        jti.m_hashCodeExpression =
+                        //                            c.isNullable () ? HASHCODE_OBJECT : "(m_column%s ^ (m_column%s >>> 32))";
+                        //                        //                            c.isNullable () ? HASHCODE_OBJECT : "(int) (m_column%s ^ (m_column%s >>> 32))";
+                        //                        jti.m_copyStyle = ColumnTypeInfo.CopyStyle.ShallowCopy;
+                        setLong (c, jti, upperLimitValue.longValue ());
                     }
                     else
                     {
@@ -655,7 +682,7 @@ public class EntityUtil
                 jti.m_javaObjectType = "Double";
                 jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "double";
                 jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                jti.m_jdbcType = "Double";
+                //jti.m_jdbcType = "Double";
                 jti.m_jdbcResultSetAccessor = "getDouble";
                 setJavaSqlType (jti, "DOUBLE");
                 jti.m_javaCastExpression = "(Double)";
@@ -669,7 +696,7 @@ public class EntityUtil
                 jti.m_javaObjectType = "Boolean";
                 jti.m_javaType = c.isNullable () ? jti.m_javaObjectType : "boolean";
                 jti.m_nonPrimitiveTypeJavaLangType = c.isNullable ();
-                jti.m_jdbcType = "Boolean";
+                //jti.m_jdbcType = "Boolean";
                 jti.m_jdbcResultSetAccessor = "getBoolean";
                 setJavaSqlType (jti, "BIT");
                 jti.m_javaCastExpression = "(Boolean)";
@@ -685,7 +712,7 @@ public class EntityUtil
                 jti.m_javaObjectType = jti.m_javaType = "Timestamp";
                 jti.m_importsJavaType.add ("java.sql.Timestamp");
                 jti.m_nonPrimitiveTypeJavaLangType = true;
-                jti.m_jdbcType = "Timestamp";
+                //jti.m_jdbcType = "Timestamp";
                 jti.m_jdbcResultSetAccessor = "getTimestamp";
                 setJavaSqlType (jti, "TIMESTAMP");
                 jti.m_javaCastExpression = "(java.sql.Timestamp)";
@@ -698,7 +725,7 @@ public class EntityUtil
                 // TODO 4 prove that guid support works
                 jti.m_javaObjectType = jti.m_javaType = "byte[]";
                 jti.m_nonPrimitiveTypeJavaLangType = true;
-                jti.m_jdbcType = "Bytes";
+                //jti.m_jdbcType = "Bytes";
                 jti.m_jdbcResultSetAccessor = "getBytes";
                 setJavaSqlType (jti, "BLOB");
                 jti.m_javaCastExpression = "(byte[])";
@@ -710,7 +737,7 @@ public class EntityUtil
             {
                 jti.m_javaObjectType = jti.m_javaType = "String";
                 jti.m_nonPrimitiveTypeJavaLangType = true;
-                jti.m_jdbcType = "String";
+                //jti.m_jdbcType = "String";
                 jti.m_jdbcResultSetAccessorFormatter = e3 -> String
                     .format ("DaoUtil.getClobAsString (rs, COLUMN_NAMES[%s.Column%s])", e3.getE1 (), e3.getE2 ());
                 jti.m_importsResultSetAccessorFormatter.add ("au.com.breakpoint.hedron.core.dao.DaoUtil");
@@ -732,7 +759,7 @@ public class EntityUtil
                 jti.m_importsJavaType.add ("java.util.List");
                 jti.m_importsEntityType.add (refcursorType);
                 jti.m_nonPrimitiveTypeJavaLangType = true;
-                jti.m_jdbcType = "TBD";
+                //jti.m_jdbcType = "TBD";
                 jti.m_jdbcResultSetAccessor = "getTBD";
                 jti.m_jdbcJavaSqlType = "OracleTypes.CURSOR";
                 jti.m_importsJavaSqlType.add ("oracle.jdbc.OracleTypes");

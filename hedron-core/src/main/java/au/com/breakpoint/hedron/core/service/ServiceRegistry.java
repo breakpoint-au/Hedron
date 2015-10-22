@@ -20,7 +20,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 import au.com.breakpoint.hedron.core.GenericFactory;
 import au.com.breakpoint.hedron.core.HcUtil;
-import au.com.breakpoint.hedron.core.IFactory;
 import au.com.breakpoint.hedron.core.context.ThreadContext;
 import au.com.breakpoint.hedron.core.value.IValue;
 import au.com.breakpoint.hedron.core.value.SafeLazyValue;
@@ -67,7 +66,7 @@ public class ServiceRegistry
     {
         T t = null;
 
-        final IFactory<Object> factory = m_registry.get (key);
+        final Supplier<Object> factory = m_registry.get (key);
 
         if (factory == null && m_chainedServiceRegistry != null)
         {
@@ -78,7 +77,7 @@ public class ServiceRegistry
         else
         {
             ThreadContext.assertFault (factory != null, "No implementation has been registered for key[%s]", key);
-            t = HcUtil.uncheckedCast (factory.newInstance ());
+            t = HcUtil.uncheckedCast (factory.get ());
         }
 
         return t;
@@ -106,7 +105,7 @@ public class ServiceRegistry
      *            specified key
      * @param factory
      */
-    public void register (final Object key, final IFactory<Object> factory)
+    public void register (final Object key, final Supplier<Object> factory)
     {
         checkAndPut (key, factory);
     }
@@ -136,7 +135,7 @@ public class ServiceRegistry
      *            a factory object that will be used to lazy-instantiate the singleton on
      *            first use
      */
-    public <T> void registerSingleton (final Object key, final IFactory<T> factory)
+    public <T> void registerSingleton (final Object key, final Supplier<T> factory)
     {
         doRegisterSingleton (key, factory, -1);
     }
@@ -170,7 +169,7 @@ public class ServiceRegistry
      * @param lifetimeMsec
      *            lifetime of the singleton in milliseconds
      */
-    public <T> void registerTimeLimitedSingleton (final Object key, final IFactory<T> factory, final long lifetimeMsec)
+    public <T> void registerTimeLimitedSingleton (final Object key, final Supplier<T> factory, final long lifetimeMsec)
     {
         doRegisterSingleton (key, factory, lifetimeMsec);
     }
@@ -184,9 +183,9 @@ public class ServiceRegistry
      * @param factory
      *            a factory object that will be used to instantiate the object
      */
-    private void checkAndPut (final Object key, final IFactory<Object> factory)
+    private void checkAndPut (final Object key, final Supplier<Object> factory)
     {
-        final IFactory<Object> storedValue = m_registry.put (key, factory);
+        final Supplier<Object> storedValue = m_registry.put (key, factory);
         ThreadContext.assertFault (storedValue == null, "An implementation has already been registered for key[%s]",
             key);
     }
@@ -203,10 +202,10 @@ public class ServiceRegistry
      * @param lifetimeMsec
      *            lifetime of the singleton in milliseconds, or -1 for non-time-limited
      */
-    private <T> void doRegisterSingleton (final Object key, final IFactory<T> factory, final long lifetimeMsec)
+    private <T> void doRegisterSingleton (final Object key, final Supplier<T> factory, final long lifetimeMsec)
     {
         // Create a threadsafe singleton creator that uses the supplied factory once.
-        final Supplier<T> singletonInstantiator = factory::newInstance;
+        final Supplier<T> singletonInstantiator = factory::get;
 
         // Implement lifetime policy at this layer. Either singleton or time-limited singleton.
         final IValue<T> singletonValue =
@@ -214,7 +213,7 @@ public class ServiceRegistry
                 .of (ServiceRegistry.class, "timeLimitedSingleton", singletonInstantiator, lifetimeMsec);
 
         // Wrap it in a factory so it can be stored in the map.
-        final IFactory<Object> factoryWrapper = singletonValue::get;
+        final Supplier<Object> factoryWrapper = singletonValue::get;
 
         checkAndPut (key, factoryWrapper);
     }
@@ -226,7 +225,7 @@ public class ServiceRegistry
      *            class name used to instantiate an object on request
      * @return the created object instance
      */
-    private IFactory<Object> getReflectionFactory (final Class<?> implClass)
+    private static Supplier<Object> getReflectionFactory (final Class<?> implClass)
     {
         return () -> HcUtil.instantiate (implClass);
     }
@@ -235,5 +234,5 @@ public class ServiceRegistry
     private final ServiceRegistry m_chainedServiceRegistry;
 
     /** The key-factory registry */
-    private final ConcurrentMap<Object, IFactory<Object>> m_registry = GenericFactory.newConcurrentHashMap ();
+    private final ConcurrentMap<Object, Supplier<Object>> m_registry = GenericFactory.newConcurrentHashMap ();
 }

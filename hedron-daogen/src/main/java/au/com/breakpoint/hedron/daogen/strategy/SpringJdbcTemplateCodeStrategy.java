@@ -45,6 +45,37 @@ import au.com.breakpoint.hedron.daogen.SmartFileJavaClass;
 import au.com.breakpoint.hedron.daogen.StoredProcedure;
 import au.com.breakpoint.hedron.daogen.StoredProcedureResultSet;
 
+/**
+ * 18.1.1 Choosing an approach for JDBC database access
+ *
+ * You can choose among several approaches to form the basis for your JDBC database
+ * access. In addition to three flavors of the JdbcTemplate, a new SimpleJdbcInsert and
+ * SimplejdbcCall approach optimizes database metadata, and the RDBMS Object style takes a
+ * more object-oriented approach similar to that of JDO Query design. Once you start using
+ * one of these approaches, you can still mix and match to include a feature from a
+ * different approach. All approaches require a JDBC 2.0-compliant driver, and some
+ * advanced features require a JDBC 3.0 driver.
+ *
+ * JdbcTemplate is the classic Spring JDBC approach and the most popular. This
+ * "lowest level" approach and all others use a JdbcTemplate under the covers.
+ *
+ * NamedParameterJdbcTemplate wraps a JdbcTemplate to provide named parameters instead of
+ * the traditional JDBC "?" placeholders. This approach provides better documentation and
+ * ease of use when you have multiple parameters for an SQL statement.
+ *
+ * SimpleJdbcInsert and SimpleJdbcCall optimize database metadata to limit the amount of
+ * necessary configuration. This approach simplifies coding so that you only need to
+ * provide the name of the table or procedure and provide a map of parameters matching the
+ * column names. This only works if the database provides adequate metadata. If the
+ * database doesn’t provide this metadata, you will have to provide explicit configuration
+ * of the parameters.
+ *
+ * RDBMS Objects including MappingSqlQuery, SqlUpdate and StoredProcedure requires you to
+ * create reusable and thread-safe objects during initialization of your data access
+ * layer. This approach is modeled after JDO Query wherein you define your query string,
+ * declare parameters, and compile the query. Once you do that, execute methods can be
+ * called multiple times with various parameter values passed in.
+ */
 public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 {
     @Override
@@ -540,7 +571,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 storedProcedurePhysicalName);
             pw.printf (" * Spring JDBC template database access.%n");
             pw.printf (" */%n");
-            // TODO 1 implement Function too if shouldReturnValues
 
             pw.addClassImport ("au.com.breakpoint.hedron.core.dao.BaseExecutableDao");
             pw.printf ("public class %sStoredProcDao extends BaseExecutableDao<%s>%n", storedProcedureName,
@@ -599,209 +629,209 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("    public %s execute (%s)%n", returnTypeString,
                 EntityUtil.getStringParametersArgs (inParameters));
             pw.printf ("    {%n");
-            if (m_shouldUseSimpleJdbcCall)
+            //            if (m_shouldUseSimpleJdbcCall)
+            //            {
+            //                pw.printf ("        // Set up in parameters.%n");
+            //                pw.printf ("        final SimpleJdbcCall sjc = new SimpleJdbcCall (m_dataSource);%n");
+            //                if (HcUtil.safeGetLength (schema.getName ()) > 0)
+            //                {
+            //                    pw.printf ("        sjc = sjc.withSchemaName (\"%s\");%n", schema.getName ());
+            //                }
+            //                final String catalogName = sp.getCatalogName ();
+            //                if (catalogName != null)
+            //                {
+            //                    pw.printf ("        sjc = sjc.withCatalogName (\"%s\");%n", catalogName);
+            //                }
+            //                pw.printf ("        sjc = sjc.with%sName (STORED_PROCEDURE_NAME);%n",
+            //                    sp.getProcedureType () == StoredProcedure.ProcedureType.FUNCTION ? "Function" : "Procedure");
+            //                pw.printf ("%n");
+            //                pw.printf ("        final MapSqlParameterSource sps = new MapSqlParameterSource ();%n");
+            //
+            //                if (true)
+            //                {
+            //                    for (final Parameter p : inParameters)
+            //                    {
+            //                        final Column c = p.getColumn ();
+            //                        pw.printf ("        sps = sps.addValue (\"%s\", value%s);%n", c.getPhysicalName (),
+            //                            c.getName ());
+            //                    }
+            //                }
+            //                pw.printf ("%n");
+            //                pw.printf ("        // Call the stored procedure.%n");
+            //                if (!shouldReturnValues)
+            //                {
+            //                    pw.printf ("        sjc.execute (sps);%n");
+            //                }
+            //                else
+            //                {
+            //                    pw.printf ("        final Map<String, Object> outValues = sjc.execute (sps);%n");
+            //                    pw.printf ("%n");
+            //                    pw.printf ("        // Gather out/return parameters.%n");
+            //                    pw.printf ("        final Result r = new Result ();%n");
+            //                    for (final Parameter p : outParameters)
+            //                    {
+            //                        final Column c = p.getColumn ();
+            //                        final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
+            //
+            //                        if (jti.m_javaConversionMethod != null)
+            //                        {
+            //                            pw.addClassImports (jti.m_importsConversionMethod);
+            //                            pw.printf ("        r.m_value%s = %s (outValues.get (\"%s\"));%n", c.getName (),
+            //                                jti.m_javaConversionMethod, c.getPhysicalName ());
+            //                        }
+            //                        else
+            //                        {
+            //                            pw.printf ("        r.m_value%s = (%s) outValues.get (\"%s\");%n", c.getName (),
+            //                                jti.m_jdbcType, c.getPhysicalName ());
+            //                        }
+            //                    }
+            //
+            //                    pw.printf ("%n");
+            //                    pw.printf ("        return r;%n");
+            //                }
+            //            }
+            //            else
+            //            {
+            pw.printf ("        final TypesafeStoredProcedure sp = new TypesafeStoredProcedure (m_dataSource);%n");
+            pw.printf ("        %ssp.execute (%s);%n", shouldReturnValues ? "return " : "",
+                EntityUtil.getStringParametersArgsRef (inParameters));
+            pw.printf ("    }%n");
+            pw.printf ("%n");
+            pw.printf ("    /** IExecutableDao implementatio */%n");
+            pw.printf ("    @Override%n");
+            pw.printf ("    public void performExecute (final %s p)%n", parametersClassName);
+            pw.printf ("    {%n");
+            pw.printf ("        execute (%s);%n", EntityUtil.getStringParameterClassParameters (inParameters, "p"));
+            pw.printf ("    }%n");
+            pw.printf ("%n");
+            pw.printf (
+                "    /** Create a subclass of Spring's StoredProcedure to use its protected execute () method */%n");
+            pw.addClassImport ("org.springframework.jdbc.object.StoredProcedure");
+            pw.printf ("    private static class TypesafeStoredProcedure extends StoredProcedure%n");
+            pw.printf ("    {%n");
+            pw.printf ("        public TypesafeStoredProcedure (final DataSource ds)%n");
+            pw.printf ("        {%n");
+            pw.printf ("            setDataSource (ds);%n");
+            pw.printf ("            setFunction (%s);%n",
+                sp.getProcedureType () == StoredProcedure.ProcedureType.FUNCTION);
+            pw.printf ("            setSql (STORED_PROCEDURE_NAME);%n");
+            if (resultSets.size () > 0)
             {
-                pw.printf ("        // Set up in parameters.%n");
-                pw.printf ("        final SimpleJdbcCall sjc = new SimpleJdbcCall (m_dataSource);%n");
-                if (HcUtil.safeGetLength (schema.getName ()) > 0)
-                {
-                    pw.printf ("        sjc = sjc.withSchemaName (\"%s\");%n", schema.getName ());
-                }
-                final String catalogName = sp.getCatalogName ();
-                if (catalogName != null)
-                {
-                    pw.printf ("        sjc = sjc.withCatalogName (\"%s\");%n", catalogName);
-                }
-                pw.printf ("        sjc = sjc.with%sName (STORED_PROCEDURE_NAME);%n",
-                    sp.getProcedureType () == StoredProcedure.ProcedureType.FUNCTION ? "Function" : "Procedure");
                 pw.printf ("%n");
-                pw.printf ("        final MapSqlParameterSource sps = new MapSqlParameterSource ();%n");
+                pw.printf ("            // Result sets.%n");
+                for (final StoredProcedureResultSet sprs : resultSets)
+                {
+                    pw.printf (
+                        "            declareParameter (new SqlReturnResultSet (VARIABLE_NAME_%s, %sDao.ROW_MAPPER));%n",
+                        sprs.getName (), sprs.getType ());
+                }
+            }
+            if (parameters.size () > 0)
+            {
+                pw.printf ("%n");
+                pw.printf ("            // Parameters.%n");
+                for (final Parameter p : parameters)
+                {
+                    final Column c = p.getColumn ();
 
-                if (true)
-                {
-                    for (final Parameter p : inParameters)
+                    final String sqlParameterTypeName = EntityUtil.getSqlParameterTypeName (p.getDirection ());
+                    pw.addClassImport ("org.springframework.jdbc.core.%s", sqlParameterTypeName);
+
+                    if (sqlParameterTypeName != null)
                     {
-                        final Column c = p.getColumn ();
-                        pw.printf ("        sps = sps.addValue (\"%s\", value%s);%n", c.getPhysicalName (),
-                            c.getName ());
-                    }
-                }
-                pw.printf ("%n");
-                pw.printf ("        // Call the stored procedure.%n");
-                if (!shouldReturnValues)
-                {
-                    pw.printf ("        sjc.execute (sps);%n");
-                }
-                else
-                {
-                    pw.printf ("        final Map<String, Object> outValues = sjc.execute (sps);%n");
-                    pw.printf ("%n");
-                    pw.printf ("        // Gather out/return parameters.%n");
-                    pw.printf ("        final Result r = new Result ();%n");
-                    for (final Parameter p : outParameters)
-                    {
-                        final Column c = p.getColumn ();
                         final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
-
-                        if (jti.m_javaConversionMethod != null)
+                        pw.addClassImports (jti.m_importsJavaSqlType);
+                        if (jti.m_rowMapperType != null)
                         {
-                            pw.addClassImports (jti.m_importsConversionMethod);
-                            pw.printf ("        r.m_value%s = %s (outValues.get (\"%s\"));%n", c.getName (),
-                                jti.m_javaConversionMethod, c.getPhysicalName ());
+                            pw.printf (
+                                "            declareParameter (new %s (VARIABLE_NAME_%s, %s, %sDao.ROW_MAPPER));%n",
+                                sqlParameterTypeName, c.getName (), jti.m_jdbcJavaSqlType, jti.m_rowMapperType);
                         }
                         else
                         {
-                            pw.printf ("        r.m_value%s = (%s) outValues.get (\"%s\");%n", c.getName (),
-                                jti.m_jdbcType, c.getPhysicalName ());
+                            pw.printf ("            declareParameter (new %s (VARIABLE_NAME_%s, %s));%n",
+                                sqlParameterTypeName, c.getName (), jti.m_jdbcJavaSqlType);
                         }
                     }
-
-                    pw.printf ("%n");
-                    pw.printf ("        return r;%n");
                 }
+            }
+            pw.printf ("%n");
+            pw.printf ("            compile ();%n");
+            pw.printf ("        }%n");
+            pw.printf ("%n");
+            pw.printf ("        public %s execute (%s)%n", returnTypeString,
+                EntityUtil.getStringParametersArgs (inParameters));
+            pw.printf ("        {%n");
+
+            pw.addClassImport ("java.util.Map");
+            pw.addClassImport ("java.util.HashMap");
+            pw.printf ("            final Map<String, Object> inParams = new HashMap<String, Object> ();%n");
+            for (final Parameter p : inParameters)
+            {
+                final Column c = p.getColumn ();
+
+                final String name = c.getName ();
+                pw.printf ("            inParams.put (VARIABLE_NAME_%s, value%s);%n", name, name);
+            }
+            pw.printf ("%n");
+            if (!shouldReturnValues)
+            {
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
+                pw.printf ("            DaoUtil.performExecute (this, inParams, STORED_PROCEDURE_NAME);%n");
             }
             else
             {
-                pw.printf ("        final TypesafeStoredProcedure sp = new TypesafeStoredProcedure (m_dataSource);%n");
-                pw.printf ("        %ssp.execute (%s);%n", shouldReturnValues ? "return " : "",
-                    EntityUtil.getStringParametersArgsRef (inParameters));
-                pw.printf ("    }%n");
-                pw.printf ("%n");
-                pw.printf ("    /** IExecutableDao implementatio */%n");
-                pw.printf ("    @Override%n");
-                pw.printf ("    public void performExecute (final %s p)%n", parametersClassName);
-                pw.printf ("    {%n");
-                pw.printf ("        execute (%s);%n", EntityUtil.getStringParameterClassParameters (inParameters, "p"));
-                pw.printf ("    }%n");
-                pw.printf ("%n");
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
                 pw.printf (
-                    "    /** Create a subclass of Spring's StoredProcedure to use its protected execute () method */%n");
-                pw.addClassImport ("org.springframework.jdbc.object.StoredProcedure");
-                pw.printf ("    private static class TypesafeStoredProcedure extends StoredProcedure%n");
-                pw.printf ("    {%n");
-                pw.printf ("        public TypesafeStoredProcedure (final DataSource ds)%n");
-                pw.printf ("        {%n");
-                pw.printf ("            setDataSource (ds);%n");
-                pw.printf ("            setFunction (%s);%n",
-                    sp.getProcedureType () == StoredProcedure.ProcedureType.FUNCTION);
-                pw.printf ("            setSql (STORED_PROCEDURE_NAME);%n");
-                if (resultSets.size () > 0)
-                {
-                    pw.printf ("%n");
-                    pw.printf ("            // Result sets.%n");
-                    for (final StoredProcedureResultSet sprs : resultSets)
-                    {
-                        pw.printf (
-                            "            declareParameter (new SqlReturnResultSet (VARIABLE_NAME_%s, %sDao.ROW_MAPPER));%n",
-                            sprs.getName (), sprs.getType ());
-                    }
-                }
-                if (parameters.size () > 0)
-                {
-                    pw.printf ("%n");
-                    pw.printf ("            // Parameters.%n");
-                    for (final Parameter p : parameters)
-                    {
-                        final Column c = p.getColumn ();
-
-                        final String sqlParameterTypeName = EntityUtil.getSqlParameterTypeName (p.getDirection ());
-                        pw.addClassImport ("org.springframework.jdbc.core.%s", sqlParameterTypeName);
-
-                        if (sqlParameterTypeName != null)
-                        {
-                            final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
-                            pw.addClassImports (jti.m_importsJavaSqlType);
-                            if (jti.m_rowMapperType != null)
-                            {
-                                pw.printf (
-                                    "            declareParameter (new %s (VARIABLE_NAME_%s, %s, %sDao.ROW_MAPPER));%n",
-                                    sqlParameterTypeName, c.getName (), jti.m_jdbcJavaSqlType, jti.m_rowMapperType);
-                            }
-                            else
-                            {
-                                pw.printf ("            declareParameter (new %s (VARIABLE_NAME_%s, %s));%n",
-                                    sqlParameterTypeName, c.getName (), jti.m_jdbcJavaSqlType);
-                            }
-                        }
-                    }
-                }
+                    "            final Map<?, ?> outParams = DaoUtil.performExecute (this, inParams, STORED_PROCEDURE_NAME);%n");
                 pw.printf ("%n");
-                pw.printf ("            compile ();%n");
-                pw.printf ("        }%n");
-                pw.printf ("%n");
-                pw.printf ("        public %s execute (%s)%n", returnTypeString,
-                    EntityUtil.getStringParametersArgs (inParameters));
-                pw.printf ("        {%n");
+                pw.printf ("            final Result r = new Result ();%n");
+                for (final Parameter p : outParameters)
+                {
+                    final Column c = p.getColumn ();
+                    final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
+                    final String name = c.getName ();
 
-                pw.addClassImport ("java.util.Map");
-                pw.addClassImport ("java.util.HashMap");
-                pw.printf ("            final Map<String, Object> inParams = new HashMap<String, Object> ();%n");
-                for (final Parameter p : inParameters)
+                    //                        pw.printf ("            r.m_value%s = %s outParams.get (VARIABLE_NAME_%s);%n", name, jti.m_javaCastExpression, name);
+                    pw.printf (
+                        "            r.m_value%s = %sDaoUtil.getOutParameter (outParams, VARIABLE_NAME_%s, STORED_PROCEDURE_NAME);%n",
+                        name, jti.m_javaCastExpression == null ? "" : " " + jti.m_javaCastExpression, name);
+                }
+
+                for (final StoredProcedureResultSet sprs : resultSets)
+                {
+                    final String name = sprs.getName ();
+                    pw.printf (
+                        "            r.m_resultSet%s = au.com.breakpoint.hedron.core.HcUtil.uncheckedCast (outParams.get (VARIABLE_NAME_%s));%n",
+                        name, name);
+                }
+
+                pw.printf ("%n");
+                pw.printf ("            return r;%n");
+            }
+            pw.printf ("        }%n");
+            pw.printf ("%n");
+            pw.printf ("        /** Name of the stored procedure in the database */%n");
+            pw.printf ("        private static final String STORED_PROCEDURE_NAME = \"%s\";%n",
+                storedProcedurePhysicalName);
+            if (parameters.size () > 0 || resultSets.size () > 0)
+            {
+                pw.printf ("%n");
+                pw.printf ("        /** Variable names used by the stored procedure */%n");
+                for (final Parameter p : parameters)
                 {
                     final Column c = p.getColumn ();
 
                     final String name = c.getName ();
-                    pw.printf ("            inParams.put (VARIABLE_NAME_%s, value%s);%n", name, name);
+                    pw.printf ("        private static final String VARIABLE_NAME_%s = \"%s\";%n", name, name);
                 }
-                pw.printf ("%n");
-                if (!shouldReturnValues)
+                for (final StoredProcedureResultSet sprs : resultSets)
                 {
-                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
-                    pw.printf ("            DaoUtil.performExecute (this, inParams, STORED_PROCEDURE_NAME);%n");
-                }
-                else
-                {
-                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
-                    pw.printf (
-                        "            final Map<?, ?> outParams = DaoUtil.performExecute (this, inParams, STORED_PROCEDURE_NAME);%n");
-                    pw.printf ("%n");
-                    pw.printf ("            final Result r = new Result ();%n");
-                    for (final Parameter p : outParameters)
-                    {
-                        final Column c = p.getColumn ();
-                        final ColumnTypeInfo jti = EntityUtil.getColumnTypeInfo (c);
-                        final String name = c.getName ();
-
-                        //                        pw.printf ("            r.m_value%s = %s outParams.get (VARIABLE_NAME_%s);%n", name, jti.m_javaCastExpression, name);
-                        pw.printf (
-                            "            r.m_value%s = %sDaoUtil.getOutParameter (outParams, VARIABLE_NAME_%s, STORED_PROCEDURE_NAME);%n",
-                            name, jti.m_javaCastExpression == null ? "" : " " + jti.m_javaCastExpression, name);
-                    }
-
-                    for (final StoredProcedureResultSet sprs : resultSets)
-                    {
-                        final String name = sprs.getName ();
-                        pw.printf (
-                            "            r.m_resultSet%s = au.com.breakpoint.hedron.core.HcUtil.uncheckedCast (outParams.get (VARIABLE_NAME_%s));%n",
-                            name, name);
-                    }
-
-                    pw.printf ("%n");
-                    pw.printf ("            return r;%n");
-                }
-                pw.printf ("        }%n");
-                pw.printf ("%n");
-                pw.printf ("        /** Name of the stored procedure in the database */%n");
-                pw.printf ("        private static final String STORED_PROCEDURE_NAME = \"%s\";%n",
-                    storedProcedurePhysicalName);
-                if (parameters.size () > 0 || resultSets.size () > 0)
-                {
-                    pw.printf ("%n");
-                    pw.printf ("        /** Variable names used by the stored procedure */%n");
-                    for (final Parameter p : parameters)
-                    {
-                        final Column c = p.getColumn ();
-
-                        final String name = c.getName ();
-                        pw.printf ("        private static final String VARIABLE_NAME_%s = \"%s\";%n", name, name);
-                    }
-                    for (final StoredProcedureResultSet sprs : resultSets)
-                    {
-                        final String name = sprs.getName ();
-                        pw.printf ("        private static final String VARIABLE_NAME_%s = \"%s\";%n", name, name);
-                    }
+                    final String name = sprs.getName ();
+                    pw.printf ("        private static final String VARIABLE_NAME_%s = \"%s\";%n", name, name);
                 }
             }
+            //            }
             pw.printf ("    }%n");
             pw.printf ("}%n");
         }
@@ -1337,32 +1367,31 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
                 pw.printf ("    @Override%n");
                 pw.printf ("    public void insert (final %s e)%n", entityName);
                 pw.printf ("    {%n");
-                if (m_shouldUseSimpleJdbcInsert)
-                {
-                    /////////// NOT CURRENTLY USED //////////
-                    pw.printf (
-                        "        SimpleJdbcInsert sji = new SimpleJdbcInsert (m_dataSource).withTableName (ENTITY_NAME);%n");
-                    pw.printf ("    %n");
-                    pw.printf ("        final Map<String, Object> columnValues = new HashMap<String, Object> (%s);%n",
-                        columns.size ());
-                    for (final Column c : nonIdentityColumns)
-                    {
-                        final String columnName = c.getName ();
-                        pw.printf ("        columnValues.put (COLUMN_NAMES[%s.Column%s], e.get%s ());%n", entityName,
-                            columnName, columnName);
-                    }
-                    pw.printf ("    %n");
-                    pw.printf ("        sji.execute (columnValues);%n");
-                }
-                else
-                {
-                    pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
-                    pw.printf (
-                        "        final int updateCount = DaoUtil.performInsert (m_dataSource, e, SQL_INSERT);%n");
-                    addClassImportThreadContext (pw);
-                    pw.printf ("        ThreadContext.assertError (updateCount == 1, \"%sDao insert failed\");%n",
-                        entityName);
-                }
+                //                if (m_shouldUseSimpleJdbcInsert)
+                //                {
+                //                    /////////// NOT CURRENTLY USED //////////
+                //                    pw.printf (
+                //                        "        SimpleJdbcInsert sji = new SimpleJdbcInsert (m_dataSource).withTableName (ENTITY_NAME);%n");
+                //                    pw.printf ("    %n");
+                //                    pw.printf ("        final Map<String, Object> columnValues = new HashMap<String, Object> (%s);%n",
+                //                        columns.size ());
+                //                    for (final Column c : nonIdentityColumns)
+                //                    {
+                //                        final String columnName = c.getName ();
+                //                        pw.printf ("        columnValues.put (COLUMN_NAMES[%s.Column%s], e.get%s ());%n", entityName,
+                //                            columnName, columnName);
+                //                    }
+                //                    pw.printf ("    %n");
+                //                    pw.printf ("        sji.execute (columnValues);%n");
+                //                }
+                //                else
+                //                {
+                pw.addClassImport ("au.com.breakpoint.hedron.core.dao.DaoUtil");
+                pw.printf ("        final int updateCount = DaoUtil.performInsert (m_dataSource, e, SQL_INSERT);%n");
+                addClassImportThreadContext (pw);
+                pw.printf ("        ThreadContext.assertError (updateCount == 1, \"%sDao insert failed\");%n",
+                    entityName);
+                //                }
                 pw.printf ("    }%n");
             }
             if (needUpdate)
@@ -1612,7 +1641,8 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             pw.printf ("    {%n");
             pw.printf ("        return new %s ();%n", entityName);
             pw.printf ("    }%n");
-            if (needUpdate || m_shouldUseSimpleJdbcInsert && canCreate)
+            //            if (needUpdate || m_shouldUseSimpleJdbcInsert && canCreate)
+            if (needUpdate)
             {
                 pw.printf ("%n");
                 pw.printf ("    /** The physical name of the database entity */%n", entityName);
@@ -1687,16 +1717,16 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
             }
             if (canCreate)
             {
-                if (!m_shouldUseSimpleJdbcInsert)
+                //                if (!m_shouldUseSimpleJdbcInsert)
+                //                {
+                pw.printf ("    private static final String SQL_INSERT = \"insert into %s (%s) values (",
+                    entityPhysicalName, EntityUtil.getStringColumnPhysicalNames (nonIdentityColumns));
+                for (int i = 0; i < nonIdentityColumns.size (); ++i)
                 {
-                    pw.printf ("    private static final String SQL_INSERT = \"insert into %s (%s) values (",
-                        entityPhysicalName, EntityUtil.getStringColumnPhysicalNames (nonIdentityColumns));
-                    for (int i = 0; i < nonIdentityColumns.size (); ++i)
-                    {
-                        pw.printf ("?%s", i == nonIdentityColumns.size () - 1 ? "" : ", ");
-                    }
-                    pw.printf (")\";%n");
+                    pw.printf ("?%s", i == nonIdentityColumns.size () - 1 ? "" : ", ");
                 }
+                pw.printf (")\";%n");
+                //                }
             }
             if (needUpdate)
             {
@@ -1908,25 +1938,25 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
         return sb.toString ();
     }
 
-    public static void setShouldUseSimpleJdbcCall (final boolean shouldUseSimpleJdbcCall)
-    {
-        m_shouldUseSimpleJdbcCall = shouldUseSimpleJdbcCall;
-    }
-
-    public static void setShouldUseSimpleJdbcInsert (final boolean shouldUseSimpleJdbcInsert)
-    {
-        m_shouldUseSimpleJdbcInsert = shouldUseSimpleJdbcInsert;
-    }
-
-    public static boolean shouldUseSimpleJdbcCall ()
-    {
-        return m_shouldUseSimpleJdbcCall;
-    }
-
-    public static boolean shouldUseSimpleJdbcInsert ()
-    {
-        return m_shouldUseSimpleJdbcInsert;
-    }
+    //    public static void setShouldUseSimpleJdbcCall (final boolean shouldUseSimpleJdbcCall)
+    //    {
+    //        m_shouldUseSimpleJdbcCall = shouldUseSimpleJdbcCall;
+    //    }
+    //
+    //    public static void setShouldUseSimpleJdbcInsert (final boolean shouldUseSimpleJdbcInsert)
+    //    {
+    //        m_shouldUseSimpleJdbcInsert = shouldUseSimpleJdbcInsert;
+    //    }
+    //
+    //    public static boolean shouldUseSimpleJdbcCall ()
+    //    {
+    //        return m_shouldUseSimpleJdbcCall;
+    //    }
+    //
+    //    public static boolean shouldUseSimpleJdbcInsert ()
+    //    {
+    //        return m_shouldUseSimpleJdbcInsert;
+    //    }
 
     private static void appendSpaces (final StringBuilder sb, final int paddingSpaces)
     {
@@ -1983,7 +2013,6 @@ public class SpringJdbcTemplateCodeStrategy implements IRelationCodeStrategy
 
     private static final String DIRECTORY_ENTITY = "entity";
 
-    private static boolean m_shouldUseSimpleJdbcCall;// false because doesn't work with Sybase
-
-    private static boolean m_shouldUseSimpleJdbcInsert;
+    //private static boolean m_shouldUseSimpleJdbcCall;// false because doesn't work with Sybase
+    //private static boolean m_shouldUseSimpleJdbcInsert;
 }

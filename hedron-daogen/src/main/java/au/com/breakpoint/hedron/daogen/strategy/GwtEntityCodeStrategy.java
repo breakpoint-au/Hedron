@@ -53,19 +53,12 @@ public class GwtEntityCodeStrategy implements IRelationCodeStrategy
     @Override
     public List<String> generateDao (final DbEnum en, final Schema schema)
     {
-        // TODO Auto-generated method stub
+        // Only entities are generated.
         return null;
     }
 
     @Override
     public List<String> generateDao (final IRelation ir, final Schema schema, final List<Capability> capabilities)
-    {
-        // Only entities are generated.
-        return GenericFactory.newArrayList ();
-    }
-
-    @Override
-    public List<String> generateStoredProcDao (final StoredProcedure sp, final Schema schema)
     {
         // Only entities are generated.
         return GenericFactory.newArrayList ();
@@ -222,6 +215,13 @@ public class GwtEntityCodeStrategy implements IRelationCodeStrategy
             }
             pw.printf ("}%n");
         }
+    }
+
+    @Override
+    public List<String> generateStoredProcDao (final StoredProcedure sp, final Schema schema)
+    {
+        // Only entities are generated.
+        return GenericFactory.newArrayList ();
     }
 
     @Override

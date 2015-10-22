@@ -16,9 +16,9 @@
 //
 package au.com.breakpoint.hedron.core.dao;
 
+import java.util.function.Function;
 import javax.sql.DataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
-import au.com.breakpoint.hedron.core.IFactoryArg;
 
 public class DataSourceUtil
 {
@@ -32,15 +32,15 @@ public class DataSourceUtil
      */
     public static DataSource createDataSource (final DatabaseDefinition d)
     {
-        return m_dataSourceFactory.newInstance (d);
+        return m_dataSourceFactory.apply (d);
     }
 
-    public static IFactoryArg<DatabaseDefinition, DataSource> getDataSourceFactory ()
+    public static Function<DatabaseDefinition, DataSource> getDataSourceFactory ()
     {
         return m_dataSourceFactory;
     }
 
-    public static void setDataSourceFactory (final IFactoryArg<DatabaseDefinition, DataSource> dataSourceFactory)
+    public static void setDataSourceFactory (final Function<DatabaseDefinition, DataSource> dataSourceFactory)
     {
         m_dataSourceFactory = dataSourceFactory;
     }
@@ -49,7 +49,7 @@ public class DataSourceUtil
      * Configurable policy for creating the data source (defaults to DBCP2
      * BasicDataSource).
      */
-    private static volatile IFactoryArg<DatabaseDefinition, DataSource> m_dataSourceFactory = d ->
+    private static volatile Function<DatabaseDefinition, DataSource> m_dataSourceFactory = d ->
     {
         final BasicDataSource bds = new BasicDataSource ();
 

@@ -64,7 +64,7 @@ public class ColumnTypeInfo
 
     public Function<E3<String, String, String>, String> m_jdbcResultSetAccessorFormatter;
 
-    public String m_jdbcType;// the java type to be used when retrieving from StoredProcedureResultSet etc
+    //public String m_jdbcType;// the java type to be used when retrieving from StoredProcedureResultSet etc
 
     public long m_maxValue = Long.MIN_VALUE;// used when storing in an intrinsic type rather than java.math.BigDecimal
 

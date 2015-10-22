@@ -1,5 +1,5 @@
 // To install/upgrade gradle wrapper
-//      gradle wrapper --gradle-version 2.6
+//      gradle wrapper --gradle-version 2.7
 
 // To build all
 //      gradlew
@@ -16,14 +16,12 @@ buildscript {
     }
 }
 
-ext {
-    githubProjectName = rootProject.name    
-}
+def githubProjectName = rootProject.name
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'eclipse'
-    
+
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
