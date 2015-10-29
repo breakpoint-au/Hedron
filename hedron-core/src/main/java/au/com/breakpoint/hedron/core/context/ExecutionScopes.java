@@ -38,13 +38,15 @@ public class ExecutionScopes
      * @param service
      *            Instance of the service to call
      */
-    public static void executeFaultBarrier (final Runnable service)
+    public static boolean executeFaultBarrier (final Runnable service)
     {
-        executeFaultBarrier (service, null);
+        return executeFaultBarrier (service, null);
     }
 
-    public static void executeFaultBarrier (final Runnable service, final Consumer<Throwable> onException)
+    public static boolean executeFaultBarrier (final Runnable service, final Consumer<Throwable> onException)
     {
+        boolean ok = false;
+
         // NOTE: Java try-with-resources closes the AutoCloseable scope before
         // executing the catch () block, thus losing ThreadContext's context id.
         // Thus any exception logging needs to be done in an inner scope.
@@ -54,6 +56,7 @@ public class ExecutionScopes
             {
                 // Execute the business service method.
                 service.run ();
+                ok = true;
             }
             catch (final Throwable e)
             {
@@ -67,6 +70,8 @@ public class ExecutionScopes
                 }
             }
         }
+
+        return ok;
     }
 
     /**
