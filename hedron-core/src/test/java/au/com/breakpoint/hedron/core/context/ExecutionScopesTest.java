@@ -16,49 +16,64 @@
 //
 package au.com.breakpoint.hedron.core.context;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.junit.Test;
-import au.com.breakpoint.hedron.core.context.ExecutionScope;
-import au.com.breakpoint.hedron.core.context.ExecutionScopes;
-import au.com.breakpoint.hedron.core.context.IScope;
-import au.com.breakpoint.hedron.core.context.ThreadContext;
 
 public class ExecutionScopesTest
 {
     @Test
     public void testExecuteFaultBarrierFaultIExecutable ()
     {
-        ExecutionScopes.executeFaultBarrier (new ExceptionalSupplier (true));
-        assertTrue (true);// exception got caught ok
+        final Optional<String> result = ExecutionScopes.executeFaultBarrier (new ExceptionalSupplier (true));
+        assertTrue (!result.isPresent ()); // exception got caught ok, null returned
     }
 
     @Test
     public void testExecuteFaultBarrierFaultRunnable ()
     {
-        ExecutionScopes.executeFaultBarrier (new ExceptionalRunnable (true));
-        assertTrue (true);// exception got caught ok
+        final boolean ok = ExecutionScopes.executeFaultBarrier (new ExceptionalRunnable (true));
+        assertTrue (!ok); // exception got caught ok
     }
 
     @Test
     public void testExecuteFaultBarrierIExecutable ()
     {
-        ExecutionScopes.executeFaultBarrier (new ExceptionalSupplier (false));
-        assertTrue (true);// exception got caught ok
+        final Optional<String> result = ExecutionScopes.executeFaultBarrier (new ExceptionalSupplier (false));
+        assertTrue (!result.isPresent ()); // exception got caught ok, null returned
+    }
+
+    @Test
+    public void testExecuteFaultBarrierNoFault ()
+    {
+        final Optional<String> result = ExecutionScopes.executeFaultBarrier ( () -> "success");
+        assertTrue (result.isPresent ()); // no exception
+        assertEquals ("success", result.get ());
     }
 
     @Test
     public void testExecuteFaultBarrierRemoveRunnable ()
     {
-        ExecutionScopes.executeFaultBarrier (new ExceptionalRunnable (false));
-        assertTrue (true);// exception got caught ok
+        final boolean ok = ExecutionScopes.executeFaultBarrier (new ExceptionalRunnable (false));
+        assertTrue (!ok); // exception got caught ok
     }
 
     @Test
     public void testExecuteFaultBarrierRunnable ()
     {
-        ExecutionScopes.executeFaultBarrier (new ExceptionalRunnable (false));
-        assertTrue (true);// exception got caught ok
+        final boolean ok = ExecutionScopes.executeFaultBarrier (new ExceptionalRunnable (false));
+        assertTrue (!ok); // exception got caught ok
+    }
+
+    @Test
+    public void testExecuteFaultBarrierRunnableNoFault ()
+    {
+        final boolean ok = ExecutionScopes.executeFaultBarrier ( () ->
+        {
+        });
+        assertTrue (ok); // no exception
     }
 
     @Test
@@ -115,7 +130,7 @@ public class ExecutionScopesTest
         private final boolean m_wrapAsFault;
     }
 
-    private static class ExceptionalSupplier implements Supplier<Void>
+    private static class ExceptionalSupplier implements Supplier<String>
     {
         public ExceptionalSupplier (final boolean wrapAsFault)
         {
@@ -123,7 +138,7 @@ public class ExecutionScopesTest
         }
 
         @Override
-        public Void get ()
+        public String get ()
         {
             if (m_wrapAsFault)
             {
@@ -134,7 +149,7 @@ public class ExecutionScopesTest
                 throw new NullPointerException ();
             }
 
-            return null;
+            return "never-gets-here";
         }
 
         private final boolean m_wrapAsFault;
