@@ -31,7 +31,7 @@ public class BuildDateUtil
             JavaInfoFile
         }
 
-        @Option (name = "-1", aliases =
+        @Option (name = "-a", aliases =
         {
                 "--appName"
         }, usage = "Specifies the name of the application", required = true)
